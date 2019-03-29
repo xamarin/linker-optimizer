@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<martin>
+		<options all-modules="true" analyze-all="true" preprocess="true" report-size="true" main-debug="false" />
+
+<!-- System.DateTimeParse (corefx/src/Common/src/CoreLib/System/Globalization/DateTimeParse.cs) is pulled in via:
+
+Found method `System.DateTime System.IConvertible::ToDateTime(System.IFormatProvider)`, which matches fail-list entry `[MethodEntry ToDateTime:Substring:Fail].
+Dependency Stack:
+  Method:System.DateTime System.IConvertible::ToDateTime(System.IFormatProvider)
+  Method:System.Object System.Convert::ChangeType(System.Object,System.TypeCode,System.IFormatProvider)
+
+Found method `System.Object System.Convert::ChangeType(System.Object,System.TypeCode,System.IFormatProvider)`, which matches fail-list entry `[MethodEntry System.Object System.Convert::ChangeType(System.Object,System.TypeCode,System.IFormatProvider):FullName:Fail].
+Dependency Stack:
+  Method:System.Object System.Convert::ChangeType(System.Object,System.TypeCode,System.IFormatProvider)
+  Method:System.Object System.Runtime.Serialization.Formatters.Binary.Converter::FromString(System.String,System.Runtime.Serialization.Formatters.Binary.InternalPrimitiveTypeE)
+  Method:System.Object System.Runtime.Serialization.Formatters.Binary.Converter::FromString(System.String,System.Runtime.Serialization.Formatters.Binary.InternalPrimitiveTypeE)
+
+-->
+
+		<type fullname="System.DateTimeParse" action="none" />
+		<type fullname="System.TimeZoneInfo" action="fail" />
+		<method substring="TimeSpan::TryParse" action="fail" />
+		<type fullname="System.Globalization.TimeSpanParse" action="fail" />
+		<type fullname="System.Globalization.DateTimeFormatInfo" action="size" />
+
+		<features>
+			<feature name="remoting" enabled="false" />
+			<feature name="encoding" enabled="false" />
+			<feature name="security" enabled="false" />
+			<feature name="collator" enabled="false" />
+			<feature name="globalization" enabled="false" />
+		</features>
+	</martin>
+</linker>

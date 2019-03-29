@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<martin>
+		<options all-modules="false" analyze-all="false" preprocess="true" />
+
+		<type name="Foo" action="fail" />
+
+		<method name="ConvertToReturnNull" action="return-null" />
+		<method name="ConvertToInstanceReturnNull" action="return-null" />
+	</martin>
+</linker>

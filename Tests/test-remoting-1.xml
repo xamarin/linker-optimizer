@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<martin>
+		<options all-modules="true" analyze-all="true" preprocess="true" report-size="true" />
+
+		<type name="SynchronizationAttribute" action="fail" />
+		<!-- this one has a preserve entry -->
+		<!-- <type fullname="System.Runtime.Remoting.RemotingServices" action="fail" /> -->
+		<type fullname="System.Runtime.Remoting.Channels.CADSerializer" action="fail" />
+		<type fullname="System.Runtime.Remoting.Channels.CrossAppDomainSink" action="fail" />
+		<type fullname="System.Runtime.Remoting.Activation.AppDomainLevelActivator" action="fail" />
+		<type fullname="System.Runtime.Remoting.Proxies.RemotingProxy" action="fail" />
+		<method substring="System.Runtime.Remoting.Activation.ActivationServices::CreateConstructionCall" action="fail" />
+		<method substring="System.Runtime.Remoting.RemotingServices::CreateClientProxyForContextBound" action="fail" />
+		<method substring="System.Runtime.Remoting.RemotingServices::GetOrCreateClientIdentity" action="fail" />
+		<method substring="System.Runtime.Remoting.RemotingServices::GetRemoteObject" action="fail" />
+		<method substring="System.Runtime.Remoting.RemotingServices::Unmarshal" action="none" />
+		<method substring="System.Runtime.Remoting.ObjRef::GetRealObject" action="none" />
+		<method substring="System.Runtime.Serialization.FormatterServices::GetSafeUninitializedObject" action="none" />
+
+		<type fullname="System.Runtime.Serialization.FormatterServices" action="none" />
+		<type fullname="System.Runtime.Serialization.Formatters.Binary.ObjectReader" action="none" />
+		<method substring="System.Runtime.Serialization.Formatters.Binary.BinaryFormatter::Deserialize" action="none" />
+
+		<features>
+			<feature name="remoting" enabled="false" />
+			<feature name="collator" enabled="false" />
+			<feature name="globalization" enabled="false" />
+		</features>
+	</martin>
+</linker>

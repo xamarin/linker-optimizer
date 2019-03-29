@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<martin>
+		<options all-modules="true" analyze-all="true" ignore-resolution-errors="true" preprocess="true" main-debug="false" report-size="true" />
+
+		<conditional feature="crypto" enabled="true">
+			<namespace name="System.Security.Cryptography">
+				<type name="CryptoConfig" action="preserve" />
+				<type name="AesCryptoServiceProvider" action="preserve" />
+				<type name="DESCryptoServiceProvider" action="preserve" />
+				<type name="DSASignatureDescription" action="preserve" />
+				<type name="MD5CryptoServiceProvider" action="preserve" />
+				<type name="RSACryptoServiceProvider" action="preserve" />
+				<type name="SHA1CryptoServiceProvider" action="preserve" />
+			</namespace>
+		</conditional>
+
+		<conditional feature="crypto" enabled="false">
+			<namespace name="System.Security.Cryptography" action="fail">
+				<method substring="HashAlgorithm::Create(System.String)" action="fail" />
+				<type name="CryptoConfig" action="fail" />
+				<type name="CryptoConfigForwarder" action="fail" />
+				<type name="AesCryptoServiceProvider" action="fail" />
+				<type name="DESCryptoServiceProvider" action="fail" />
+				<type name="DSASignatureDescription" action="fail" />
+			</namespace>
+		</conditional>
+
+		<features>
+			<feature name="crypto" enabled="false" />
+		</features>
+	</martin>
+</linker>

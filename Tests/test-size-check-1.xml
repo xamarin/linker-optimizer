@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<martin>
+		<options all-modules="true" preprocess="true" report-size="true" analyze-all="true" main-debug="false" />
+	</martin>
+</linker>

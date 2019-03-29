@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<martin>
+		<features>
+			<feature name="remoting" enabled="false" />
+		</features>
+	</martin>
+</linker>

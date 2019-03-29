@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<martin>
+		<options all-modules="true" analyze-all="true" preprocess="true" />
+
+		<conditional feature="globalization" enabled="false">
+			<namespace name="System.Globalization">
+				<type name="HebrewNumber" action="fail" />
+				<type name="JapaneseCalendar" action="fail" />
+				<type name="TaiwanCalendar" action="fail" />
+				<type name="DateTimeFormatInfo">
+					<method substring="DateTimeFormatInfo::TryParseHebrewNumber" action="fail"/>
+				</type>
+			</namespace>
+			<type fullname="System.DateTimeParse">
+				<method name="MatchHebrewDigits" action="fail"/>
+			</type>
+		</conditional>
+
+		<features>
+			<feature name="globalization" enabled="false" />
+		</features>
+	</martin>
+</linker>

@@ -1,0 +1,28 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "monolinker", "monolinker.csproj", "{D60432F1-3C12-4235-A1CC-4CA5575403BD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E94B6C48-0D8E-4343-B0BD-7F9AE6626FB8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|net_4_x = Debug|net_4_x
+		Debug|wasm_tools = Debug|wasm_tools
+		Release|net_4_x = Release|net_4_x
+		Release|wasm_tools = Release|wasm_tools
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|net_4_x.ActiveCfg = Debug|net_4_x
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|net_4_x.Build.0 = Debug|net_4_x
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|wasm_tools.ActiveCfg = Debug|wasm_tools
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|wasm_tools.Build.0 = Debug|wasm_tools
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Release|net_4_x.ActiveCfg = Release|net_4_x
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Release|net_4_x.Build.0 = Release|net_4_x
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Release|wasm_tools.ActiveCfg = Release|wasm_tools
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Release|wasm_tools.Build.0 = Release|wasm_tools
+	EndGlobalSection
+EndGlobal

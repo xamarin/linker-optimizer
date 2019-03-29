@@ -99,20 +99,62 @@
     <Compile Include="..\..\..\external\linker\linker\Linker\TypeReferenceExtensions.cs" />
     <Compile Include="..\..\..\external\linker\linker\Linker\XApiReader.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Linker.Conditionals\MartinTestStep.cs" />
+    <Compile Include="Linker.Conditionals\MartinContext.cs" />
+    <Compile Include="Linker.Conditionals\ConditionalMarkStep.cs" />
+    <Compile Include="Linker.Conditionals\BasicBlockScanner.cs" />
+    <Compile Include="Linker.Conditionals\CecilHelper.cs" />
+    <Compile Include="Linker.Conditionals\BasicBlock.cs" />
+    <Compile Include="Linker.Conditionals\BasicBlockList.cs" />
+    <Compile Include="Linker.Conditionals\BranchType.cs" />
+    <Compile Include="Linker.Conditionals\MartinTestException.cs" />
+    <Compile Include="Linker.Conditionals\LinkerConditional.cs" />
+    <Compile Include="Linker.Conditionals\IsWeakInstanceOfConditional.cs" />
+    <Compile Include="Linker.Conditionals\IsFeatureSupportedConditional.cs" />
+    <Compile Include="Linker.Conditionals\FlowAnalysis.cs" />
+    <Compile Include="Linker.Conditionals\AsWeakInstanceOfConditional.cs" />
+    <Compile Include="Linker.Conditionals\IsTypeAvailableConditional.cs" />
+    <Compile Include="Linker.Conditionals\XApiReader.cs" />
+    <Compile Include="Linker.Conditionals\BasicBlockType.cs" />
+    <Compile Include="Linker.Conditionals\MartinOptions.cs" />
+    <Compile Include="Linker.Conditionals\JumpOrigin.cs" />
+    <Compile Include="Linker.Conditionals\DeadCodeEliminator.cs" />
+    <Compile Include="Linker.Conditionals\PreprocessStep.cs" />
+    <Compile Include="Linker.Conditionals\CodeRewriter.cs" />
+    <Compile Include="Linker.Conditionals\DebugHelpers.cs" />
+    <Compile Include="Linker.Conditionals\MartinAssertException.cs" />
+    <Compile Include="Linker.Conditionals\SizeReportStep.cs" />
+    <Compile Include="Linker.Conditionals\ConstantCallConditional.cs" />
+    <Compile Include="Linker.Conditionals\RequireFeatureConditional.cs" />
+    <Compile Include="..\..\class\corlib\System.Runtime.CompilerServices\MonoLinkerFeature.cs">
+      <Link>System.Runtime.CompilerServices\MonoLinkerFeature.cs</Link>
+    </Compile>
+    <Compile Include="Linker.Conditionals\XmlConfigurationWriter.cs" />
+    <Compile Include="Linker.Conditionals\ConstantValue.cs" />
+  </ItemGroup>
   <!--End of common files-->
   <!-- @ALL_SOURCES@ -->
   <ItemGroup>
-    <ProjectReference Include="../../class/System/System.csproj" />
-    <ProjectReference Include="../../class/System.Core/System.Core.csproj" />
-    <ProjectReference Include="../../class/System.XML/System.Xml.csproj" />
-    <ProjectReference Include="../../class/Mono.Cecil/Mono.Cecil.csproj" />
+    <Reference Include="Mono.Cecil, Version=0.9.5.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
   </ItemGroup>
-  <!-- @ALL_REFERENCES@ -->
-  <!-- @ALL_RESOURCES@ -->
   <PropertyGroup>
     <!-- Force the pre-build event to run after references have been resolved. The default
       behavior is to run them before resolving references, which can cause things like
       culevel.exe to be used before they have been built. -->
     <PreBuildEventDependsOn>ResolveReferences</PreBuildEventDependsOn>
   </PropertyGroup>
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <TextStylePolicy TabsToSpaces="False" RemoveTrailingWhitespace="True" NoTabsAfterNonTabs="False" EolMarker="Native" FileWidth="80" TabWidth="8" IndentWidth="8" scope="text/x-csharp" />
+          <CSharpFormattingPolicy IndentBlock="True" IndentBraces="False" IndentSwitchCaseSection="True" LabelPositioning="OneLess" NewLinesForBracesInTypes="True" NewLinesForBracesInMethods="True" SpaceWithinMethodDeclarationParenthesis="False" SpaceBetweenEmptyMethodDeclarationParentheses="False" SpaceWithinMethodCallParentheses="False" SpaceBetweenEmptyMethodCallParentheses="False" SpaceAfterControlFlowStatementKeyword="True" SpaceWithinExpressionParentheses="False" SpaceWithinCastParentheses="False" SpaceWithinOtherParentheses="False" SpaceAfterCast="False" SpacesIgnoreAroundVariableDeclaration="False" SpaceBetweenEmptySquareBrackets="False" SpaceWithinSquareBrackets="False" SpaceAfterColonInBaseTypeDeclaration="True" SpaceAfterComma="True" SpaceAfterDot="False" SpaceAfterSemicolonsInForStatement="True" SpaceBeforeColonInBaseTypeDeclaration="True" SpaceBeforeComma="False" SpaceBeforeDot="False" SpaceBeforeSemicolonsInForStatement="False" SpacingAroundBinaryOperator="Single" WrappingPreserveSingleLine="True" WrappingKeepStatementsOnSingleLine="True" IndentSwitchSection="False" NewLinesForBracesInProperties="False" NewLinesForBracesInAccessors="False" NewLinesForBracesInAnonymousMethods="False" NewLinesForBracesInControlBlocks="False" NewLinesForBracesInAnonymousTypes="False" NewLinesForBracesInObjectCollectionArrayInitializers="False" NewLinesForBracesInLambdaExpressionBody="False" NewLineForElse="False" NewLineForCatch="False" NewLineForFinally="False" NewLineForMembersInObjectInit="False" NewLineForMembersInAnonymousTypes="False" NewLineForClausesInQuery="False" SpacingAfterMethodDeclarationName="True" SpaceAfterMethodCallName="True" SpaceBeforeOpenSquareBracket="True" scope="text/x-csharp" />
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>

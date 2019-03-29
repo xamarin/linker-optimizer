@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+	<martin>
+		<options all-modules="true" analyze-all="false" preprocess="true" />
+
+		<type fullname="Mono.Globalization.Unicode.SimpleCollator" action="fail" />
+
+		<namespace name="System.Globalization">
+			<type name="CompareInfo">
+				<method name="get_UseManagedCollation" action="return-false" />
+			</type>
+		</namespace>
+	</martin>
+</linker>
