@@ -14,15 +14,10 @@ Global
 		Debug|wasm_tools = Debug|wasm_tools
 		Release|net_4_x = Release|net_4_x
 		Release|wasm_tools = Release|wasm_tools
+		Debug|Any CPU = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|net_4_x.ActiveCfg = Debug|net_4_x
-		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|net_4_x.Build.0 = Debug|net_4_x
-		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|wasm_tools.ActiveCfg = Debug|wasm_tools
-		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|wasm_tools.Build.0 = Debug|wasm_tools
-		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Release|net_4_x.ActiveCfg = Release|net_4_x
-		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Release|net_4_x.Build.0 = Release|net_4_x
-		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Release|wasm_tools.ActiveCfg = Release|wasm_tools
-		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Release|wasm_tools.Build.0 = Release|wasm_tools
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D60432F1-3C12-4235-A1CC-4CA5575403BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
