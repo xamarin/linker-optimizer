@@ -28,7 +28,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Mono.Cecil.Cil;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	public class BasicBlock
 	{

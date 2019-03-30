@@ -1,5 +1,5 @@
 ﻿//
-// BasicBlockType.cs
+// MartinTestException.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -24,15 +24,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
-	public enum BasicBlockType
+	[Obsolete ("REMOVE")]
+	class MartinTestException : Exception
 	{
-		Normal,
-		Try,
-		Catch,
-		Finally,
-		Filter,
-		Deleted
+		public MartinTestException ()
+		{ }
+
+		public MartinTestException (string message)
+			: base (message)
+		{ }
 	}
 }

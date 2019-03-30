@@ -27,7 +27,7 @@ using System;
 using System.Xml.XPath;
 using Mono.Cecil;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	class OptionsReader
 	{

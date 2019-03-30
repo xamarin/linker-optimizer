@@ -30,7 +30,7 @@ using Mono.Linker.Steps;
 using System.Collections.Generic;
 using Mono.Collections.Generic;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	public class ConditionalMarkStep : MarkStep
 	{

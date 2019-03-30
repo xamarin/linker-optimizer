@@ -28,7 +28,7 @@ using System.Runtime.CompilerServices;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	static class DebugHelpers
 	{

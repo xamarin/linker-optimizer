@@ -1,5 +1,5 @@
 ﻿//
-// ConstantCallConditional.cs
+// IsFeatureSupportedConditional.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -24,70 +24,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using System.Runtime.CompilerServices;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
-	public class ConstantCallConditional : LinkerConditional
+	public class IsFeatureSupportedConditional : LinkerConditional
 	{
-		public MethodDefinition Target {
+		public MonoLinkerFeature Feature {
 			get;
 		}
 
-		public int StackDepth {
-			get;
-		}
-
-		public ConstantValue Constant {
-			get;
-		}
-
-		ConstantCallConditional (BasicBlockScanner scanner, MethodDefinition target, int stackDepth, ConstantValue constant)
+		IsFeatureSupportedConditional (BasicBlockScanner scanner, MonoLinkerFeature feature)
 			: base (scanner)
 		{
-			Target = target;
-			Constant = constant;
-			StackDepth = stackDepth;
+			Feature = feature;
 		}
 
 		public override void RewriteConditional (ref BasicBlock block)
 		{
-			Scanner.LogDebug (1, $"REWRITE CONSTANT CALL: {this}");
+			var evaluated = Context.Options.IsFeatureEnabled (Feature);
+			Scanner.LogDebug (1, $"REWRITE FEATURE CONDITIONAL: {Feature} {evaluated}");
 
-			RewriteConditional (ref block, StackDepth, Constant);
+			RewriteConditional (ref block, 0, evaluated ? ConstantValue.True : ConstantValue.False);
 		}
 
-		public static ConstantCallConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index, MethodDefinition target, ConstantValue constant)
+		public static IsFeatureSupportedConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index)
 		{
+			if (bb.Instructions.Count == 1)
+				throw new NotSupportedException ();
 			if (index + 1 >= scanner.Body.Instructions.Count)
 				throw new NotSupportedException ();
 
 			/*
-			 * Calling a constant property.
+			 * `bool MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature feature)`
 			 *
 			 */
 
-			int stackDepth;
-			int size = 1;
-			if (target.IsStatic)
-				stackDepth = 0;
-			else if (bb.Count == 1)
-				stackDepth = 1;
-			else {
-				var previous = scanner.Body.Instructions [index - 1];
-				if (CecilHelper.IsSimpleLoad (previous) || previous.OpCode.Code == Code.Nop) {
-					stackDepth = 0;
-					size++;
-				} else {
-					stackDepth = 1;
-				}
-			}
+			if (bb.Instructions.Count > 2)
+				scanner.BlockList.SplitBlockAt (ref bb, bb.Instructions.Count - 2);
 
-			if (bb.Instructions.Count > size)
-				scanner.BlockList.SplitBlockAt (ref bb, bb.Instructions.Count - size);
-
-			var instance = new ConstantCallConditional (scanner, target, stackDepth, constant);
+			var feature = (MonoLinkerFeature)CecilHelper.GetFeatureArgument (bb.FirstInstruction);
+			var instance = new IsFeatureSupportedConditional (scanner, feature);
 			bb.LinkerConditional = instance;
 
 			LookAheadAfterConditional (scanner.BlockList, ref bb, ref index);
@@ -97,7 +74,7 @@ namespace Mono.Linker.Conditionals
 
 		public override string ToString ()
 		{
-			return $"[{GetType ().Name}: {StackDepth} {Constant} {Target}]";
+			return $"[{GetType ().Name}: {Feature}]";
 		}
 	}
 }

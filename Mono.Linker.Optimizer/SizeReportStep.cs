@@ -27,7 +27,7 @@ using System;
 using Mono.Cecil;
 using System.Collections.Generic;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	public class SizeReportStep : ConditionalBaseStep
 	{

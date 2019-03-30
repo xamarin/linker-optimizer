@@ -1,5 +1,5 @@
 ﻿//
-// BranchType.cs
+// MartinAssertException.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -23,18 +23,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-namespace Mono.Linker.Conditionals
+using System;
+namespace Mono.Linker.Optimizer
 {
-	public enum BranchType
+	class MartinAssertException : Exception
 	{
-		None,
-		Jump,
-		Return,
-		Exit,
-		False,
-		True,
-		Switch,
-		Conditional,
-		EndFinally
+		public MartinAssertException ()
+		{ }
+
+		public MartinAssertException (string message)
+			: base (message)
+		{ }
 	}
 }

@@ -25,7 +25,7 @@
 // THE SOFTWARE.
 using Mono.Cecil;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	public class PreprocessStep : ConditionalBaseStep
 	{

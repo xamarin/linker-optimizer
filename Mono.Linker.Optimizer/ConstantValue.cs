@@ -1,5 +1,5 @@
 ﻿//
-// ConditionalBaseStep.cs
+// ConstantValue.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -23,22 +23,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
-using Mono.Linker.Steps;
-
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
-	public abstract class ConditionalBaseStep : BaseStep
+	public enum ConstantValue
 	{
-		new public MartinContext Context {
-			get;
-		}
-
-		public AnnotationStore Annotation => Context.Context.Annotations;
-
-		protected ConditionalBaseStep (MartinContext context)
-		{
-			Context = context;
-		}
+		False,
+		True,
+		Throw,
+		Null
 	}
 }

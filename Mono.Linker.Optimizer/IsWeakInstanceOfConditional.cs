@@ -27,7 +27,7 @@ using System;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	public class IsWeakInstanceOfConditional : LinkerConditional
 	{

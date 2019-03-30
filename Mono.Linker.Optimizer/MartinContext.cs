@@ -32,7 +32,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Linker.Steps;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	public class MartinContext
 	{

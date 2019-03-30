@@ -28,7 +28,6 @@ using System.IO;
 using System.Linq;
 using System.Xml.XPath;
 using System.Collections.Generic;
-using Mono.Linker.Conditionals;
 using Mono.Linker.Steps;
 
 namespace Mono.Linker.Optimizer

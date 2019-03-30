@@ -28,7 +28,7 @@ using System.Xml;
 using System.Text;
 using System.Collections.Generic;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	public class XmlConfigurationWriter
 	{

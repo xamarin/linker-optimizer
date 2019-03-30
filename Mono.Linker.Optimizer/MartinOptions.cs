@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Mono.Cecil;
 
-namespace Mono.Linker.Conditionals
+namespace Mono.Linker.Optimizer
 {
 	public class MartinOptions
 	{
