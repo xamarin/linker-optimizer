@@ -32,6 +32,8 @@ using Mono.Collections.Generic;
 
 namespace Mono.Linker.Optimizer
 {
+	using BasicBlocks;
+
 	public class ConditionalMarkStep : MarkStep
 	{
 		public MartinContext MartinContext {

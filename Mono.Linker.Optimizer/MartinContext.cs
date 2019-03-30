@@ -34,6 +34,8 @@ using Mono.Linker.Steps;
 
 namespace Mono.Linker.Optimizer
 {
+	using BasicBlocks;
+
 	public class MartinContext
 	{
 		public LinkContext Context {

@@ -31,6 +31,8 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Linker.Optimizer.Conditionals
 {
+	using BasicBlocks;
+
 	public class RequireFeatureConditional : LinkerConditional
 	{
 		public MonoLinkerFeature Feature {

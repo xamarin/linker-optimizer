@@ -1,5 +1,5 @@
 ﻿//
-// ConstantValue.cs
+// BranchType.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -23,13 +23,18 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-namespace Mono.Linker.Optimizer
+namespace Mono.Linker.Optimizer.BasicBlocks
 {
-	public enum ConstantValue
+	public enum BranchType
 	{
+		None,
+		Jump,
+		Return,
+		Exit,
 		False,
 		True,
-		Throw,
-		Null
+		Switch,
+		Conditional,
+		EndFinally
 	}
 }

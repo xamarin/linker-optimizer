@@ -23,8 +23,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
-namespace Mono.Linker.Optimizer
+namespace Mono.Linker.Optimizer.BasicBlocks
 {
 	public enum BasicBlockType
 	{

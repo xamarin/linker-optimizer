@@ -29,6 +29,8 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Linker.Optimizer.Conditionals
 {
+	using BasicBlocks;
+
 	public abstract class LinkerConditional
 	{
 		public BasicBlockScanner Scanner {

@@ -30,6 +30,8 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Linker.Optimizer
 {
+	using BasicBlocks;
+
 	static class DebugHelpers
 	{
 		public static Exception AssertFail (string message) => throw new MartinAssertException (message);

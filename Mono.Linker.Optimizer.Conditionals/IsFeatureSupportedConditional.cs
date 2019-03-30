@@ -28,6 +28,8 @@ using System.Runtime.CompilerServices;
 
 namespace Mono.Linker.Optimizer.Conditionals
 {
+	using BasicBlocks;
+
 	public class IsFeatureSupportedConditional : LinkerConditional
 	{
 		public MonoLinkerFeature Feature {

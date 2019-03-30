@@ -27,6 +27,8 @@ using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer
 {
+	using BasicBlocks;
+
 	public class PreprocessStep : ConditionalBaseStep
 	{
 		public PreprocessStep (MartinContext context)
