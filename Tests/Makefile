@@ -145,7 +145,7 @@ test-%: test-%.exe build
 	@echo RUN TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --martin $(if $(wildcard $(@F).xml), --martin-xml $(@F).xml) $(LINKER_ARGS_DEFAULT) --dump-dependencies -a $@
+	$(LINKER) --martin $@ $(LINKER_ARGS_DEFAULT) --dump-dependencies
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
@@ -159,7 +159,7 @@ aottest-%: aottest-%.exe build
 	@echo RUN TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --martin $(if $(wildcard $(@F).xml), --martin-xml $(@F).xml) $(LINKER_ARGS_AOT) --dump-dependencies -a $@
+	$(LINKER) --martin $@ $(LINKER_ARGS_AOT) --dump-dependencies
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
@@ -173,7 +173,7 @@ iltest-%: iltest-%.exe build
 	@echo RUN TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --martin $(if $(wildcard $(@F).xml), --martin-xml $(@F).xml) $(LINKER_ARGS_DEFAULT) --dump-dependencies -a $@
+	$(LINKER) --martin $@ $(LINKER_ARGS_DEFAULT) --dump-dependencies
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
@@ -187,7 +187,7 @@ corlib-test: build
 	@echo RUN CORLIB TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --martin --martin-xml corlib-nunit.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -a $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll -x $(abs_topdir)/class/corlib/LinkerDescriptor/mscorlib.xml
+	$(LINKER) --martin $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll --martin-xml corlib-nunit.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -x $(abs_topdir)/class/corlib/LinkerDescriptor/mscorlib.xml
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
@@ -197,7 +197,7 @@ corlib-test-profiler: build-release
 	@echo RUN CORLIB TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	time (mono --debug $(PROFILER_FLAGS) $(LINKER_RELEASE_EXE) --martin -i corlib-profile.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -a $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml)
+	time (mono --debug $(PROFILER_FLAGS) $(LINKER_RELEASE_EXE) --martin $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll -i corlib-profile.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml)
 
 corlib-test-profiler-disabled: build-release
 	@echo RUN CORLIB TEST $@
@@ -219,7 +219,7 @@ corlib-xtest: build
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
 	@echo $(XUNIT_PATH)
-	$(LINKER) --martin -i corlib-xunit.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -a $(PROFILE_PATH)/tests/net_4_x_corlib_xunit-test.dll -d $(XUNIT_PATH) -d $(PROFILE_PATH)/tests -d $(PROFILE_PATH)/Facades -x $(abs_topdir)/class/corlib/LinkerDescriptor/mscorlib_xtest.xml
+	$(LINKER) --martin -a $(PROFILE_PATH)/tests/net_4_x_corlib_xunit-test.dll -i corlib-xunit.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -d $(XUNIT_PATH) -d $(PROFILE_PATH)/tests -d $(PROFILE_PATH)/Facades -x $(abs_topdir)/class/corlib/LinkerDescriptor/mscorlib_xtest.xml
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt

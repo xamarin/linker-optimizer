@@ -35,6 +35,7 @@ namespace Mono.Linker.Optimizer
 	public static class Program
 	{
 		static readonly OptimizerOptions options = new OptimizerOptions ();
+		static string mainModule;
 		static bool moduleEnabled;
 
 		public static int Main (string[] args)
@@ -56,8 +57,14 @@ namespace Mono.Linker.Optimizer
 			moduleEnabled &= !options.DisableModule;
 
 			if (moduleEnabled) {
-				arguments.Insert (0, "--custom-step");
-				arguments.Insert (1, $"TypeMapStep:{typeof (InitializeStep).AssemblyQualifiedName}");
+				if (mainModule == null) {
+					Console.Error.WriteLine ("Missing main module argument.");
+					return 1;
+				}
+				arguments.Insert (0, "-a");
+				arguments.Insert (1, mainModule);
+				arguments.Insert (2, "--custom-step");
+				arguments.Insert (3, $"TypeMapStep:{typeof (InitializeStep).AssemblyQualifiedName}");
 			}
 
 			var watch = new Stopwatch ();
@@ -102,6 +109,13 @@ namespace Mono.Linker.Optimizer
 				arguments.RemoveAt (0);
 				switch (token) {
 				case "--martin":
+					if (mainModule != null) {
+						Console.Error.WriteLine ($"Duplicate --martin argument.");
+						Environment.Exit (1);
+					}
+					mainModule = arguments[0];
+					arguments.RemoveAt (0);
+					LoadFile (mainModule);
 					moduleEnabled = true;
 					continue;
 				case "--martin-xml":
@@ -117,6 +131,13 @@ namespace Mono.Linker.Optimizer
 					break;
 				}
 			}
+		}
+
+		static void LoadFile (string filename)
+		{
+			var xml = Path.ChangeExtension (Path.GetExtension (filename), "xml");
+			if (File.Exists (xml))
+				OptionsReader.Read (options, filename);
 		}
 
 		class InitializeStep : IStep

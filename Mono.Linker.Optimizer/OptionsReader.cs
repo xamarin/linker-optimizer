@@ -45,6 +45,7 @@ namespace Mono.Linker.Optimizer
 		{
 			var reader = new OptionsReader (options);
 			reader.Read (new XPathDocument (filename));
+			Console.WriteLine ($"Read XML description from {filename}.");
 		}
 
 		OptionsReader (OptimizerOptions options)
