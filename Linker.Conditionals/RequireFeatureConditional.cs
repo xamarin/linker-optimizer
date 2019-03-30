@@ -56,7 +56,9 @@ namespace Mono.Linker.Conditionals
 
 			Context.LogMessage (MessageImportance.High, Environment.NewLine);
 			Context.LogMessage (MessageImportance.High, $"Required feature `{Feature}` not available.");
+#if FIXME
 			Context.Context.Tracer.Dump ();
+#endif
 			Context.LogMessage (MessageImportance.High, Environment.NewLine);
 
 			var pns = Context.Context.GetType ("System.PlatformNotSupportedException");

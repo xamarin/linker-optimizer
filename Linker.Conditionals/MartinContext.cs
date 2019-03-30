@@ -25,6 +25,7 @@
 // THE SOFTWARE.
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Diagnostics;
 using System.Collections.Generic;
 using Mono.Cecil;
@@ -45,10 +46,10 @@ namespace Mono.Linker.Conditionals
 
 		public AnnotationStore Annotations => Context.Annotations;
 
-		MartinContext (LinkContext context)
+		MartinContext (LinkContext context, MartinOptions options)
 		{
 			Context = context;
-			Options = new MartinOptions ();
+			Options = options;
 		}
 
 		public void LogMessage (MessageImportance importance, string message)
@@ -62,16 +63,19 @@ namespace Mono.Linker.Conditionals
 			Context.Logger.LogMessage (MessageImportance.Low, message);
 		}
 
-		public static void InitializePipeline (LinkContext context)
+		public static void Initialize (LinkContext linkContext, MartinOptions options)
 		{
-			context.Logger.LogMessage (MessageImportance.Normal, "Enabling Martin's Playground");
+			linkContext.Logger.LogMessage (MessageImportance.Normal, "Enabling Martin's Playground");
 
-			context.MartinContext = new MartinContext (context);
+			var context = new MartinContext (linkContext, options);
 
-			context.Pipeline.AddStepAfter (typeof (TypeMapStep), new InitializeStep ());
-			context.Pipeline.AddStepAfter (typeof (InitializeStep), new PreprocessStep ());
-			context.Pipeline.ReplaceStep (typeof (MarkStep), new ConditionalMarkStep ());
-			context.Pipeline.AddStepAfter (typeof (OutputStep), new SizeReportStep ());
+			context.Initialize ();
+
+			if (options.Preprocess)
+				linkContext.Pipeline.AddStepBefore (typeof (MarkStep), new PreprocessStep (context));
+			linkContext.Pipeline.ReplaceStep (typeof (MarkStep), new ConditionalMarkStep (context));
+			if (options.ReportSize)
+				linkContext.Pipeline.AddStepAfter (typeof (OutputStep), new SizeReportStep (context));
 		}
 
 		const string LinkerSupportType = "System.Runtime.CompilerServices.MonoLinkerSupport";
@@ -88,6 +92,7 @@ namespace Mono.Linker.Conditionals
 		SupportMethodRegistration _require_feature;
 		Lazy<TypeDefinition> _platform_not_support_exception;
 		Lazy<MethodDefinition> _platform_not_supported_exception_ctor;
+		FieldInfo _tracer_stack_field;
 
 		void Initialize ()
 		{
@@ -120,7 +125,7 @@ namespace Mono.Linker.Conditionals
 			_platform_not_supported_exception_ctor = new Lazy<MethodDefinition> (
 				() => _platform_not_support_exception.Value.Methods.FirstOrDefault (m => m.Name == ".ctor") ?? throw new NotSupportedException ($"Can't find `System.PlatformNotSupportedException`."));
 
-			Options.CheckEnvironmentOptions ();
+			_tracer_stack_field = typeof (Tracer).GetField ("dependency_stack", BindingFlags.Instance | BindingFlags.NonPublic);
 		}
 
 		SupportMethodRegistration ResolveSupportMethod (string name, bool full = false)
@@ -205,12 +210,49 @@ namespace Mono.Linker.Conditionals
 			return Instruction.Create (OpCodes.Newobj, reference);
 		}
 
-		class InitializeStep : BaseStep
+		static bool IsAssemblyBound (TypeDefinition td)
 		{
-			protected override void Process ()
-			{
-				Context.MartinContext.Initialize ();
-				base.Process ();
+			do {
+				if (td.IsNestedPrivate || td.IsNestedAssembly || td.IsNestedFamilyAndAssembly)
+					return true;
+
+				td = td.DeclaringType;
+			} while (td != null);
+
+			return false;
+		}
+
+		static string TokenString (object o)
+		{
+			if (o == null)
+				return "N:null";
+
+			if (o is TypeReference t) {
+				bool addAssembly = true;
+				var td = t as TypeDefinition ?? t.Resolve ();
+
+				if (td != null) {
+					addAssembly = td.IsNotPublic || IsAssemblyBound (td);
+					t = td;
+				}
+
+				var addition = addAssembly ? $":{t.Module}" : "";
+
+				return $"{(o as IMetadataTokenProvider).MetadataToken.TokenType}:{o}{addition}";
+			}
+
+			if (o is IMetadataTokenProvider)
+				return (o as IMetadataTokenProvider).MetadataToken.TokenType + ":" + o;
+
+			return "Other:" + o;
+		}
+
+		internal void DumpTracerStack ()
+		{
+			var stack = (Stack<object>)_tracer_stack_field.GetValue (Context.Tracer);
+			LogMessage (MessageImportance.Normal, "Dependency Stack:");
+			foreach (var dependency in stack) {
+				LogMessage (MessageImportance.Normal, $"  {TokenString (dependency)}");
 			}
 		}
 

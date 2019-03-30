@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7595733A-3875-4A89-AF46-84222C91EE49}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Mono.Linker.Optimizer</RootNamespace>
+    <AssemblyName>Mono.Linker.Optimizer</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Linker.Conditionals\AsWeakInstanceOfConditional.cs" />
+    <Compile Include="Linker.Conditionals\BasicBlock.cs" />
+    <Compile Include="Linker.Conditionals\BasicBlockList.cs" />
+    <Compile Include="Linker.Conditionals\BasicBlockScanner.cs" />
+    <Compile Include="Linker.Conditionals\BasicBlockType.cs" />
+    <Compile Include="Linker.Conditionals\BranchType.cs" />
+    <Compile Include="Linker.Conditionals\CecilHelper.cs" />
+    <Compile Include="Linker.Conditionals\CodeRewriter.cs" />
+    <Compile Include="Linker.Conditionals\ConditionalMarkStep.cs" />
+    <Compile Include="Linker.Conditionals\ConstantCallConditional.cs" />
+    <Compile Include="Linker.Conditionals\ConstantValue.cs" />
+    <Compile Include="Linker.Conditionals\DeadCodeEliminator.cs" />
+    <Compile Include="Linker.Conditionals\DebugHelpers.cs" />
+    <Compile Include="Linker.Conditionals\FlowAnalysis.cs" />
+    <Compile Include="Linker.Conditionals\IsFeatureSupportedConditional.cs" />
+    <Compile Include="Linker.Conditionals\IsTypeAvailableConditional.cs" />
+    <Compile Include="Linker.Conditionals\IsWeakInstanceOfConditional.cs" />
+    <Compile Include="Linker.Conditionals\JumpOrigin.cs" />
+    <Compile Include="Linker.Conditionals\LinkerConditional.cs" />
+    <Compile Include="Linker.Conditionals\MartinAssertException.cs" />
+    <Compile Include="Linker.Conditionals\MartinContext.cs" />
+    <Compile Include="Linker.Conditionals\MartinOptions.cs" />
+    <Compile Include="Linker.Conditionals\MartinTestException.cs" />
+    <Compile Include="Linker.Conditionals\PreprocessStep.cs" />
+    <Compile Include="Linker.Conditionals\RequireFeatureConditional.cs" />
+    <Compile Include="Linker.Conditionals\SizeReportStep.cs" />
+    <Compile Include="Linker.Conditionals\OptionsReader.cs" />
+    <Compile Include="Linker.Conditionals\XmlConfigurationWriter.cs" />
+    <Compile Include="Linker.Conditionals\ConditionalBaseStep.cs" />
+    <Compile Include="System.Runtime.CompilerServices\MonoLinkerFeature.cs" />
+    <Compile Include="System.Runtime.CompilerServices\MonoLinkerSupport.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="external\linker\src\linker\Mono.Linker.csproj">
+      <Project>{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}</Project>
+      <Name>Mono.Linker</Name>
+    </ProjectReference>
+    <ProjectReference Include="external\linker\external\cecil\Mono.Cecil.csproj">
+      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
+      <Name>Mono.Cecil</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

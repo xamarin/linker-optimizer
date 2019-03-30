@@ -34,7 +34,9 @@ namespace Mono.Linker.Conditionals
 {
 	public class ConditionalMarkStep : MarkStep
 	{
-		public MartinContext MartinContext => _context.MartinContext;
+		public MartinContext MartinContext {
+			get;
+		}
 
 		Queue<MethodDefinition> _conditional_methods;
 		Dictionary<MethodDefinition, BasicBlockScanner> _block_scanner_by_method;
@@ -44,8 +46,10 @@ namespace Mono.Linker.Conditionals
 			private set;
 		}
 
-		public ConditionalMarkStep ()
+		public ConditionalMarkStep (MartinContext context)
 		{
+			MartinContext = context;
+
 			_conditional_methods = new Queue<MethodDefinition> ();
 			_block_scanner_by_method = new Dictionary<MethodDefinition, BasicBlockScanner> ();
 		}

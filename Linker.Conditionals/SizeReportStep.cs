@@ -26,38 +26,32 @@
 using System;
 using Mono.Cecil;
 using System.Collections.Generic;
-using Mono.Linker.Steps;
 
 namespace Mono.Linker.Conditionals
 {
-	public class SizeReportStep : BaseStep
+	public class SizeReportStep : ConditionalBaseStep
 	{
 		readonly Dictionary<string, int> namespace_sizes;
 		readonly Dictionary<string, int> type_sizes;
 		readonly Dictionary<string, int> method_sizes;
 
-		public SizeReportStep ()
+		public SizeReportStep (MartinContext context)
+			: base (context)
 		{
 			namespace_sizes = new Dictionary<string, int> ();
 			type_sizes = new Dictionary<string, int> ();
 			method_sizes = new Dictionary<string, int> ();
 		}
 
-		protected override bool ConditionToProcess ()
-		{
-			return Context.MartinContext.Options.ReportSize;
-		}
-
 		protected override void ProcessAssembly (AssemblyDefinition assembly)
 		{
-			foreach (TypeDefinition type in assembly.MainModule.Types) {
+			foreach (var type in assembly.MainModule.Types) {
 				ProcessType (type);
 			}
 		}
 
 		protected override void EndProcess ()
 		{
-			base.EndProcess ();
 			Report ();
 		}
 
@@ -124,8 +118,8 @@ namespace Mono.Linker.Conditionals
 			if (method_sizes.ContainsKey (method.FullName))
 				return;
 
-			if (Context.MartinContext.Options.HasTypeEntry (method.DeclaringType, MartinOptions.TypeAction.Size))
-				Context.MartinContext.LogMessage (MessageImportance.Normal, $"SIZE: {method.FullName} {method.Body.CodeSize}");
+			if (Context.Options.HasTypeEntry (method.DeclaringType, MartinOptions.TypeAction.Size))
+				Context.LogMessage (MessageImportance.Normal, $"SIZE: {method.FullName} {method.Body.CodeSize}");
 
 			method_sizes.Add (method.FullName, method.Body.CodeSize);
 

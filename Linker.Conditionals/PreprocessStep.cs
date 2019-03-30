@@ -23,21 +23,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
-using System.IO;
-using System.Xml;
-using System.Text;
-using System.Collections.Generic;
 using Mono.Cecil;
-using Mono.Linker.Steps;
 
 namespace Mono.Linker.Conditionals
 {
-	public class PreprocessStep : BaseStep
+	public class PreprocessStep : ConditionalBaseStep
 	{
-		protected override bool ConditionToProcess ()
+		public PreprocessStep (MartinContext context)
+			: base (context)
 		{
-			return Context.MartinContext.Options.Preprocess;
 		}
 
 		protected override void ProcessAssembly (AssemblyDefinition assembly)
@@ -45,20 +39,16 @@ namespace Mono.Linker.Conditionals
 			foreach (var type in assembly.MainModule.Types) {
 				ProcessType (type);
 			}
-
-			base.ProcessAssembly (assembly);
 		}
 
 		protected override void EndProcess ()
 		{
 			DumpConstantProperties ();
-
-			base.EndProcess ();
 		}
 
 		void ProcessType (TypeDefinition type)
 		{
-			Context.MartinContext.Options.ProcessTypeEntries (type, a => ProcessTypeActions (type, a));
+			Context.Options.ProcessTypeEntries (type, a => ProcessTypeActions (type, a));
 
 			if (type.HasNestedTypes) {
 				foreach (var nested in type.NestedTypes)
@@ -76,7 +66,7 @@ namespace Mono.Linker.Conditionals
 
 		void ProcessMethod (MethodDefinition method)
 		{
-			Context.MartinContext.Options.ProcessMethodEntries (method, a => ProcessMethodActions (method, a));
+			Context.Options.ProcessMethodEntries (method, a => ProcessMethodActions (method, a));
 		}
 
 		void ProcessProperty (PropertyDefinition property)
@@ -88,30 +78,30 @@ namespace Mono.Linker.Conditionals
 			if (property.PropertyType.MetadataType != MetadataType.Boolean)
 				return;
 
-			var scanner = BasicBlockScanner.Scan (Context.MartinContext, property.GetMethod);
+			var scanner = BasicBlockScanner.Scan (Context, property.GetMethod);
 			if (scanner == null || !scanner.FoundConditionals)
 				return;
 
-			Context.MartinContext.LogMessage (MessageImportance.Normal, $"Found conditional property: {property}");
+			Context.LogMessage (MessageImportance.Normal, $"Found conditional property: {property}");
 
 			scanner.RewriteConditionals ();
 
 			if (!CecilHelper.IsConstantLoad (scanner.Body, out var value)) {
-				Context.MartinContext.LogMessage (MessageImportance.High, $"Property `{property}` uses conditionals, but does not return a constant.");
+				Context.LogMessage (MessageImportance.High, $"Property `{property}` uses conditionals, but does not return a constant.");
 				return;
 			}
 
-			Context.MartinContext.MarkAsConstantMethod (property.GetMethod, value ? ConstantValue.True : ConstantValue.False);
+			Context.MarkAsConstantMethod (property.GetMethod, value ? ConstantValue.True : ConstantValue.False);
 
-			Context.MartinContext.Debug ();
+			Context.Debug ();
 		}
 
 		void ProcessTypeActions (TypeDefinition type, MartinOptions.TypeAction action)
 		{
 			switch (action) {
 			case MartinOptions.TypeAction.Debug:
-				Context.MartinContext.LogMessage (MessageImportance.High, $"Debug type: {type} {action}");
-				Context.MartinContext.Debug ();
+				Context.LogMessage (MessageImportance.High, $"Debug type: {type} {action}");
+				Context.Debug ();
 				break;
 
 			case MartinOptions.TypeAction.Preserve:
@@ -121,32 +111,31 @@ namespace Mono.Linker.Conditionals
 			}
 		}
 
-
 		void ProcessMethodActions (MethodDefinition method, MartinOptions.MethodAction action)
 		{
 			switch (action) {
 			case MartinOptions.MethodAction.Debug:
-				Context.MartinContext.LogMessage (MessageImportance.High, $"Debug method: {method} {action}");
-				Context.MartinContext.Debug ();
+				Context.LogMessage (MessageImportance.High, $"Debug method: {method} {action}");
+				Context.Debug ();
 				break;
 
 			case MartinOptions.MethodAction.Throw:
-				CodeRewriter.ReplaceWithPlatformNotSupportedException (Context.MartinContext, method);
+				CodeRewriter.ReplaceWithPlatformNotSupportedException (Context, method);
 				break;
 
 			case MartinOptions.MethodAction.ReturnFalse:
-				CodeRewriter.ReplaceWithReturnFalse (Context.MartinContext, method);
+				CodeRewriter.ReplaceWithReturnFalse (Context, method);
 				break;
 
 			case MartinOptions.MethodAction.ReturnNull:
-				CodeRewriter.ReplaceWithReturnNull (Context.MartinContext, method);
+				CodeRewriter.ReplaceWithReturnNull (Context, method);
 				break;
 			}
 		}
 
 		void DumpConstantProperties ()
 		{
-			var writer = new XmlConfigurationWriter (Context.MartinContext);
+			var writer = new XmlConfigurationWriter (Context);
 			writer.DumpConstantProperties ();
 		}
 	}
