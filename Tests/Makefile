@@ -12,9 +12,13 @@ ILASM = ilasm
 RUNTIME = $(MONO_ROOT)/runtime/mono-wrapper
 RUNTIME_FLAGS =
 
+PROFILER_FLAGS := --profile=log:calls,calldepth=100
+
 # XUNIT_PATH := $(abspath $(topdir)/..)/external/xunit-binaries
 
-LINKER = MONO_PATH=$(MONO_ROOT)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) --debug ../bin/Debug/Mono.Linker.Optimizer.exe
+LINKER_EXE = ../bin/Debug/Mono.Linker.Optimizer.exe
+LINKER_RELEASE_EXE = ../bin/Release/Mono.Linker.Optimizer.exe
+LINKER = MONO_PATH=$(MONO_ROOT)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) --debug $(LINKER_EXE)
 
 LINKER_ARGS = -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH)
 LINKER_ARGS_DEFAULT = $(LINKER_ARGS) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization
@@ -189,17 +193,17 @@ corlib-test: build
 	MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
 	(cd $(LINKER_OUTPUT); MONO_PATH=.:$(PROFILE_PATH) $(RUNTIME) $(RUNTIME_FLAGS) --debug $(PROFILE_PATH)/nunit-lite-console.exe net_4_x_corlib_test.dll $(NUNIT_ARGS) $(TESTNAME_ARG))
 
-corlib-test-linkonly: build
+corlib-test-profiler: build-release
 	@echo RUN CORLIB TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	time ($(LINKER_CORLIB_TEST) --dump-dependencies --martin -a $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll -i corlib-nunit.xml -x $(abs_topdir)/class/corlib/LinkerDescriptor/mscorlib.xml)
+	time (mono --debug $(PROFILER_FLAGS) $(LINKER_RELEASE_EXE) --martin -i corlib-profile.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -a $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml)
 
-corlib-test-linkonly2: build
+corlib-test-profiler-disabled: build-release
 	@echo RUN CORLIB TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	time ($(LINKER_CORLIB_TEST) --dump-dependencies -a $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll -i corlib-nunit.xml -x $(abs_topdir)/class/corlib/LinkerDescriptor/mscorlib.xml)
+	time (mono --debug $(PROFILER_FLAGS) $(LINKER_RELEASE_EXE) $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -a $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml)
 
 corlib-test-globalization: build
 	$(MAKE) corlib-test MARTIN_LINKER_OPTIONS="globalization" EXTRA_NUNIT_EXCLUDES=",LinkerGlobalization,ManagedCollator"
@@ -224,6 +228,9 @@ corlib-xtest: build
 
 build:
 	msbuild /nologo /verbosity:minimal ../Mono.Linker.Optimizer.sln
+
+build-release:
+	msbuild /nologo /verbosity:minimal /p:Configuration=Release ../Mono.Linker.Optimizer.sln
 
 clean:
 	@rm -rf $(LINKER_OUTPUT)

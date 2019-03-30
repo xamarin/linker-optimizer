@@ -61,6 +61,10 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public bool DisableModule {
+			get; set;
+		}
+
 		readonly List<TypeEntry> _type_actions;
 		readonly List<MethodEntry> _method_actions;
 		readonly Dictionary<MonoLinkerFeature, bool> _enabled_features;
@@ -112,6 +116,9 @@ namespace Mono.Linker.Optimizer
 					break;
 				case "report-size":
 					ReportSize = enabled ?? true;
+					break;
+				case "disable-module":
+					DisableModule = enabled ?? true;
 					break;
 				default:
 					SetFeatureEnabled (part, enabled ?? false);
