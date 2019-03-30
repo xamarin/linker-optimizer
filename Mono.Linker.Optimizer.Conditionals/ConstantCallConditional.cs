@@ -27,7 +27,7 @@ using System;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Mono.Linker.Optimizer
+namespace Mono.Linker.Optimizer.Conditionals
 {
 	public class ConstantCallConditional : LinkerConditional
 	{

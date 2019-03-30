@@ -30,6 +30,8 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Linker.Optimizer
 {
+	using Conditionals;
+
 	public class BasicBlock
 	{
 		public int Index {

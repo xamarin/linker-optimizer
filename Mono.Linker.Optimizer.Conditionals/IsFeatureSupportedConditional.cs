@@ -26,7 +26,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Mono.Linker.Optimizer
+namespace Mono.Linker.Optimizer.Conditionals
 {
 	public class IsFeatureSupportedConditional : LinkerConditional
 	{

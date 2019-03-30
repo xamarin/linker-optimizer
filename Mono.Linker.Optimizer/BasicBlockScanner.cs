@@ -32,6 +32,8 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Linker.Optimizer
 {
+	using Conditionals;
+
 	public class BasicBlockScanner
 	{
 		public MartinContext Context {
