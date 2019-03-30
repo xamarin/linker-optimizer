@@ -1,2 +1,5 @@
+*.exe
+*.pdb
+*.dll
+*.mdb
 output/
-log*

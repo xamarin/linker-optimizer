@@ -1,18 +1,23 @@
-thisdir = tools/linker/Martin/Tests
-SUBDIRS =
-include ../../../../build/rules.make
-
+topdir := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 abs_topdir := $(abspath $(topdir))
-LINKER_OUTPUT := output
-PROFILE_PATH := $(abspath $(topdir)/class/lib/$(PROFILE_DIRECTORY))
-AOTPROFILE_PATH := $(abspath $(topdir)/class/lib/testing_aot_full)
-XUNIT_PATH := $(abspath $(topdir)/..)/external/xunit-binaries
 
-LINKER = MONO_PATH=$(topdir)/class/lib/$(BUILD_TOOLS_PROFILE) $(RUNTIME) $(RUNTIME_FLAGS) --debug $(topdir)/class/lib/$(BUILD_TOOLS_PROFILE)/monolinker.exe -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH)
+LINKER_OUTPUT := output
+
+PROFILE = net_4_x
+PROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/$(PROFILE))
+AOTPROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/testing_aot_full)
+
+MCS = csc
+ILASM = ilasm
+RUNTIME = $(MONO_ROOT)/runtime/mono-wrapper
+RUNTIME_FLAGS =
+
+# XUNIT_PATH := $(abspath $(topdir)/..)/external/xunit-binaries
+
+LINKER = MONO_PATH=$(MONO_ROOT)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) --debug ../bin/Debug/monolinker.exe -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH)
+
 LINKER_DEFAULT = $(LINKER) -c link -l none $(LINKER_PROFILE_OPTIONS) --exclude-feature sre --exclude-feature security --exclude-feature globalization
 LINKER_CORLIB_TEST = $(LINKER) -c copy -p link mscorlib -l none $(LINKER_PROFILE_OPTIONS) --exclude-feature sre
-AOTLINKER = MONO_PATH=$(topdir)/class/lib/$(BUILD_TOOLS_PROFILE) $(RUNTIME) $(RUNTIME_FLAGS) --debug $(topdir)/class/lib/$(BUILD_TOOLS_PROFILE)/monolinker.exe -out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH)
-AOTLINKER_DEFAULT = $(AOTLINKER) -c link -l none $(LINKER_PROFILE_OPTIONS) --exclude-feature sre --exclude-feature security --exclude-feature globalization
 
 TEST_EXEC = MONO_PATH=$(LINKER_OUTPUT) $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot
 NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,ReflectionEmit,NotWorking,CAS,LinkerNotWorking,$(EXTRA_NUNIT_EXCLUDES)
@@ -22,18 +27,17 @@ ifdef TESTNAME
 TESTNAME_ARG = -test=$(TESTNAME)
 endif
 
-TESTS_COMPILER = $(MCS) -nologo -noconfig -unsafe -nostdlib -debug:portable -r:$(topdir)/class/lib/$(PROFILE_DIRECTORY)/mscorlib.dll
-AOTTESTS_COMPILER = $(MCS) -nologo -noconfig -unsafe -nostdlib -debug:portable -r:$(topdir)/class/lib/testing_aot_full/mscorlib.dll
+TESTS_COMPILER = $(MCS) -nologo -noconfig -unsafe -nostdlib -debug:portable -r:$(PROFILE_PATH)/mscorlib.dll
+AOTTESTS_COMPILER = $(MCS) -nologo -noconfig -unsafe -nostdlib -debug:portable -r:$(AOTPROFILE_PATH)/mscorlib.dll
 
 CLEAN_FILES += *.exe *.dll *.pdb
 
 CORLIB_SOURCES := \
-	$(topdir)/class/corlib/System.Runtime.CompilerServices/MonoLinkerFeature.cs \
-	$(topdir)/class/corlib/System.Runtime.CompilerServices/MonoLinkerSupport.cs
+	../System.Runtime.CompilerServices/MonoLinkerFeature.cs \
+	../System.Runtime.CompilerServices/MonoLinkerSupport.cs
 
 TEST_HELPER_SOURCES := \
-	$(topdir)/class/corlib/System.Runtime.CompilerServices/MonoLinkerFeature.cs \
-	$(topdir)/class/corlib/System.Runtime.CompilerServices/MonoLinkerSupport.cs \
+	$(CORLIB_SOURCES) \
 	AssertionException.cs \
 	TestHelpers.cs
 
@@ -215,7 +219,7 @@ corlib-xtest: build
 	(cd $(LINKER_OUTPUT); MONO_PATH=.:$(PROFILE_PATH):$(XUNIT_PATH) REMOTE_EXECUTOR="$(PROFILE_PATH)/tests/RemoteExecutorConsoleApp.exe" $(RUNTIME) $(RUNTIME_FLAGS) --debug $(XUNIT_PATH)/xunit.console.exe net_4_x_corlib_xunit-test.dll $(XUNIT_ARGS))
 
 build::
-	$(MAKE) PROFILE=build -C ../..
+	# $(MAKE) PROFILE=build -C ../..
 
 clean:
 	@rm -rf $(LINKER_OUTPUT)
