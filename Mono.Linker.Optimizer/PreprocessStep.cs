@@ -31,7 +31,7 @@ namespace Mono.Linker.Optimizer
 
 	public class PreprocessStep : ConditionalBaseStep
 	{
-		public PreprocessStep (MartinContext context)
+		public PreprocessStep (OptimizerContext context)
 			: base (context)
 		{
 		}

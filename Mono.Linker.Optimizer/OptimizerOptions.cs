@@ -230,7 +230,7 @@ namespace Mono.Linker.Optimizer
 			return _method_actions.Any (e => e.Matches (method, MethodAction.Fail));
 		}
 
-		public void CheckFailList (MartinContext context, TypeDefinition type, string original = null)
+		public void CheckFailList (OptimizerContext context, TypeDefinition type, string original = null)
 		{
 			if (type.DeclaringType != null) {
 				CheckFailList (context, type.DeclaringType, original ?? type.FullName);
@@ -253,7 +253,7 @@ namespace Mono.Linker.Optimizer
 				throw new NotSupportedException (message + original_message + ".");
 		}
 
-		public void CheckFailList (MartinContext context, MethodDefinition method)
+		public void CheckFailList (OptimizerContext context, MethodDefinition method)
 		{
 			CheckFailList (context, method.DeclaringType, method.FullName);
 
@@ -272,14 +272,14 @@ namespace Mono.Linker.Optimizer
 				throw new NotSupportedException (message + ".");
 		}
 
-		static void DumpFailEntry (MartinContext context, TypeEntry entry)
+		static void DumpFailEntry (OptimizerContext context, TypeEntry entry)
 		{
 			context.LogMessage (MessageImportance.High, "  " + entry.ToString ());
 			if (entry.Parent != null)
 				DumpFailEntry (context, entry.Parent);
 		}
 
-		static void DumpFailEntry (MartinContext context, MethodEntry entry)
+		static void DumpFailEntry (OptimizerContext context, MethodEntry entry)
 		{
 			context.LogMessage (MessageImportance.High, "  " + entry.ToString ());
 			if (entry.Parent != null)

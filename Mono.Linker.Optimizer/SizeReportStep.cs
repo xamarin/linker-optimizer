@@ -35,7 +35,7 @@ namespace Mono.Linker.Optimizer
 		readonly Dictionary<string, int> type_sizes;
 		readonly Dictionary<string, int> method_sizes;
 
-		public SizeReportStep (MartinContext context)
+		public SizeReportStep (OptimizerContext context)
 			: base (context)
 		{
 			namespace_sizes = new Dictionary<string, int> ();

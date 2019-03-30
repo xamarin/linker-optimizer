@@ -1,5 +1,5 @@
 ﻿//
-// MartinContext.cs
+// OptimizerContext.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -36,7 +36,7 @@ namespace Mono.Linker.Optimizer
 {
 	using BasicBlocks;
 
-	public class MartinContext
+	public class OptimizerContext
 	{
 		public LinkContext Context {
 			get;
@@ -48,7 +48,7 @@ namespace Mono.Linker.Optimizer
 
 		public AnnotationStore Annotations => Context.Annotations;
 
-		MartinContext (LinkContext context, OptimizerOptions options)
+		OptimizerContext (LinkContext context, OptimizerOptions options)
 		{
 			Context = context;
 			Options = options;
@@ -69,7 +69,7 @@ namespace Mono.Linker.Optimizer
 		{
 			linkContext.Logger.LogMessage (MessageImportance.Normal, "Enabling Martin's Playground");
 
-			var context = new MartinContext (linkContext, options);
+			var context = new OptimizerContext (linkContext, options);
 
 			context.Initialize ();
 

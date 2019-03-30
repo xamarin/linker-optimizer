@@ -36,7 +36,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 	public class BasicBlockScanner
 	{
-		public MartinContext Context {
+		public OptimizerContext Context {
 			get;
 		}
 
@@ -63,7 +63,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			private set;
 		}
 
-		BasicBlockScanner (MartinContext context, MethodDefinition method, int? debug = null)
+		BasicBlockScanner (OptimizerContext context, MethodDefinition method, int? debug = null)
 		{
 			Context = context;
 			Method = method;
@@ -76,7 +76,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 		public static bool ThrowOnError;
 
-		public static BasicBlockScanner Scan (MartinContext context, MethodDefinition method, int? debug = null)
+		public static BasicBlockScanner Scan (OptimizerContext context, MethodDefinition method, int? debug = null)
 		{
 			var scanner = new BasicBlockScanner (context, method, debug);
 			if (!scanner.Scan ())

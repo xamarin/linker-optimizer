@@ -36,7 +36,7 @@
     <Compile Include="Mono.Linker.Optimizer\ConditionalMarkStep.cs" />
     <Compile Include="Mono.Linker.Optimizer\DebugHelpers.cs" />
     <Compile Include="Mono.Linker.Optimizer\MartinAssertException.cs" />
-    <Compile Include="Mono.Linker.Optimizer\MartinContext.cs" />
+    <Compile Include="Mono.Linker.Optimizer\OptimizerContext.cs" />
     <Compile Include="Mono.Linker.Optimizer\OptimizerOptions.cs" />
     <Compile Include="Mono.Linker.Optimizer\MartinTestException.cs" />
     <Compile Include="Mono.Linker.Optimizer\PreprocessStep.cs" />

@@ -37,7 +37,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			get;
 		}
 
-		public MartinContext Context => Scanner.Context;
+		public OptimizerContext Context => Scanner.Context;
 
 		public BasicBlockList BlockList => Scanner.BlockList;
 
@@ -261,7 +261,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 		/*
 		 * Replace the entire method body with `throw new PlatformNotSupportedException ()`.
 		 */
-		public static void ReplaceWithPlatformNotSupportedException (MartinContext context, MethodDefinition method)
+		public static void ReplaceWithPlatformNotSupportedException (OptimizerContext context, MethodDefinition method)
 		{
 			if (method.IsAbstract || method.IsVirtual || method.IsConstructor || !method.IsIL)
 				throw ThrowUnsupported (method, "Cannot rewrite method of this type into throwing an exception.");
@@ -276,7 +276,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 		/*
 		 * Replace the entire method body with `return null`.
 		 */
-		public static void ReplaceWithReturnNull (MartinContext context, MethodDefinition method)
+		public static void ReplaceWithReturnNull (OptimizerContext context, MethodDefinition method)
 		{
 			if (method.IsAbstract || method.IsVirtual || method.IsConstructor || !method.IsIL)
 				throw ThrowUnsupported (method, "Cannot rewrite method of this type into returning null.");
@@ -295,7 +295,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 		/*
 		 * Replace the entire method body with `return false`.
 		 */
-		public static void ReplaceWithReturnFalse (MartinContext context, MethodDefinition method)
+		public static void ReplaceWithReturnFalse (OptimizerContext context, MethodDefinition method)
 		{
 			if (method.IsAbstract || method.IsVirtual || method.IsConstructor || !method.IsIL)
 				throw ThrowUnsupported (method, "Cannot rewrite method of this type into returning false.");

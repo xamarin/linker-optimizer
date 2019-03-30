@@ -39,7 +39,7 @@ namespace Mono.Linker.Optimizer.Conditionals
 
 		public BasicBlockList BlockList => Scanner.BlockList;
 
-		protected MartinContext Context => Scanner.Context;
+		protected OptimizerContext Context => Scanner.Context;
 
 		protected MethodDefinition Method => BlockList.Body.Method;
 

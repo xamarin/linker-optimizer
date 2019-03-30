@@ -32,11 +32,11 @@ namespace Mono.Linker.Optimizer
 {
 	public class XmlConfigurationWriter
 	{
-		public MartinContext Context {
+		public OptimizerContext Context {
 			get;
 		}
 
-		public XmlConfigurationWriter (MartinContext context)
+		public XmlConfigurationWriter (OptimizerContext context)
 		{
 			Context = context;
 		}

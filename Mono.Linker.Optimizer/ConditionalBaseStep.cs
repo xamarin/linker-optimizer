@@ -30,13 +30,13 @@ namespace Mono.Linker.Optimizer
 {
 	public abstract class ConditionalBaseStep : BaseStep
 	{
-		new public MartinContext Context {
+		new public OptimizerContext Context {
 			get;
 		}
 
 		public AnnotationStore Annotation => Context.Context.Annotations;
 
-		protected ConditionalBaseStep (MartinContext context)
+		protected ConditionalBaseStep (OptimizerContext context)
 		{
 			Context = context;
 		}

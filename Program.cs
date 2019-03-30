@@ -114,7 +114,7 @@ namespace Mono.Linker.Optimizer
 		{
 			public void Process (LinkContext context)
 			{
-				MartinContext.Initialize (context, options);
+				OptimizerContext.Initialize (context, options);
 			}
 		}
 	}

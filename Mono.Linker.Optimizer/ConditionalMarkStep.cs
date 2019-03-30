@@ -36,7 +36,7 @@ namespace Mono.Linker.Optimizer
 
 	public class ConditionalMarkStep : MarkStep
 	{
-		public MartinContext MartinContext {
+		public OptimizerContext OptimizerContext {
 			get;
 		}
 
@@ -48,9 +48,9 @@ namespace Mono.Linker.Optimizer
 			private set;
 		}
 
-		public ConditionalMarkStep (MartinContext context)
+		public ConditionalMarkStep (OptimizerContext context)
 		{
-			MartinContext = context;
+			OptimizerContext = context;
 
 			_conditional_methods = new Queue<MethodDefinition> ();
 			_block_scanner_by_method = new Dictionary<MethodDefinition, BasicBlockScanner> ();
@@ -70,8 +70,8 @@ namespace Mono.Linker.Optimizer
 
 				var scanner = _block_scanner_by_method [conditional];
 				if (scanner.DebugLevel > 0) {
-					MartinContext.LogMessage (MessageImportance.Normal, $"CONDITIONAL METHOD: {conditional}");
-					MartinContext.Debug ();
+					OptimizerContext.LogMessage (MessageImportance.Normal, $"CONDITIONAL METHOD: {conditional}");
+					OptimizerContext.Debug ();
 				}
 
 				scanner.RewriteConditionals ();
@@ -83,20 +83,20 @@ namespace Mono.Linker.Optimizer
 
 		protected override void MarkMethodBody (MethodBody body)
 		{
-			if (!MartinContext.IsEnabled (body.Method)) {
+			if (!OptimizerContext.IsEnabled (body.Method)) {
 				base.MarkMethodBody (body);
 				return;
 			}
 
-			var debug = MartinContext.GetDebugLevel (body.Method);
+			var debug = OptimizerContext.GetDebugLevel (body.Method);
 			if (debug > 0) {
-				MartinContext.LogMessage (MessageImportance.Normal, $"MARK BODY: {body.Method}");
-				MartinContext.Debug ();
+				OptimizerContext.LogMessage (MessageImportance.Normal, $"MARK BODY: {body.Method}");
+				OptimizerContext.Debug ();
 			}
 
-			var scanner = BasicBlockScanner.Scan (MartinContext, body.Method);
+			var scanner = BasicBlockScanner.Scan (OptimizerContext, body.Method);
 			if (scanner == null) {
-				MartinContext.LogDebug ($"BB SCAN FAILED: {body.Method}");
+				OptimizerContext.LogDebug ($"BB SCAN FAILED: {body.Method}");
 				base.MarkMethodBody (body);
 				return;
 			}
@@ -107,7 +107,7 @@ namespace Mono.Linker.Optimizer
 			}
 
 			if (debug > 0)
-				MartinContext.LogDebug ($"MARK BODY - CONDITIONAL: {body.Method}");
+				OptimizerContext.LogDebug ($"MARK BODY - CONDITIONAL: {body.Method}");
 
 			scanner.RewriteConditionals ();
 
@@ -136,27 +136,27 @@ namespace Mono.Linker.Optimizer
 			if (Annotations.IsProcessed (type))
 				return null;
 
-			if (MartinContext.Options.EnableDebugging (type)) {
-				MartinContext.LogMessage (MessageImportance.Normal, $"MARK TYPE: {type}");
-				MartinContext.Debug ();
+			if (OptimizerContext.Options.EnableDebugging (type)) {
+				OptimizerContext.LogMessage (MessageImportance.Normal, $"MARK TYPE: {type}");
+				OptimizerContext.Debug ();
 			}
 
-			MartinContext.Options.CheckFailList (MartinContext, type);
+			OptimizerContext.Options.CheckFailList (OptimizerContext, type);
 
-			if (ProcessingConditionals && MartinContext.IsConditionalTypeMarked (type))
-				MartinContext.AttemptingToRedefineConditional (type);
+			if (ProcessingConditionals && OptimizerContext.IsConditionalTypeMarked (type))
+				OptimizerContext.AttemptingToRedefineConditional (type);
 
 			return base.MarkType (reference);
 		}
 
 		protected override void EnqueueMethod (MethodDefinition method)
 		{
-			if (MartinContext.Options.EnableDebugging (method)) {
-				MartinContext.LogMessage (MessageImportance.Normal, $"ENQUEUE METHOD: {method}");
-				MartinContext.Debug ();
+			if (OptimizerContext.Options.EnableDebugging (method)) {
+				OptimizerContext.LogMessage (MessageImportance.Normal, $"ENQUEUE METHOD: {method}");
+				OptimizerContext.Debug ();
 			}
 
-			MartinContext.Options.CheckFailList (MartinContext, method);
+			OptimizerContext.Options.CheckFailList (OptimizerContext, method);
 
 			if (_conditional_methods.Contains (method))
 				return;
