@@ -118,7 +118,7 @@ namespace Mono.Linker.Optimizer
 			if (method_sizes.ContainsKey (method.FullName))
 				return;
 
-			if (Context.Options.HasTypeEntry (method.DeclaringType, MartinOptions.TypeAction.Size))
+			if (Context.Options.HasTypeEntry (method.DeclaringType, OptimizerOptions.TypeAction.Size))
 				Context.LogMessage (MessageImportance.Normal, $"SIZE: {method.FullName} {method.Body.CodeSize}");
 
 			method_sizes.Add (method.FullName, method.Body.CodeSize);

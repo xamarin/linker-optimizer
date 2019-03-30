@@ -34,7 +34,7 @@ namespace Mono.Linker.Optimizer
 {
 	public static class Program
 	{
-		static readonly MartinOptions options = new MartinOptions ();
+		static readonly OptimizerOptions options = new OptimizerOptions ();
 
 		public static int Main (string[] args)
 		{

@@ -42,13 +42,13 @@ namespace Mono.Linker.Optimizer
 			get;
 		}
 
-		public MartinOptions Options {
+		public OptimizerOptions Options {
 			get;
 		}
 
 		public AnnotationStore Annotations => Context.Annotations;
 
-		MartinContext (LinkContext context, MartinOptions options)
+		MartinContext (LinkContext context, OptimizerOptions options)
 		{
 			Context = context;
 			Options = options;
@@ -65,7 +65,7 @@ namespace Mono.Linker.Optimizer
 			Context.Logger.LogMessage (MessageImportance.Low, message);
 		}
 
-		public static void Initialize (LinkContext linkContext, MartinOptions options)
+		public static void Initialize (LinkContext linkContext, OptimizerOptions options)
 		{
 			linkContext.Logger.LogMessage (MessageImportance.Normal, "Enabling Martin's Playground");
 

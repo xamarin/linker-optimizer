@@ -31,23 +31,23 @@ namespace Mono.Linker.Optimizer
 {
 	class OptionsReader
 	{
-		public MartinOptions Options {
+		public OptimizerOptions Options {
 			get;
 		}
 
-		public static void Read (MartinOptions options, XPathDocument document)
+		public static void Read (OptimizerOptions options, XPathDocument document)
 		{
 			var reader = new OptionsReader (options);
 			reader.Read (document);
 		}
 
-		public static void Read (MartinOptions options, string filename)
+		public static void Read (OptimizerOptions options, string filename)
 		{
 			var reader = new OptionsReader (options);
 			reader.Read (new XPathDocument (filename));
 		}
 
-		OptionsReader (MartinOptions options)
+		OptionsReader (OptimizerOptions options)
 		{
 			Options = options;
 		}
@@ -113,7 +113,7 @@ namespace Mono.Linker.Optimizer
 			if (string.IsNullOrEmpty (name) || !GetBoolAttribute (nav, "enabled", out var enabled))
 				throw ThrowError ("<conditional> needs both `feature` and `enabled` arguments.");
 
-			var feature = MartinOptions.FeatureByName (name);
+			var feature = OptimizerOptions.FeatureByName (name);
 
 			ProcessChildren (nav, "namespace", child => OnNamespaceEntry (child, Conditional));
 			ProcessChildren (nav, "type", child => OnTypeEntry (child, null, Conditional));
@@ -131,28 +131,28 @@ namespace Mono.Linker.Optimizer
 			return false;
 		}
 
-		bool GetName (XPathNavigator nav, out string name, out MartinOptions.MatchKind match)
+		bool GetName (XPathNavigator nav, out string name, out OptimizerOptions.MatchKind match)
 		{
 			name = GetAttribute (nav, "name");
 			var fullname = GetAttribute (nav, "fullname");
 			var substring = GetAttribute (nav, "substring");
 
 			if (!string.IsNullOrEmpty (fullname)) {
-				match = MartinOptions.MatchKind.FullName;
+				match = OptimizerOptions.MatchKind.FullName;
 				if (!string.IsNullOrEmpty (name) || !string.IsNullOrEmpty (substring))
 					return false;
 				name = fullname;
 			} else if (!string.IsNullOrEmpty (name)) {
-				match = MartinOptions.MatchKind.Name;
+				match = OptimizerOptions.MatchKind.Name;
 				if (!string.IsNullOrEmpty (fullname) || !string.IsNullOrEmpty (substring))
 					return false;
 			} else if (!string.IsNullOrEmpty (substring)) {
-				match = MartinOptions.MatchKind.Substring;
+				match = OptimizerOptions.MatchKind.Substring;
 				if (!string.IsNullOrEmpty (name) || !string.IsNullOrEmpty (fullname))
 					return false;
 				name = substring;
 			} else {
-				match = MartinOptions.MatchKind.Name;
+				match = OptimizerOptions.MatchKind.Name;
 				return false;
 			}
 
@@ -165,41 +165,41 @@ namespace Mono.Linker.Optimizer
 			if (string.IsNullOrEmpty (name))
 				throw ThrowError ("<namespace> entry needs `name` attribute.");
 
-			MartinOptions.TypeEntry entry;
+			OptimizerOptions.TypeEntry entry;
 			var action = GetAttribute (nav, "action");
 			if (!string.IsNullOrEmpty (action))
-				entry = AddTypeEntry (name, MartinOptions.MatchKind.Namespace, action, null, conditional);
+				entry = AddTypeEntry (name, OptimizerOptions.MatchKind.Namespace, action, null, conditional);
 			else
-				entry = Options.AddTypeEntry (name, MartinOptions.MatchKind.Namespace, MartinOptions.TypeAction.None, null, conditional);
+				entry = Options.AddTypeEntry (name, OptimizerOptions.MatchKind.Namespace, OptimizerOptions.TypeAction.None, null, conditional);
 
 			ProcessChildren (nav, "type", child => OnTypeEntry (child, entry, conditional));
 			ProcessChildren (nav, "method", child => OnMethodEntry (child, entry, conditional));
 		}
 
-		void OnTypeEntry (XPathNavigator nav, MartinOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
+		void OnTypeEntry (XPathNavigator nav, OptimizerOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
 		{
 			if (!GetName (nav, out var name, out var match))
 				throw ThrowError ($"Ambiguous name in type entry `{nav.OuterXml}`.");
 
-			MartinOptions.TypeEntry entry;
+			OptimizerOptions.TypeEntry entry;
 			var action = GetAttribute (nav, "action");
 			if (!string.IsNullOrEmpty (action))
 				entry = AddTypeEntry (name, match, action, parent, conditional);
 			else
-				entry = Options.AddTypeEntry (name, match, MartinOptions.TypeAction.None, parent, conditional);
+				entry = Options.AddTypeEntry (name, match, OptimizerOptions.TypeAction.None, parent, conditional);
 
 			ProcessChildren (nav, "method", child => OnMethodEntry (child, entry, conditional));
 		}
 
-		MartinOptions.TypeEntry AddTypeEntry (string name, MartinOptions.MatchKind match, string action, MartinOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
+		OptimizerOptions.TypeEntry AddTypeEntry (string name, OptimizerOptions.MatchKind match, string action, OptimizerOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
 		{
-			if (!MartinOptions.TryParseTypeAction (action, out var typeAction))
+			if (!OptimizerOptions.TryParseTypeAction (action, out var typeAction))
 				throw ThrowError ($"Invalid `action` attribute: `{action}`.");
 
 			return Options.AddTypeEntry (name, match, typeAction, parent, conditional);
 		}
 
-		void OnMethodEntry (XPathNavigator nav, MartinOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
+		void OnMethodEntry (XPathNavigator nav, OptimizerOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
 		{
 			if (!GetName (nav, out var name, out var match))
 				throw ThrowError ($"Ambiguous name in method entry `{nav.OuterXml}`.");
@@ -208,7 +208,7 @@ namespace Mono.Linker.Optimizer
 			if (string.IsNullOrEmpty (action))
 				throw ThrowError ($"Missing `action` attribute in {nav.OuterXml}.");
 
-			if (!MartinOptions.TryParseMethodAction (action, out var methodAction))
+			if (!OptimizerOptions.TryParseMethodAction (action, out var methodAction))
 				throw ThrowError ($"Invalid `action` attribute in {nav.OuterXml}.");
 
 			Options.AddMethodEntry (name, match, methodAction, parent, conditional);

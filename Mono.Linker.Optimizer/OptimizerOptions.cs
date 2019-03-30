@@ -1,5 +1,5 @@
 ﻿//
-// MartinOptions.cs
+// OptimizerOptions.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -31,7 +31,7 @@ using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer
 {
-	public class MartinOptions
+	public class OptimizerOptions
 	{
 		public bool ScanAllModules {
 			get; set;
@@ -65,7 +65,7 @@ namespace Mono.Linker.Optimizer
 		readonly List<MethodEntry> _method_actions;
 		readonly Dictionary<MonoLinkerFeature, bool> _enabled_features;
 
-		public MartinOptions ()
+		public OptimizerOptions ()
 		{
 			AutoDebugMain = true;
 			NoConditionalRedefinition = true;

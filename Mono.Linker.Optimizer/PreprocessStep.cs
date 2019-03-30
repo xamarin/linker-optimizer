@@ -98,38 +98,38 @@ namespace Mono.Linker.Optimizer
 			Context.Debug ();
 		}
 
-		void ProcessTypeActions (TypeDefinition type, MartinOptions.TypeAction action)
+		void ProcessTypeActions (TypeDefinition type, OptimizerOptions.TypeAction action)
 		{
 			switch (action) {
-			case MartinOptions.TypeAction.Debug:
+			case OptimizerOptions.TypeAction.Debug:
 				Context.LogMessage (MessageImportance.High, $"Debug type: {type} {action}");
 				Context.Debug ();
 				break;
 
-			case MartinOptions.TypeAction.Preserve:
+			case OptimizerOptions.TypeAction.Preserve:
 				Context.Annotations.SetPreserve (type, TypePreserve.All);
 				Context.Annotations.Mark (type);
 				break;
 			}
 		}
 
-		void ProcessMethodActions (MethodDefinition method, MartinOptions.MethodAction action)
+		void ProcessMethodActions (MethodDefinition method, OptimizerOptions.MethodAction action)
 		{
 			switch (action) {
-			case MartinOptions.MethodAction.Debug:
+			case OptimizerOptions.MethodAction.Debug:
 				Context.LogMessage (MessageImportance.High, $"Debug method: {method} {action}");
 				Context.Debug ();
 				break;
 
-			case MartinOptions.MethodAction.Throw:
+			case OptimizerOptions.MethodAction.Throw:
 				CodeRewriter.ReplaceWithPlatformNotSupportedException (Context, method);
 				break;
 
-			case MartinOptions.MethodAction.ReturnFalse:
+			case OptimizerOptions.MethodAction.ReturnFalse:
 				CodeRewriter.ReplaceWithReturnFalse (Context, method);
 				break;
 
-			case MartinOptions.MethodAction.ReturnNull:
+			case OptimizerOptions.MethodAction.ReturnNull:
 				CodeRewriter.ReplaceWithReturnNull (Context, method);
 				break;
 			}
