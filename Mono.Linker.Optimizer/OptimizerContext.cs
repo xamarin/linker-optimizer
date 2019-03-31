@@ -25,7 +25,6 @@
 // THE SOFTWARE.
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Diagnostics;
 using System.Collections.Generic;
 using Mono.Cecil;
@@ -34,6 +33,7 @@ using Mono.Linker.Steps;
 
 namespace Mono.Linker.Optimizer
 {
+	using System.Reflection;
 	using BasicBlocks;
 
 	public class OptimizerContext

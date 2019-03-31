@@ -1,33 +1,9 @@
-topdir := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-abs_topdir := $(abspath $(topdir))
+thisdir = tools/linker/Martin/Tests
 
-LINKER_OUTPUT := output
+makefile_dir := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+ROOTDIR := $(abspath $(makefile_dir)/..)
 
-PROFILE = net_4_x
-PROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/$(PROFILE))
-AOTPROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/testing_aot_full)
-
-MCS = csc
-ILASM = ilasm
-RUNTIME = $(MONO_ROOT)/runtime/mono-wrapper
-RUNTIME_FLAGS =
-
-PROFILER_FLAGS := --profile=log:calls,calldepth=100
-
-# XUNIT_PATH := $(abspath $(topdir)/..)/external/xunit-binaries
-
-LINKER_EXE = ../bin/Debug/Mono.Linker.Optimizer.exe
-LINKER_RELEASE_EXE = ../bin/Release/Mono.Linker.Optimizer.exe
-LINKER = MONO_PATH=$(MONO_ROOT)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) --debug $(LINKER_EXE)
-
-LINKER_ARGS = -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH)
-LINKER_ARGS_DEFAULT = $(LINKER_ARGS) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization
-LINKER_ARGS_CORLIB_TEST = $(LINKER_ARGS) -c copy -p link mscorlib -l none --exclude-feature sre
-LINKER_ARGS_AOT = -out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization
-
-TEST_EXEC = MONO_PATH=$(LINKER_OUTPUT) $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot
-NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,ReflectionEmit,NotWorking,CAS,LinkerNotWorking,$(EXTRA_NUNIT_EXCLUDES)
-XUNIT_ARGS := -noappdomain -noshadow -parallel none -notrait category=failing -notrait category=nonmonotests -notrait Benchmark=true -notrait category=outerloop -notrait category=nonosxtests
+include $(ROOTDIR)/rules.make
 
 ifdef TESTNAME
 TESTNAME_ARG = -test=$(TESTNAME)
@@ -219,18 +195,12 @@ corlib-xtest: build
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
 	@echo $(XUNIT_PATH)
-	$(LINKER) --martin -a $(PROFILE_PATH)/tests/net_4_x_corlib_xunit-test.dll -i corlib-xunit.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -d $(XUNIT_PATH) -d $(PROFILE_PATH)/tests -d $(PROFILE_PATH)/Facades -x $(abs_topdir)/class/corlib/LinkerDescriptor/mscorlib_xtest.xml
+	$(LINKER) --martin -a $(PROFILE_PATH)/tests/net_4_x_corlib_xunit-test.dll -i corlib-xunit.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -d $(XUNIT_PATH) -d $(PROFILE_PATH)/tests -d $(PROFILE_PATH)/Facades -x $(ROOTDIR)/class/corlib/LinkerDescriptor/mscorlib_xtest.xml
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
 	@cp $(XUNIT_PATH)/*.dll $(LINKER_OUTPUT)
 	(cd $(LINKER_OUTPUT); MONO_PATH=.:$(PROFILE_PATH):$(XUNIT_PATH) REMOTE_EXECUTOR="$(PROFILE_PATH)/tests/RemoteExecutorConsoleApp.exe" $(RUNTIME) $(RUNTIME_FLAGS) --debug $(XUNIT_PATH)/xunit.console.exe net_4_x_corlib_xunit-test.dll $(XUNIT_ARGS))
-
-build:
-	msbuild /nologo /verbosity:minimal ../Mono.Linker.Optimizer.sln
-
-build-release:
-	msbuild /nologo /verbosity:minimal /p:Configuration=Release ../Mono.Linker.Optimizer.sln
 
 clean:
 	@rm -rf $(LINKER_OUTPUT)
@@ -239,4 +209,8 @@ clean:
 
 cross-check: all run corlib-test corlib-test-globalization
 
+ifdef INTEGRATED_MAKE
+build::
+	$(MAKE) PROFILE=build -C ../..
 
+endif
