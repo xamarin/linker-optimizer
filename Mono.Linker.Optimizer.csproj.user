@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <StartAction>Project</StartAction>
+    <StartArguments>--martin test-weak-instances-1 -out output -b true -d /Workspace/mono-linker/mcs/class/lib/net_4_x -c link -l none  --exclude-feature sre --exclude-feature security --exclude-feature globalization --dump-dependencies</StartArguments>
+    <StartWorkingDirectory>Tests</StartWorkingDirectory>
+    <ConsolePause>true</ConsolePause>
+  </PropertyGroup>
+</Project>

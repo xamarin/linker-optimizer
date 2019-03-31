@@ -1,3 +1,4 @@
+COMPILER_OUTPUT := $(ROOTDIR)/output
 LINKER_OUTPUT := output
 
 PROFILE = net_4_x
@@ -13,11 +14,11 @@ PROFILER_FLAGS := --profile=log:calls,calldepth=100
 
 # XUNIT_PATH := $(abspath $(topdir)/..)/external/xunit-binaries
 
-LINKER_EXE = ../bin/Debug/Mono.Linker.Optimizer.exe
-LINKER_RELEASE_EXE = ../bin/Release/Mono.Linker.Optimizer.exe
+LINKER_EXE = $(COMPILER_OUTPUT)/bin/Debug/Mono.Linker.Optimizer.exe
+LINKER_RELEASE_EXE = $(COMPILER_OUTPUT)/bin/Release/Mono.Linker.Optimizer.exe
 LINKER = MONO_PATH=$(MONO_ROOT)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) --debug $(LINKER_EXE)
 
-LINKER_ARGS = -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH)
+LINKER_ARGS = -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH) -d $(ROOTDIR)/Tests/TestHelpers
 LINKER_ARGS_DEFAULT = $(LINKER_ARGS) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization
 LINKER_ARGS_CORLIB_TEST = $(LINKER_ARGS) -c copy -p link mscorlib -l none --exclude-feature sre
 LINKER_ARGS_AOT = -out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization

@@ -3,15 +3,19 @@ thisdir = tools/linker/Martin
 makefile_dir := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 ROOTDIR := $(abspath $(makefile_dir))
 
-include rules.make
+include $(ROOTDIR)/build/rules.make
+
+standalone-all:: build
+
+CLEAN_DIRECTORIES += output
 
 ifdef STANDALONE_MAKE
 
-build:
+standalone-build::
 	msbuild /nologo /verbosity:minimal $(ROOTDIR)/Mono.Linker.Optimizer.sln
 
-build-release:
-	msbuild /nologo /verbosity:minimal /p:Configuration=Release $(ROOTDIR)Mono.Linker.Optimizer.sln
+standalone-build-release::
+	msbuild /nologo /verbosity:minimal /p:Configuration=Release $(ROOTDIR)/Mono.Linker.Optimizer.sln
 
 endif
 
@@ -19,13 +23,13 @@ ifdef INTEGRATED_MAKE
 
 PROGRAM = monolinker-optimizer.exe
 
-LOCAL_MCS_FLAGS = /main:Mono.Linker.Optimizer.Program
+LOCAL_MCS_FLAGS = /main:Mono.Linker.Optimizer.Program /r:$(the_libdir)monolinker.exe
 LIB_REFS = System System.Core System.Xml Mono.Cecil
 
 include $(ROOTDIR)/../../../build/executable.make
 
-build: $(the_lib)
+standalone-build:: $(the_lib)
 
-build-release: $(the_lib)
+standalone-build-release:: $(the_lib)
 
 endif

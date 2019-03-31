@@ -4,6 +4,3 @@ Mono.Linker.Optimizer.BasicBlocks/*.cs
 Mono.Linker.Optimizer.Conditionals/*.cs
 
 System.Runtime.CompilerServices/*.cs
-
-../../../../external/linker/src/linker/Linker/*.cs
-../../../../external/linker/src/linker/Linker.Steps/*.cs
