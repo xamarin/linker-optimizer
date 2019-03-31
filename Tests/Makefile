@@ -214,3 +214,9 @@ build::
 	$(MAKE) PROFILE=build -C ../..
 
 endif
+
+ifdef STANDALONE_MAKE
+build::
+	$(MAKE) -C .. build
+
+endif

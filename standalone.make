@@ -1,12 +1,12 @@
 LINKER_OUTPUT := output
 
 PROFILE = net_4_x
-PROFILE_PATH := $(abspath $(MONO_ROOTDIR)/mcs/class/lib/$(PROFILE))
-AOTPROFILE_PATH := $(abspath $(MONO_ROOTDIR)/mcs/class/lib/testing_aot_full)
+PROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/$(PROFILE))
+AOTPROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/testing_aot_full)
 
 MCS = csc
 ILASM = ilasm
-RUNTIME = $(MONO_ROOTDIR)/runtime/mono-wrapper
+RUNTIME = $(MONO_ROOT)/runtime/mono-wrapper
 RUNTIME_FLAGS =
 
 PROFILER_FLAGS := --profile=log:calls,calldepth=100
@@ -15,7 +15,7 @@ PROFILER_FLAGS := --profile=log:calls,calldepth=100
 
 LINKER_EXE = ../bin/Debug/Mono.Linker.Optimizer.exe
 LINKER_RELEASE_EXE = ../bin/Release/Mono.Linker.Optimizer.exe
-LINKER = MONO_PATH=$(MONO_ROOTDIR)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) --debug $(LINKER_EXE)
+LINKER = MONO_PATH=$(MONO_ROOT)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) --debug $(LINKER_EXE)
 
 LINKER_ARGS = -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH)
 LINKER_ARGS_DEFAULT = $(LINKER_ARGS) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization
