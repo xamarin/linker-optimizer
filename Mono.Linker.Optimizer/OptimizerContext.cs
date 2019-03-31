@@ -206,6 +206,32 @@ namespace Mono.Linker.Optimizer
 			return constant_methods.Keys.ToList ();
 		}
 
+		internal bool TryFastResolve (MethodReference reference, out MethodDefinition resolved)
+		{
+			if (reference is MethodDefinition method) {
+				resolved = method;
+				return true;
+			}
+
+			resolved = null;
+			if (reference.MetadataToken.TokenType != TokenType.MemberRef && reference.MetadataToken.TokenType != TokenType.MethodSpec)
+				return false;
+
+			if (reference.DeclaringType.IsNested || reference.DeclaringType.HasGenericParameters)
+				return false;
+
+			var type = reference.DeclaringType.Resolve ();
+			if (type == null)
+				return false;
+
+			if (type == _corlib_support_type || type == _test_helper_support_type) {
+				resolved = reference.Resolve ();
+				return true;
+			}
+
+			return false;
+		}
+
 		internal Instruction CreateNewPlatformNotSupportedException (MethodDefinition method)
 		{
 			var reference = method.DeclaringType.Module.ImportReference (_platform_not_supported_exception_ctor.Value);

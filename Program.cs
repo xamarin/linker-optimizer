@@ -38,6 +38,8 @@ namespace Mono.Linker.Optimizer
 		static string mainModule;
 		static bool moduleEnabled;
 
+		const string ProgramName = "Mono Linker Optimizer";
+
 		public static int Main (string[] args)
 		{
 			if (args.Length == 0) {
@@ -70,11 +72,17 @@ namespace Mono.Linker.Optimizer
 			var watch = new Stopwatch ();
 			watch.Start ();
 
-			Driver.Execute (arguments.ToArray ());
+			try {
+				var driver = new Driver (arguments.ToArray ());
+				driver.Run ();
+			} catch (Exception ex) {
+				Console.Error.WriteLine ($"Fatal error in {ProgramName}: {ex.Message}");
+				throw;
+			}
 
 			watch.Stop ();
 
-			Console.Error.WriteLine ($"Mono Linker Optimizer finished in {watch.Elapsed}.");
+			Console.Error.WriteLine ($"{ProgramName} finished in {watch.Elapsed}.");
 
 			return 0;
 		}
@@ -135,9 +143,9 @@ namespace Mono.Linker.Optimizer
 
 		static void LoadFile (string filename)
 		{
-			var xml = Path.ChangeExtension (Path.GetExtension (filename), "xml");
+			var xml = Path.ChangeExtension (Path.GetFileNameWithoutExtension (filename), "xml");
 			if (File.Exists (xml))
-				OptionsReader.Read (options, filename);
+				OptionsReader.Read (options, xml);
 		}
 
 		class InitializeStep : IStep

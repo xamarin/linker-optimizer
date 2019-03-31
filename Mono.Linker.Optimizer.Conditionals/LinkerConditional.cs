@@ -107,7 +107,10 @@ namespace Mono.Linker.Optimizer.Conditionals
 		public static bool Scan (BasicBlockScanner scanner, ref BasicBlock bb, ref int index, Instruction instruction)
 		{
 			var reference = (MethodReference)instruction.Operand;
-			var target = reference.Resolve ();
+
+			if (!scanner.Context.TryFastResolve (reference, out var target))
+				return false;
+
 			if (target == null) {
 				if (reference.DeclaringType.Name.Contains ("...")) {
 					// FIXME: we don't support Ranges yet.

@@ -23,7 +23,7 @@ LINKER = MONO_PATH=$(MONO_ROOT)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) 
 LINKER_ARGS = -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH)
 LINKER_ARGS_DEFAULT = $(LINKER_ARGS) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization
 LINKER_ARGS_CORLIB_TEST = $(LINKER_ARGS) -c copy -p link mscorlib -l none --exclude-feature sre
-LINKER_ARGS_AOT = --out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization
+LINKER_ARGS_AOT = -out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH) -c link -l none --exclude-feature sre --exclude-feature security --exclude-feature globalization
 
 TEST_EXEC = MONO_PATH=$(LINKER_OUTPUT) $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot
 NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,ReflectionEmit,NotWorking,CAS,LinkerNotWorking,$(EXTRA_NUNIT_EXCLUDES)
@@ -187,7 +187,7 @@ corlib-test: build
 	@echo RUN CORLIB TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --martin $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll --martin-xml corlib-nunit.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -x $(abs_topdir)/class/corlib/LinkerDescriptor/mscorlib.xml
+	$(LINKER) --martin $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll --martin-xml corlib-nunit.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
@@ -197,7 +197,7 @@ corlib-test-profiler: build-release
 	@echo RUN CORLIB TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	time (mono --debug $(PROFILER_FLAGS) $(LINKER_RELEASE_EXE) --martin $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll -i corlib-profile.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml)
+	time (mono --debug $(PROFILER_FLAGS) $(LINKER_RELEASE_EXE) --martin $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll --martin-xml corlib-profile.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml)
 
 corlib-test-profiler-disabled: build-release
 	@echo RUN CORLIB TEST $@
