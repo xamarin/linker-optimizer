@@ -3,8 +3,6 @@
 	<martin>
 		<features>
 			<feature name="martin" enabled="true" />
-			<feature name="collator" enabled="false" />
-			<feature name="remoting" enabled="false" />
 		</features>
 	</martin>
 </linker>

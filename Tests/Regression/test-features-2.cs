@@ -19,8 +19,8 @@ namespace Martin.LinkerTest
 
 		public static void RunFeature2 ()
 		{
-			if (MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Remoting))
-				TestHelpers.AssertFail ("Remoting should be disabled.");
+			if (MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Unknown))
+				TestHelpers.AssertFail ("Feature `MonoLinkerFeature.Unknown` should be disabled.");
 		}
 	}
 }

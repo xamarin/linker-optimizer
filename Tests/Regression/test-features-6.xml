@@ -3,8 +3,6 @@
 	<martin>
 		<features>
 			<feature name="martin" />
-			<feature name="collator" enabled="false" />
-			<feature name="globalization" enabled="false" />
 		</features>
 	</martin>
 </linker>

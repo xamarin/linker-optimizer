@@ -14,8 +14,8 @@ namespace Martin.LinkerTest
 		{
 			if (!MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Martin))
 				throw new InvalidOperationException ("Expected `MonoLinkerFeature.Martin` to be enabled.");
-			if (MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Globalization))
-				throw new InvalidOperationException ("Expected `MonoLinkerFeature.Globalization` to be disabled.");
+			if (MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Unknown))
+				throw new InvalidOperationException ("Expected `MonoLinkerFeature.Unknown` to be disabled.");
 		}
 	}
 }

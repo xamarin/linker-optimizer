@@ -17,8 +17,8 @@ namespace Martin.LinkerTest
 			case MonoLinkerFeature.Martin:
 				supported = MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Martin);
 				break;
-			case MonoLinkerFeature.Remoting:
-				supported = MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Remoting);
+			case MonoLinkerFeature.Unknown:
+				supported = MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Unknown);
 				break;
 			case MonoLinkerFeature.ReflectionEmit:
 				Console.Error.WriteLine ("REFLECTION EMIT");
