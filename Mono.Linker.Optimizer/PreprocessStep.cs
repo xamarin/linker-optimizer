@@ -23,6 +23,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+using System;
 using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer
@@ -36,16 +37,23 @@ namespace Mono.Linker.Optimizer
 		{
 		}
 
-		protected override void ProcessAssembly (AssemblyDefinition assembly)
+		protected override void Process ()
 		{
-			foreach (var type in assembly.MainModule.Types) {
-				ProcessType (type);
-			}
+			if (!Context.Options.Preprocess)
+				return;
+
+			Preprocess ();
+
+			DumpConstantProperties ();
 		}
 
-		protected override void EndProcess ()
+		void Preprocess ()
 		{
-			DumpConstantProperties ();
+			foreach (var assembly in GetAssemblies ()) {
+				foreach (var type in assembly.MainModule.Types) {
+					ProcessType (type);
+				}
+			}
 		}
 
 		void ProcessType (TypeDefinition type)

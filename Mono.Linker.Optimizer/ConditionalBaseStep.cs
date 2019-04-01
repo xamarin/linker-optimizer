@@ -24,21 +24,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using System.Collections.Generic;
+using Mono.Cecil;
 using Mono.Linker.Steps;
 
 namespace Mono.Linker.Optimizer
 {
-	public abstract class ConditionalBaseStep : BaseStep
+	public abstract class ConditionalBaseStep : IStep
 	{
-		new public OptimizerContext Context {
+		public OptimizerContext Context {
 			get;
 		}
 
-		public AnnotationStore Annotation => Context.Context.Annotations;
+		public AnnotationStore Annotations => Context.Context.Annotations;
 
 		protected ConditionalBaseStep (OptimizerContext context)
 		{
 			Context = context;
 		}
+
+		public void Process (LinkContext context)
+		{
+			Process ();
+		}
+
+		protected abstract void Process ();
+
+		protected AssemblyDefinition[] GetAssemblies () => Context.Context.GetAssemblies ();
 	}
 }

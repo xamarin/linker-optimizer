@@ -43,15 +43,14 @@ namespace Mono.Linker.Optimizer
 			method_sizes = new Dictionary<string, int> ();
 		}
 
-		protected override void ProcessAssembly (AssemblyDefinition assembly)
+		protected override void Process ()
 		{
-			foreach (var type in assembly.MainModule.Types) {
-				ProcessType (type);
+			foreach (var assembly in GetAssemblies ()) {
+				foreach (var type in assembly.MainModule.Types) {
+					ProcessType (type);
+				}
 			}
-		}
 
-		protected override void EndProcess ()
-		{
 			Report ();
 		}
 
