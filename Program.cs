@@ -152,7 +152,7 @@ namespace Mono.Linker.Optimizer
 		{
 			public void Process (LinkContext context)
 			{
-				OptimizerContext.Initialize (context, options);
+				OptimizerContext.Initialize (context, mainModule, options);
 			}
 		}
 	}

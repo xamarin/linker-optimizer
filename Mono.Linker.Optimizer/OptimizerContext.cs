@@ -65,13 +65,13 @@ namespace Mono.Linker.Optimizer
 			Context.Logger.LogMessage (MessageImportance.Low, message);
 		}
 
-		public static void Initialize (LinkContext linkContext, OptimizerOptions options)
+		public static void Initialize (LinkContext linkContext, string mainModule, OptimizerOptions options)
 		{
 			linkContext.Logger.LogMessage (MessageImportance.Normal, "Enabling Martin's Playground");
 
 			var context = new OptimizerContext (linkContext, options);
 
-			context.Initialize ();
+			context.Initialize (mainModule);
 
 			if (options.Preprocess)
 				linkContext.Pipeline.AddStepBefore (typeof (MarkStep), new PreprocessStep (context));
@@ -86,6 +86,7 @@ namespace Mono.Linker.Optimizer
 
 		TypeDefinition _corlib_support_type;
 		TypeDefinition _test_helper_support_type;
+		AssemblyDefinition _main_module;
 		SupportMethodRegistration _is_weak_instance_of;
 		SupportMethodRegistration _as_weak_instance_of;
 		SupportMethodRegistration _is_feature_supported;
@@ -96,7 +97,7 @@ namespace Mono.Linker.Optimizer
 		Lazy<MethodDefinition> _platform_not_supported_exception_ctor;
 		FieldInfo _tracer_stack_field;
 
-		void Initialize ()
+		void Initialize (string mainModule)
 		{
 			LogMessage (MessageImportance.High, "Initializing Martin's Playground");
 
@@ -108,11 +109,17 @@ namespace Mono.Linker.Optimizer
 				case "TestHelpers":
 					_test_helper_support_type = asm.MainModule.GetType (LinkerSupportType);
 					break;
+				default:
+					if (asm.Name.Name.Equals (mainModule))
+						_main_module = asm;
+					break;
 				}
 			}
 
 			if (_corlib_support_type == null)
 				throw new NotSupportedException ($"Cannot find `{LinkerSupportType}` in corlib.");
+			if (_main_module == null)
+				throw new NotSupportedException ($"Cannot find main module `{mainModule}` is assembly list.");
 
 			_is_weak_instance_of = ResolveSupportMethod ("IsWeakInstanceOf");
 			_as_weak_instance_of = ResolveSupportMethod ("AsWeakInstanceOf");
@@ -159,7 +166,7 @@ namespace Mono.Linker.Optimizer
 
 		public bool IsEnabled (MethodDefinition method)
 		{
-			return Options.ScanAllModules || Options.EnableDebugging (method.DeclaringType);
+			return Options.ScanAllModules || method.Module.Assembly == _main_module || Options.EnableDebugging (method.DeclaringType);
 		}
 
 		internal int GetDebugLevel (MethodDefinition method)
