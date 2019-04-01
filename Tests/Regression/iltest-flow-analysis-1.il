@@ -3,7 +3,7 @@
 }
 .assembly extern 'TestHelpers'
 {
-  .ver 0:0:0:0
+	.ver 0:0:0:0
 }
 
 .namespace Martin.LinkerTest
