@@ -5,6 +5,8 @@ ROOTDIR := $(abspath $(makefile_dir)/../..)
 
 include $(ROOTDIR)/build/rules.make
 
+LOCAL_LINKER_ARGS := --martin-options -all-modules
+
 TEST_CASES := \
 	test-weak-instances-1.cs \
 	test-weak-instances-2.cs \
@@ -49,4 +51,3 @@ $(eval $(call RunTests,flow-analysis))
 
 $(eval $(call RunIlTests,conditionals))
 $(eval $(call RunIlTests,flow-analysis))
-

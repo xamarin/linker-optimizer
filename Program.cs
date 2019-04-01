@@ -132,7 +132,7 @@ namespace Mono.Linker.Optimizer
 					OptionsReader.Read (options, filename);
 					moduleEnabled = true;
 					break;
-				case "--martin-args":
+				case "--martin-options":
 					options.ParseOptions (arguments[0]);
 					arguments.RemoveAt (0);
 					moduleEnabled = true;

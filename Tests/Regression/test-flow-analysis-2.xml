@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker>
 	<martin>
-		<options all-modules="false" analyze-all="true" preprocess="false" />
+		<options analyze-all="true" preprocess="false" />
 
 		<method substring="ArrayElementsHaveSpace" action="debug"/>
 	</martin>

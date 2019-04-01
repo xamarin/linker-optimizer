@@ -14,7 +14,7 @@ CLEAN_DIRECTORIES += $(LINKER_OUTPUT)
 
 compile-tests:: $(TEST_CASES:.cs=.exe) $(ILTEST_CASES:.il=.exe) $(AOTTEST_CASES:.cs=.exe) $(BROKEN_TESTS:.cs=.exe) $(TEST_HELPERS_LIBRARY) $(LINKER_EXE)
 
-run: $(TEST_CASES:.cs=) $(AOTTEST_CASES:.cs=) $(ILTEST_CASES:.il=) build
+run: $(TEST_CASES:.cs=) $(AOTTEST_CASES:.cs=) $(ILTEST_CASES:.il=) standalone-build
 
 test-%.exe: test-%.cs $(TEST_HELPERS_LIBRARY)
 	$(TESTS_COMPILER) /optimize /out:$@ /r:$(TEST_HELPERS_LIBRARY) $(filter test-%.cs,$^)
@@ -33,11 +33,11 @@ define RunIlTests
 iltest-$(1): build $(patsubst %.il,%,$(filter iltest-$(1)-%.il,$(ILTEST_CASES)))
 endef
 
-test-%: test-%.exe build
+test-%: test-%.exe standalone-build
 	@echo RUN TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --martin $@ $(LINKER_ARGS_DEFAULT) --dump-dependencies
+	$(LINKER) --martin $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
@@ -47,11 +47,11 @@ test-%: test-%.exe build
 	(cd $(LINKER_OUTPUT); MONO_PATH=. $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot ./$(@F).exe)
 	#@rm -rf $(LINKER_OUTPUT)
 
-aottest-%: aottest-%.exe build
+aottest-%: aottest-%.exe standalone-build
 	@echo RUN TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --martin $@ $(LINKER_ARGS_AOT) --dump-dependencies
+	$(LINKER) --martin $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_AOT) --dump-dependencies
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
@@ -61,11 +61,11 @@ aottest-%: aottest-%.exe build
 	(cd $(LINKER_OUTPUT); MONO_PATH=. $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot ./$(@F).exe)
 	#@rm -rf $(LINKER_OUTPUT)
 
-iltest-%: iltest-%.exe build
+iltest-%: iltest-%.exe standalone-build
 	@echo RUN TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --martin $@ $(LINKER_ARGS_DEFAULT) --dump-dependencies
+	$(LINKER) --martin $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
@@ -74,3 +74,7 @@ iltest-%: iltest-%.exe build
 	@ls -lR $(LINKER_OUTPUT)
 	(cd $(LINKER_OUTPUT); MONO_PATH=. $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot ./$(@F).exe)
 	#@rm -rf $(LINKER_OUTPUT)
+
+standalone-build::
+	$(MAKE) -C $(ROOTDIR) standalone-build
+

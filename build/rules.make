@@ -6,13 +6,13 @@ standalone-all:: standalone-build
 
 standalone-build::
 
-ifneq "$(MONO_ROOT)" ""
-STANDALONE_MAKE = 1
-else
 ifneq "$(wildcard $(ROOTDIR)/../net_4_x-linked-size.csv)" ""
 INTEGRATED_MAKE = 1
 else
+ifneq "$(MONO_ROOT)" ""
 STANDALONE_MAKE = 1
+else
+$(error "`MONO_ROOT` environment variable must be set in standalone-mode.")
 endif
 endif
 

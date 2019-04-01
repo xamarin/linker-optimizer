@@ -90,7 +90,7 @@ namespace Mono.Linker.Optimizer
 				if (part [0] == '+') {
 					part = part.Substring (1);
 					enabled = true;
-				} else if (part [1] == '-') {
+				} else if (part [0] == '-') {
 					part = part.Substring (1);
 					enabled = false;
 				}
