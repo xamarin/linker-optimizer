@@ -85,7 +85,6 @@ namespace Mono.Linker.Optimizer
 
 		TypeDefinition _corlib_support_type;
 		TypeDefinition _test_helper_support_type;
-		AssemblyDefinition _main_module;
 		SupportMethodRegistration _is_weak_instance_of;
 		SupportMethodRegistration _as_weak_instance_of;
 		SupportMethodRegistration _is_feature_supported;
@@ -104,20 +103,23 @@ namespace Mono.Linker.Optimizer
 				switch (asm.Name.Name) {
 				case "mscorlib":
 					_corlib_support_type = asm.MainModule.GetType (LinkerSupportType);
+					CorlibAssembly = asm;
 					break;
 				case "TestHelpers":
 					_test_helper_support_type = asm.MainModule.GetType (LinkerSupportType);
 					break;
 				default:
 					if (asm.Name.Name.Equals (mainModule))
-						_main_module = asm;
+						MainAssembly = asm;
 					break;
 				}
 			}
 
 			if (_corlib_support_type == null)
 				throw new NotSupportedException ($"Cannot find `{LinkerSupportType}` in corlib.");
-			if (_main_module == null)
+			if (CorlibAssembly == null)
+				throw new NotSupportedException ($"Cannot find `mscorlib.dll` is assembly list.");
+			if (MainAssembly == null)
 				throw new NotSupportedException ($"Cannot find main module `{mainModule}` is assembly list.");
 
 			_is_weak_instance_of = ResolveSupportMethod ("IsWeakInstanceOf");
@@ -146,6 +148,16 @@ namespace Mono.Linker.Optimizer
 			return new SupportMethodRegistration (corlib, helper);
 		}
 
+		public AssemblyDefinition CorlibAssembly {
+			get;
+			private set;
+		}
+
+		public AssemblyDefinition MainAssembly {
+			get;
+			private set;
+		}
+
 		public TypeDefinition MonoLinkerSupportType {
 			get;
 			private set;
@@ -165,7 +177,7 @@ namespace Mono.Linker.Optimizer
 
 		public bool IsEnabled (MethodDefinition method)
 		{
-			return Options.ScanAllModules || method.Module.Assembly == _main_module || Options.EnableDebugging (method.DeclaringType);
+			return Options.ScanAllModules || method.Module.Assembly == MainAssembly || Options.EnableDebugging (method.DeclaringType);
 		}
 
 		internal int GetDebugLevel (MethodDefinition method)

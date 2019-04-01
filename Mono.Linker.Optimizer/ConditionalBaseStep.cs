@@ -36,6 +36,8 @@ namespace Mono.Linker.Optimizer
 			get;
 		}
 
+		public OptimizerOptions Options => Context.Options;
+
 		public AnnotationStore Annotations => Context.Context.Annotations;
 
 		protected ConditionalBaseStep (OptimizerContext context)

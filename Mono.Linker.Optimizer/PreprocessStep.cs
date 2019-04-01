@@ -25,6 +25,7 @@
 // THE SOFTWARE.
 using System;
 using Mono.Cecil;
+using System.Runtime.CompilerServices;
 
 namespace Mono.Linker.Optimizer
 {
@@ -39,12 +40,38 @@ namespace Mono.Linker.Optimizer
 
 		protected override void Process ()
 		{
-			if (!Context.Options.Preprocess)
+			RemoveFeatures ();
+
+			if (!Options.Preprocess)
 				return;
 
 			Preprocess ();
 
 			DumpConstantProperties ();
+		}
+
+		void RemoveFeatures ()
+		{
+			if (!Options.IsFeatureEnabled (MonoLinkerFeature.Collator))
+				RemoveCollatorResources ();
+		}
+
+		readonly static string [] MonoCollationResources = {
+			"collation.cjkCHS.bin",
+			"collation.cjkCHT.bin",
+			"collation.cjkJA.bin",
+			"collation.cjkKO.bin",
+			"collation.cjkKOlv2.bin",
+			"collation.core.bin",
+			"collation.tailoring.bin"
+		};
+
+		void RemoveCollatorResources ()
+		{
+			foreach (var assembly in GetAssemblies ()) {
+				foreach (var res in MonoCollationResources)
+					Annotations.AddResourceToRemove (assembly, res);
+			}
 		}
 
 		void Preprocess ()
@@ -58,7 +85,7 @@ namespace Mono.Linker.Optimizer
 
 		void ProcessType (TypeDefinition type)
 		{
-			Context.Options.ProcessTypeEntries (type, a => ProcessTypeActions (type, a));
+			Options.ProcessTypeEntries (type, a => ProcessTypeActions (type, a));
 
 			if (type.HasNestedTypes) {
 				foreach (var nested in type.NestedTypes)
@@ -76,7 +103,7 @@ namespace Mono.Linker.Optimizer
 
 		void ProcessMethod (MethodDefinition method)
 		{
-			Context.Options.ProcessMethodEntries (method, a => ProcessMethodActions (method, a));
+			Options.ProcessMethodEntries (method, a => ProcessMethodActions (method, a));
 		}
 
 		void ProcessProperty (PropertyDefinition property)
