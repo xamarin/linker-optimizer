@@ -2,7 +2,7 @@
 <linker>
 	<martin>
 		<features>
-			<feature name="martin" enabled="false" />
+			<feature name="martin" enabled="true" />
 		</features>
 	</martin>
 </linker>

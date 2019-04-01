@@ -2,8 +2,7 @@
 <linker>
 	<martin>
 		<features>
-			<feature name="collator" enabled="false" />
-			<feature name="globalization" enabled="false" />
+			<feature name="martin" enabled="false" />
 		</features>
 	</martin>
 </linker>

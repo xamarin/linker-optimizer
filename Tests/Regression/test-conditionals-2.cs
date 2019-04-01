@@ -26,7 +26,7 @@ namespace Martin.LinkerTest
 
 		ISimpleCollator GetCollator ()
 		{
-			if (!MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Globalization))
+			if (!MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Martin))
 				return null;
 
 			if (collator != null)
@@ -35,6 +35,8 @@ namespace Martin.LinkerTest
 			if (collators == null) {
 				Interlocked.CompareExchange (ref collators, new Dictionary<string, ISimpleCollator> (StringComparer.Ordinal), null);
 			}
+
+			TestHelpers.AssertRemoved ();
 
 			lock (collators) {
 				if (!collators.TryGetValue (_sortName, out collator)) {

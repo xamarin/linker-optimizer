@@ -35,7 +35,9 @@ namespace Martin.LinkerTest
 			if ((bindingAttr & (BindingFlags) LookupMask) == 0)
 				bindingAttr |= TestConditionals.ConstructorDefault;
 
-			if (MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Remoting)) {
+			bool status = false;
+			if (MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature.Martin)) {
+				status = true;
 				if (activationAttributes != null && activationAttributes.Length > 0) {
 					if (type.IsMarshalByRef) {
 						if (!(type.IsContextful)) {
@@ -47,6 +49,8 @@ namespace Martin.LinkerTest
 					}
 				}
 			}
+
+			TestHelpers.Assert (status);
 
 			TypeInfo rt = type.UnderlyingSystemType as TypeInfo;
 
