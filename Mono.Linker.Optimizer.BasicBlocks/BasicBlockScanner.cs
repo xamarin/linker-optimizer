@@ -86,20 +86,20 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 		public IReadOnlyCollection<BasicBlock> BasicBlocks => BlockList.Blocks;
 
-		[Conditional ("Debug")]
+		[Conditional ("DEBUG")]
 		internal void LogDebug (int level, string message)
 		{
 			if (DebugLevel >= level)
 				Context.LogMessage (MessageImportance.Low, message);
 		}
 
-		[Conditional ("Debug")]
+		[Conditional ("DEBUG")]
 		internal void LogDebug (int level, string indent, string message, IReadOnlyCollection<Instruction> collection)
 		{
 			LogDebug (level, indent, message, collection, i => CecilHelper.Format (i));
 		}
 
-		[Conditional ("Debug")]
+		[Conditional ("DEBUG")]
 		internal void LogDebug<T> (int level, string indent, string message, IReadOnlyCollection<T> collection, Func<T, string> formatter = null)
 		{
 			if (DebugLevel < level || collection.Count == 0)
@@ -112,14 +112,14 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			}
 		}
 
-		[Conditional ("Debug")]
+		[Conditional ("DEBUG")]
 		internal void DumpBlocks (int level = 1)
 		{
 			if (DebugLevel >= level)
 				BlockList.Dump ();
 		}
 
-		[Conditional ("Debug")]
+		[Conditional ("DEBUG")]
 		internal void DumpBlock (int level, BasicBlock block)
 		{
 			if (DebugLevel >= level)
