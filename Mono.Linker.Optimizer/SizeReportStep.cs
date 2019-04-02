@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using System.IO;
 using Mono.Cecil;
 using System.Collections.Generic;
 
@@ -46,6 +47,7 @@ namespace Mono.Linker.Optimizer
 		protected override void Process ()
 		{
 			foreach (var assembly in GetAssemblies ()) {
+				ReportSize (assembly);
 				foreach (var type in assembly.MainModule.Types) {
 					ProcessType (type);
 				}
@@ -53,6 +55,37 @@ namespace Mono.Linker.Optimizer
 
 			Report ();
 		}
+
+		void ReportSize (AssemblyDefinition assembly)
+		{
+			var action = Annotations.GetAction (assembly);
+			switch (action) {
+			case AssemblyAction.Save:
+			case AssemblyAction.Link:
+			case AssemblyAction.AddBypassNGen:
+			case AssemblyAction.Copy:
+				break;
+			default:
+				return;
+			}
+
+			var file = new FileInfo (assembly.MainModule.FileName).Name;
+			var output = Path.Combine (Context.Context.OutputDirectory, file);
+			if (!File.Exists (output)) {
+				Context.LogMessage (MessageImportance.High, $"Output file does not exist: {output}");
+				return;
+			}
+
+			var outputInfo = new FileInfo (output);
+			Context?.ReportWriter.ReportAssemblySize (assembly, outputInfo.Length);
+		}
+
+		static FileInfo GetOriginalAssemblyFileInfo (AssemblyDefinition assembly)
+		{
+			return new FileInfo (assembly.MainModule.FileName);
+		}
+
+
 
 		struct SizeEntry : IComparable<SizeEntry>
 		{

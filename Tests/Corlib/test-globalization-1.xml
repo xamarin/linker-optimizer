@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker>
 	<martin>
-		<options all-modules="true" analyze-all="true" preprocess="true" main-debug="false" />
+		<options all-modules="true" analyze-all="true" preprocess="true" report-size="true" main-debug="false" />
 
 		<conditional feature="globalization" enabled="false">
 			<namespace name="System.Globalization">

@@ -40,12 +40,19 @@ namespace Mono.Linker.Optimizer
 		}
 
 		readonly Dictionary<string, TypeEntry> _namespace_hash;
+		readonly Dictionary<string, long> _assembly_sizes;
 
 		public ReportWriter (OptimizerContext context)
 		{
 			Context = context;
 
 			_namespace_hash = new Dictionary<string, TypeEntry> ();
+			_assembly_sizes = new Dictionary<string, long> ();
+		}
+
+		public void ReportAssemblySize (AssemblyDefinition assembly, long size)
+		{
+			_assembly_sizes.Add (assembly.Name.Name, size);
 		}
 
 		public void MarkAsContainingConditionals (MethodDefinition method)
@@ -119,6 +126,17 @@ namespace Mono.Linker.Optimizer
 
 		public void WriteReport (XmlWriter xml)
 		{
+			if (_assembly_sizes.Count > 0) {
+				xml.WriteStartElement ("size-report");
+				foreach (var entry in _assembly_sizes) {
+					xml.WriteStartElement ("assembly");
+					xml.WriteAttributeString ("name", entry.Key);
+					xml.WriteAttributeString ("value", entry.Value.ToString ());
+					xml.WriteEndElement ();
+				}
+				xml.WriteEndElement ();
+			}
+
 			foreach (var entry in _namespace_hash.Values) {
 				xml.WriteStartElement ("namespace");
 				xml.WriteAttributeString ("name", entry.Name);

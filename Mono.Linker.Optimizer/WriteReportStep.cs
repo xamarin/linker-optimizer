@@ -42,6 +42,7 @@ namespace Mono.Linker.Optimizer
 			var settings = new XmlWriterSettings {
 				Indent = true,
 				OmitXmlDeclaration = false,
+				NewLineHandling = NewLineHandling.None,
 				ConformanceLevel = ConformanceLevel.Document,
 				IndentChars = "\t",
 				Encoding = Encoding.Default
