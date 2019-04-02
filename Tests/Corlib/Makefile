@@ -5,6 +5,8 @@ ROOTDIR := $(abspath $(makefile_dir)/../..)
 
 include $(ROOTDIR)/build/rules.make
 
+LOCAL_LINKER_ARGS := --martin-options -main-debug --martin-report $(LINKER_OUTPUT)/martin-report.xml
+
 TEST_CASES := \
 	test-globalization-1.cs \
 	test-globalization-2.cs \

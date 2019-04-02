@@ -311,6 +311,25 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			context.MarkAsConstantMethod (method, ConstantValue.False);
 		}
 
+		/*
+		 * Replace the entire method body with `return true`.
+		 */
+		public static void ReplaceWithReturnTrue (OptimizerContext context, MethodDefinition method)
+		{
+			if (method.IsAbstract || method.IsVirtual || method.IsConstructor || !method.IsIL)
+				throw ThrowUnsupported (method, "Cannot rewrite method of this type into returning true.");
+			if (method.HasParameters)
+				throw ThrowUnsupported (method, "Can only rewrite parameterless methods into returning true.");
+
+			if (method.ReturnType.MetadataType != MetadataType.Boolean)
+				throw ThrowUnsupported (method, "Can only rewrite methods returning bool into returning true.");
+
+			method.Body.Instructions.Clear ();
+			method.Body.Instructions.Add (Instruction.Create (OpCodes.Ldc_I4_1));
+			method.Body.Instructions.Add (Instruction.Create (OpCodes.Ret));
+			context.MarkAsConstantMethod (method, ConstantValue.True);
+		}
+
 		static Exception ThrowUnsupported (MethodDefinition method, string message)
 		{
 			throw new NotSupportedException ($"Code refactoring error in `{method}`: {message}");

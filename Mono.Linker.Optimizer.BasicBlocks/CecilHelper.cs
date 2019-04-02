@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using System.Text;
 using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -375,6 +376,29 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 				value = false;
 				return false;
 			}
+		}
+
+		public static string GetMethodSignature (MethodDefinition method)
+		{
+			var builder = new StringBuilder ();
+			builder.Append ("(");
+
+			if (method.HasParameters) {
+				var parameters = method.Parameters;
+				for (int i = 0; i < parameters.Count; i++) {
+					var parameter = parameters [i];
+					if (i > 0)
+						builder.Append (",");
+
+					if (parameter.ParameterType.IsSentinel)
+						builder.Append ("...,");
+
+					builder.Append (parameter.ParameterType.FullName);
+				}
+			}
+
+			builder.Append (")");
+			return builder.ToString ();
 		}
 
 		// Unused template listing all possible opcode types.

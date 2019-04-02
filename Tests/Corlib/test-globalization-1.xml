@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker>
 	<martin>
-		<options all-modules="true" analyze-all="true" preprocess="true" />
+		<options all-modules="true" analyze-all="true" preprocess="true" main-debug="false" />
 
 		<conditional feature="globalization" enabled="false">
 			<namespace name="System.Globalization">
+				<type name="GlobalizationMode" debug="true">
+					<method name="get_Invariant" action="return-true" />
+				</type>
+
 				<type name="HebrewNumber" action="fail" />
 				<type name="JapaneseCalendar" action="fail" />
 				<type name="TaiwanCalendar" action="fail" />

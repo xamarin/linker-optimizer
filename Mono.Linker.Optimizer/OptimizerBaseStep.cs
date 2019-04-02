@@ -1,5 +1,5 @@
 ﻿//
-// ConditionalBaseStep.cs
+// OptimizerBaseStep.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -30,7 +30,7 @@ using Mono.Linker.Steps;
 
 namespace Mono.Linker.Optimizer
 {
-	public abstract class ConditionalBaseStep : IStep
+	public abstract class OptimizerBaseStep : IStep
 	{
 		public OptimizerContext Context {
 			get;
@@ -40,7 +40,7 @@ namespace Mono.Linker.Optimizer
 
 		public AnnotationStore Annotations => Context.Context.Annotations;
 
-		protected ConditionalBaseStep (OptimizerContext context)
+		protected OptimizerBaseStep (OptimizerContext context)
 		{
 			Context = context;
 		}

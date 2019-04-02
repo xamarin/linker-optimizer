@@ -137,6 +137,11 @@ namespace Mono.Linker.Optimizer
 					arguments.RemoveAt (0);
 					moduleEnabled = true;
 					break;
+				case "--martin-report":
+					filename = arguments [0];
+					arguments.RemoveAt (0);
+					options.ReportFileName = filename;
+					break;
 				}
 			}
 		}

@@ -44,8 +44,7 @@
     <Compile Include="Mono.Linker.Optimizer\PreprocessStep.cs" />
     <Compile Include="Mono.Linker.Optimizer\SizeReportStep.cs" />
     <Compile Include="Mono.Linker.Optimizer\OptionsReader.cs" />
-    <Compile Include="Mono.Linker.Optimizer\XmlConfigurationWriter.cs" />
-    <Compile Include="Mono.Linker.Optimizer\ConditionalBaseStep.cs" />
+    <Compile Include="Mono.Linker.Optimizer\OptimizerBaseStep.cs" />
     <Compile Include="System.Runtime.CompilerServices\MonoLinkerFeature.cs" />
     <Compile Include="System.Runtime.CompilerServices\MonoLinkerSupport.cs" />
     <Compile Include="Mono.Linker.Optimizer.Conditionals\LinkerConditional.cs" />
@@ -66,6 +65,8 @@
     <Compile Include="Mono.Linker.Optimizer.BasicBlocks\ConstantValue.cs" />
     <Compile Include="Mono.Linker.Optimizer.BasicBlocks\DeadCodeEliminator.cs" />
     <Compile Include="Mono.Linker.Optimizer.Conditionals\RequireFeatureConditional.cs" />
+    <Compile Include="Mono.Linker.Optimizer\ReportWriter.cs" />
+    <Compile Include="Mono.Linker.Optimizer\WriteReportStep.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="external\linker\src\linker\Mono.Linker.csproj">

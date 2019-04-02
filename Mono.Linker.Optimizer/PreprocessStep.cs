@@ -27,12 +27,10 @@ using System;
 using Mono.Cecil;
 using System.Runtime.CompilerServices;
 
-namespace Mono.Linker.Optimizer
-{
+namespace Mono.Linker.Optimizer {
 	using BasicBlocks;
 
-	public class PreprocessStep : ConditionalBaseStep
-	{
+	public class PreprocessStep : OptimizerBaseStep {
 		public PreprocessStep (OptimizerContext context)
 			: base (context)
 		{
@@ -46,8 +44,6 @@ namespace Mono.Linker.Optimizer
 				return;
 
 			Preprocess ();
-
-			DumpConstantProperties ();
 		}
 
 		void RemoveFeatures ()
@@ -164,16 +160,14 @@ namespace Mono.Linker.Optimizer
 				CodeRewriter.ReplaceWithReturnFalse (Context, method);
 				break;
 
+			case OptimizerOptions.MethodAction.ReturnTrue:
+				CodeRewriter.ReplaceWithReturnTrue (Context, method);
+				break;
+
 			case OptimizerOptions.MethodAction.ReturnNull:
 				CodeRewriter.ReplaceWithReturnNull (Context, method);
 				break;
 			}
-		}
-
-		void DumpConstantProperties ()
-		{
-			var writer = new XmlConfigurationWriter (Context);
-			writer.DumpConstantProperties ();
 		}
 	}
 }

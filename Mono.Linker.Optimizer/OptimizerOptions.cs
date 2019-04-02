@@ -31,6 +31,8 @@ using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer
 {
+	using BasicBlocks;
+
 	public class OptimizerOptions
 	{
 		public bool ScanAllModules {
@@ -62,6 +64,10 @@ namespace Mono.Linker.Optimizer
 		}
 
 		public bool DisableModule {
+			get; set;
+		}
+
+		public string ReportFileName {
 			get; set;
 		}
 
@@ -175,6 +181,9 @@ namespace Mono.Linker.Optimizer
 			case "return-false":
 				action = MethodAction.ReturnFalse;
 				return true;
+			case "return-true":
+				action = MethodAction.ReturnTrue;
+				return true;
 			default:
 				return Enum.TryParse (name, true, out action);
 			}
@@ -281,14 +290,14 @@ namespace Mono.Linker.Optimizer
 
 		static void DumpFailEntry (OptimizerContext context, TypeEntry entry)
 		{
-			context.LogMessage (MessageImportance.High, "  " + entry.ToString ());
+			context.LogMessage (MessageImportance.High, "  " + entry);
 			if (entry.Parent != null)
 				DumpFailEntry (context, entry.Parent);
 		}
 
 		static void DumpFailEntry (OptimizerContext context, MethodEntry entry)
 		{
-			context.LogMessage (MessageImportance.High, "  " + entry.ToString ());
+			context.LogMessage (MessageImportance.High, "  " + entry);
 			if (entry.Parent != null)
 				DumpFailEntry (context, entry.Parent);
 		}
@@ -370,6 +379,7 @@ namespace Mono.Linker.Optimizer
 			Warn,
 			Throw,
 			ReturnFalse,
+			ReturnTrue,
 			ReturnNull
 		}
 
@@ -476,6 +486,8 @@ namespace Mono.Linker.Optimizer
 				case MatchKind.Substring:
 					return method.FullName.Contains (Name);
 				default:
+					if (Name.Contains ('('))
+						return method.Name + CecilHelper.GetMethodSignature (method) == Name;
 					return method.Name == Name;
 				}
 			}

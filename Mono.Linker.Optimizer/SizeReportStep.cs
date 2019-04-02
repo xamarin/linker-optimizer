@@ -29,7 +29,7 @@ using System.Collections.Generic;
 
 namespace Mono.Linker.Optimizer
 {
-	public class SizeReportStep : ConditionalBaseStep
+	public class SizeReportStep : OptimizerBaseStep
 	{
 		readonly Dictionary<string, int> namespace_sizes;
 		readonly Dictionary<string, int> type_sizes;

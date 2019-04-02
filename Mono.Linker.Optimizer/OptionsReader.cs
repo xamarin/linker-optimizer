@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using System.Xml;
 using System.Xml.XPath;
 using Mono.Cecil;
 
@@ -44,7 +45,10 @@ namespace Mono.Linker.Optimizer
 		public static void Read (OptimizerOptions options, string filename)
 		{
 			var reader = new OptionsReader (options);
-			reader.Read (new XPathDocument (filename));
+			var settings = new XmlReaderSettings ();
+			using (var xml = XmlReader.Create (filename, settings)) {
+				reader.Read (new XPathDocument (xml));
+			}
 			Console.WriteLine ($"Read XML description from {filename}.");
 		}
 
