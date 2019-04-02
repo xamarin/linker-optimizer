@@ -92,6 +92,8 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 				Scanner.LogDebug (2, $"REMOVE DEAD BLOCKS DONE: {Method.Name} {foundDeadBlocks}");
 				Scanner.DumpBlocks (2);
+
+				Scanner.Context.ReportWriter?.RemovedDeadBlocks (Method);
 			}
 
 			return removedDeadBlocks;
@@ -129,6 +131,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			}
 
 			index = -1;
+			Scanner.Context.ReportWriter?.RemovedDeadExceptionBlocks (Method);
 		}
 
 		public bool RemoveDeadJumps ()
@@ -166,6 +169,8 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 				Scanner.LogDebug (2, $"REMOVE DEAD JUMPS DONE: {Method.Name}");
 				Scanner.DumpBlocks (2);
+
+				Scanner.Context.ReportWriter?.RemovedDeadJumps (Method);
 			}
 
 			return removedDeadBlocks;
@@ -188,6 +193,8 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 				Scanner.LogDebug (2, $"REMOVE CONSTANT JUMPS DONE: {Method.Name}");
 				Scanner.DumpBlocks (2);
+
+				Scanner.Context.ReportWriter?.RemovedDeadConstantJumps (Method);
 			}
 
 			return removedConstantJumps;
@@ -348,6 +355,8 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 				Scanner.LogDebug (1, $"REMOVE VARIABLES DONE: {removed}");
 				Scanner.DumpBlocks (1);
+
+				Scanner.Context.ReportWriter?.RemovedDeadVariables (Method);
 			}
 
 			return removed;

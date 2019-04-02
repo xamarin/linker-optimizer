@@ -48,14 +48,45 @@ namespace Mono.Linker.Optimizer
 			_namespace_hash = new Dictionary<string, TypeEntry> ();
 		}
 
-		internal void MarkAsConstantMethod (MethodDefinition method, ConstantValue value)
+		public void MarkAsContainingConditionals (MethodDefinition method)
 		{
 			if (method.DeclaringType.DeclaringType != null)
 				throw new NotSupportedException ($"Conditionals in nested classes are not supported yet.");
 
-			Console.Error.WriteLine ($"MARK AS CONSTANT: {method.FullName} - {CecilHelper.GetMethodSignature (method)}");
+			GetMethodEntry (method);
+		}
+
+		public void MarkAsConstantMethod (MethodDefinition method, ConstantValue value)
+		{
+			if (method.DeclaringType.DeclaringType != null)
+				throw new NotSupportedException ($"Conditionals in nested classes are not supported yet.");
 
 			GetMethodEntry (method).ConstantValue = value;
+		}
+
+		public void RemovedDeadBlocks (MethodDefinition method)
+		{
+			GetMethodEntry (method).DeadCodeMode |= DeadCodeMode.RemovedDeadBlocks;
+		}
+
+		public void RemovedDeadExceptionBlocks (MethodDefinition method)
+		{
+			GetMethodEntry (method).DeadCodeMode |= DeadCodeMode.RemovedExceptionBlocks;
+		}
+
+		public void RemovedDeadJumps (MethodDefinition method)
+		{
+			GetMethodEntry (method).DeadCodeMode |= DeadCodeMode.RemovedDeadJumps;
+		}
+
+		public void RemovedDeadConstantJumps (MethodDefinition method)
+		{
+			GetMethodEntry (method).DeadCodeMode |= DeadCodeMode.RemovedConstantJumps;
+		}
+
+		public void RemovedDeadVariables (MethodDefinition method)
+		{
+			GetMethodEntry (method).DeadCodeMode |= DeadCodeMode.RemovedDeadVariables;
 		}
 
 		TypeEntry GetTypeEntry (TypeDefinition type)
@@ -135,7 +166,29 @@ namespace Mono.Linker.Optimizer
 				break;
 			}
 
+			if (entry.DeadCodeMode != DeadCodeMode.None)
+				xml.WriteAttributeString ("dead-code", FormatDeadCodeMode (entry.DeadCodeMode));
+
 			xml.WriteEndElement ();
+		}
+
+		string FormatDeadCodeMode (DeadCodeMode mode)
+		{
+			if (mode == DeadCodeMode.None)
+				return "none";
+
+			var modes = new List<string> ();
+			if ((mode & DeadCodeMode.RemovedDeadBlocks) != 0)
+				modes.Add ("blocks");
+			if ((mode & DeadCodeMode.RemovedExceptionBlocks) != 0)
+				modes.Add ("exception-blocks");
+			if ((mode & DeadCodeMode.RemovedDeadJumps) != 0)
+				modes.Add ("jumps");
+			if ((mode & DeadCodeMode.RemovedConstantJumps) != 0)
+				modes.Add ("constant-jumps");
+			if ((mode & DeadCodeMode.RemovedDeadVariables) != 0)
+				modes.Add ("variables");
+			return string.Join (",", modes);
 		}
 
 		class TypeEntry
@@ -158,11 +211,23 @@ namespace Mono.Linker.Optimizer
 		{
 			public readonly string Name;
 			public ConstantValue? ConstantValue;
+			public DeadCodeMode DeadCodeMode;
 
 			public MethodEntry (string name)
 			{
 				Name = name;
 			}
+		}
+
+		[Flags]
+		enum DeadCodeMode
+		{
+			None				= 0,
+			RemovedDeadBlocks		= 1,
+			RemovedExceptionBlocks		= 2,
+			RemovedDeadJumps		= 4,
+			RemovedConstantJumps		= 8,
+			RemovedDeadVariables		= 16
 		}
 	}
 }
