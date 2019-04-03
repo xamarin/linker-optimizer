@@ -17,5 +17,20 @@
 	</conditional>
 
 	<conditional feature="reflection-emit" enabled="false">
+		<type fullname="System.AppDomain">
+			<method name="get_IsReflectionEmitSupported" action="return-false" />
+		</type>
+	</conditional>
+
+	<conditional feature="remoting" enabled="false">
+		<type fullname="System.AppDomain">
+			<method name="get_IsRemotingSupported" action="return-false" />
+		</type>
+	</conditional>
+
+	<conditional feature="security" enabled="false">
+		<type fullname="System.AppDomain">
+			<method name="get_IsSecuritySupported" action="return-false" />
+		</type>
 	</conditional>
 </linker-optimizer>
