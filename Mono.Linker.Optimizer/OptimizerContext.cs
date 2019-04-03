@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -108,6 +109,8 @@ namespace Mono.Linker.Optimizer
 		{
 			LogMessage (MessageImportance.High, "Initializing Martin's Playground");
 
+			var mainName = Path.GetFileNameWithoutExtension (mainModule);
+
 			foreach (var asm in Context.GetAssemblies ()) {
 				switch (asm.Name.Name) {
 				case "mscorlib":
@@ -118,18 +121,16 @@ namespace Mono.Linker.Optimizer
 					_test_helper_support_type = asm.MainModule.GetType (LinkerSupportType);
 					break;
 				default:
-					if (asm.Name.Name.Equals (mainModule))
+					if (asm.Name.Name.Equals (mainName))
 						MainAssembly = asm;
 					break;
 				}
 			}
 
-			if (_corlib_support_type == null)
-				throw new NotSupportedException ($"Cannot find `{LinkerSupportType}` in corlib.");
 			if (CorlibAssembly == null)
-				throw new NotSupportedException ($"Cannot find `mscorlib.dll` is assembly list.");
+				throw new OptimizerException ($"Cannot find `mscorlib.dll` is assembly list.");
 			if (MainAssembly == null)
-				throw new NotSupportedException ($"Cannot find main module `{mainModule}` is assembly list.");
+				throw new OptimizerException ($"Cannot find main module `{mainModule}` is assembly list.");
 
 			_is_weak_instance_of = ResolveSupportMethod ("IsWeakInstanceOf");
 			_as_weak_instance_of = ResolveSupportMethod ("AsWeakInstanceOf");
@@ -140,19 +141,16 @@ namespace Mono.Linker.Optimizer
 			_require_feature = ResolveSupportMethod ("RequireFeature");
 
 			_platform_not_support_exception = new Lazy<TypeDefinition> (
-				() => Context.GetType ("System.PlatformNotSupportedException") ?? throw new NotSupportedException ($"Can't find `System.PlatformNotSupportedException`."));
+				() => Context.GetType ("System.PlatformNotSupportedException") ?? throw new OptimizerException ($"Can't find `System.PlatformNotSupportedException`."));
 			_platform_not_supported_exception_ctor = new Lazy<MethodDefinition> (
-				() => _platform_not_support_exception.Value.Methods.FirstOrDefault (m => m.Name == ".ctor") ?? throw new NotSupportedException ($"Can't find `System.PlatformNotSupportedException`."));
+				() => _platform_not_support_exception.Value.Methods.FirstOrDefault (m => m.Name == ".ctor") ?? throw new OptimizerException ($"Can't find `System.PlatformNotSupportedException`."));
 
 			_tracer_stack_field = typeof (Tracer).GetField ("dependency_stack", BindingFlags.Instance | BindingFlags.NonPublic);
 		}
 
 		SupportMethodRegistration ResolveSupportMethod (string name, bool full = false)
 		{
-			var corlib = _corlib_support_type.Methods.FirstOrDefault (m => full ? m.FullName == name : m.Name == name);
-			if (corlib == null)
-				throw new NotSupportedException ($"Cannot find `{LinkerSupportType}.{name}`.");
-
+			var corlib = _corlib_support_type?.Methods.FirstOrDefault (m => full ? m.FullName == name : m.Name == name);
 			var helper = _test_helper_support_type?.Methods.FirstOrDefault (m => full ? m.FullName == name : m.Name == name);
 			return new SupportMethodRegistration (corlib, helper);
 		}
@@ -215,7 +213,7 @@ namespace Mono.Linker.Optimizer
 			var message = $"Attempting to mark type `{type}` after it's already been used in a conditional!";
 			LogMessage (MessageImportance.High, message);
 			if (Options.NoConditionalRedefinition)
-				throw new NotSupportedException (message);
+				throw new OptimizerException (message);
 		}
 
 		internal void MarkAsConstantMethod (MethodDefinition method, ConstantValue value)

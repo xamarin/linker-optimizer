@@ -1,51 +1,49 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options all-modules="true" analyze-all="true" preprocess="true" report-size="false" />
+<linker-optimizer>
+	<options all-modules="true" analyze-all="true" preprocessor="full" report-size="false" />
 
-		<conditional feature="remoting" enabled="false">
-			<namespace name="System.Runtime.Remoting">
-				<type name="SynchronizationAttribute" action="fail" />
-				<type name="CADSerializer" action="fail" />
-				<type name="RemotingProxy" action="fail" />
-				<type name="CrossAppDomainSink" action="fail" />
-				<type name="AppDomainLevelActivator" action="fail" />
+	<conditional feature="remoting" enabled="false">
+		<namespace name="System.Runtime.Remoting">
+			<type name="SynchronizationAttribute" action="fail" />
+			<type name="CADSerializer" action="fail" />
+			<type name="RemotingProxy" action="fail" />
+			<type name="CrossAppDomainSink" action="fail" />
+			<type name="AppDomainLevelActivator" action="fail" />
 
-				<type name="ActivationServices">
-					<method name="CreateConstructionCall" action="fail" />
-				</type>
-
-				<type name="RemotingServices">
-					<!-- this type has some preserve entries -->
-					<method name="CreateClientProxyForContextBound" action="fail" />
-					<method name="GetOrCreateClientIdentity" action="fail" />
-					<method name="GetRemoteObject" action="fail" />
-				</type>
-			</namespace>
-		</conditional>
-
-		<conditional feature="serialization" enabled="false">
-			<namespace name="System.Runtime.Serialization.Formatters.Binary">
-				<type name="BinaryFormatter" action="fail" />
-			</namespace>
-
-			<type substring="System.Security.Claims.ClaimsIdentity" action="none" />
-			<type substring="System.Security.Principal" action="none" />
-		</conditional>
-
-		<conditional feature="security" enabled="false">
-			<type fullname="System.AppDomain">
-				<method name="get_DefaultPrincipal" action="throw" />
+			<type name="ActivationServices">
+				<method name="CreateConstructionCall" action="fail" />
 			</type>
 
-			<type substring="System.Security.Claims.ClaimsIdentity" action="none" />
-			<type substring="System.Security.Principal" action="none" />
-		</conditional>
+			<type name="RemotingServices">
+				<!-- this type has some preserve entries -->
+				<method name="CreateClientProxyForContextBound" action="fail" />
+				<method name="GetOrCreateClientIdentity" action="fail" />
+				<method name="GetRemoteObject" action="fail" />
+			</type>
+		</namespace>
+	</conditional>
 
-		<features>
-			<feature name="remoting" enabled="false" />
-			<feature name="serialization" enabled="false" />
-			<feature name="security" enabled="false" />
-		</features>
-	</martin>
-</linker>
+	<conditional feature="serialization" enabled="false">
+		<namespace name="System.Runtime.Serialization.Formatters.Binary">
+			<type name="BinaryFormatter" action="fail" />
+		</namespace>
+
+		<type substring="System.Security.Claims.ClaimsIdentity" action="none" />
+		<type substring="System.Security.Principal" action="none" />
+	</conditional>
+
+	<conditional feature="security" enabled="false">
+		<type fullname="System.AppDomain">
+			<method name="get_DefaultPrincipal" action="throw" />
+		</type>
+
+		<type substring="System.Security.Claims.ClaimsIdentity" action="none" />
+		<type substring="System.Security.Principal" action="none" />
+	</conditional>
+
+	<features>
+		<feature name="remoting" enabled="false" />
+		<feature name="serialization" enabled="false" />
+		<feature name="security" enabled="false" />
+	</features>
+</linker-optimizer>

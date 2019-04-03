@@ -76,9 +76,9 @@ namespace Mono.Linker.Optimizer.Conditionals
 		public static IsTypeAvailableConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index)
 		{
 			if (bb.Instructions.Count == 1)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 			if (index + 1 >= scanner.Method.Body.Instructions.Count)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			/*
 			 * `bool MonoLinkerSupport.IsTypeAvailable (string)`
@@ -89,7 +89,7 @@ namespace Mono.Linker.Optimizer.Conditionals
 				scanner.BlockList.SplitBlockAt (ref bb, bb.Instructions.Count - 2);
 
 			if (bb.FirstInstruction.OpCode.Code != Code.Ldstr)
-				throw new NotSupportedException ($"Invalid argument `{bb.FirstInstruction}` used in `MonoLinkerSupport.IsTypeAvailable(string)` conditional.");
+				throw new OptimizerAssertionException ($"Invalid argument `{bb.FirstInstruction}` used in `MonoLinkerSupport.IsTypeAvailable(string)` conditional.");
 
 			var instance = new IsTypeAvailableConditional (scanner, (string)bb.FirstInstruction.Operand);
 			bb.LinkerConditional = instance;
@@ -102,7 +102,7 @@ namespace Mono.Linker.Optimizer.Conditionals
 		public static IsTypeAvailableConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index, TypeDefinition type)
 		{
 			if (index + 1 >= scanner.Method.Body.Instructions.Count)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			/*
 			 * `bool MonoLinkerSupport.IsTypeAvailable<T> ()`

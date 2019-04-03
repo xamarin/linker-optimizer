@@ -123,7 +123,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			while (end_index > index) {
 				var current = BlockList [index];
 				if (!current.IsDead)
-					throw new NotSupportedException ();
+					throw new OptimizerAssertionException ();
 
 				Scanner.LogDebug (2, $"      MARKING DEAD: {current}");
 

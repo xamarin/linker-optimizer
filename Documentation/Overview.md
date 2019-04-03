@@ -155,7 +155,7 @@ The `Unknown` feature is always disabled (this is used by the regression tests f
 
 We can of course remove them from corlib, but should reserve some values for those regression tests (since you have to use constant loads like `ldc.i4.1` in IL, it's kinda cumbersome to modify those enum values).
 
-I didn't hook up any command-line options yet, but there's an environment variable `MARTIN_LINKER_OPTIONS`, so you could for instance say `MARTIN_LINKER_OPTIONS=security,remoting` to disable those two features (by default, all features are enabled).
+I didn't hook up any command-line options yet, but there's an environment variable `LINKER_OPTIMIZER_OPTIONS`, so you could for instance say `LINKER_OPTIMIZER_OPTIONS=security,remoting` to disable those two features (by default, all features are enabled).
 
 ### Implicit Conditional Methods
 

@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options all-modules="true" preprocess="true" report-size="true" analyze-all="true" main-debug="false" />
+<linker-optimizer>
+	<options all-modules="true" preprocessor="full" report-size="true" analyze-all="true" />
 
-		<conditional feature="security" enabled="false">
-			<type fullname="System.AppDomain">
-				<method name="get_DefaultPrincipal" action="throw" />
-			</type>
-		</conditional>
+	<conditional feature="security" enabled="false">
+		<type fullname="System.AppDomain">
+			<method name="get_DefaultPrincipal" action="throw" />
+		</type>
+	</conditional>
 
-		<features>
-			<feature name="security" enabled="false" />
-		</features>
-	</martin>
-</linker>
+	<features>
+		<feature name="security" enabled="false" />
+	</features>
+</linker-optimizer>

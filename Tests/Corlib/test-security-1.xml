@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options all-modules="true" preprocess="true" report-size="true" />
+<linker-optimizer>
+	<options all-modules="true" preprocessor="full" report-size="true" />
 
-		<type name="HebrewNumber" action="fail" />
-		<type name="EncodingTable" action="fail" />
+	<type name="HebrewNumber" action="fail" />
+	<type name="EncodingTable" action="fail" />
 
-		<type name="X509Helper" action="fail" />
-		<type name="X509Certificate" action="fail" />
-		<type name="DependencyInjector" action="fail" />
-		<type name="SystemDependencyProvider" action="fail" />
-		<method name="GetDefaultHostEvidence" action="fail" />
+	<type name="X509Helper" action="fail" />
+	<type name="X509Certificate" action="fail" />
+	<type name="DependencyInjector" action="fail" />
+	<type name="SystemDependencyProvider" action="fail" />
+	<method name="GetDefaultHostEvidence" action="fail" />
 
-		<features>
-			<feature name="encoding" enabled="false" />
-			<feature name="security" enabled="false" />
-			<feature name="collator" enabled="false" />
-			<feature name="globalization" enabled="false" />
-		</features>
-	</martin>
-</linker>
+	<features>
+		<feature name="encoding" enabled="false" />
+		<feature name="security" enabled="false" />
+		<feature name="collator" enabled="false" />
+		<feature name="globalization" enabled="false" />
+	</features>
+</linker-optimizer>

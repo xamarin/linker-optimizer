@@ -40,10 +40,14 @@ namespace Mono.Linker.Optimizer {
 		{
 			RemoveFeatures ();
 
-			if (!Options.Preprocess)
-				return;
+			Context.LogMessage (MessageImportance.Normal, $"Preprocessor mode: {Options.Preprocessor}.");
 
-			Preprocess ();
+			switch (Options.Preprocessor) {
+			case OptimizerOptions.PreprocessorMode.Automatic:
+			case OptimizerOptions.PreprocessorMode.Full:
+				Preprocess ();
+				break;
+			}
 		}
 
 		void RemoveFeatures ()
@@ -92,8 +96,10 @@ namespace Mono.Linker.Optimizer {
 				ProcessMethod (method);
 			}
 
-			foreach (var property in type.Properties) {
-				ProcessProperty (property);
+			if (Options.Preprocessor == OptimizerOptions.PreprocessorMode.Full) {
+				foreach (var property in type.Properties) {
+					ProcessProperty (property);
+				}
 			}
 		}
 

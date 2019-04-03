@@ -10,20 +10,20 @@ All arguments for this module must come first on the command-line, custom argume
 
 To enable the module, you need to pass
 
-* `--martin <filename>`: Specify the main module to be linked.
-If `<filename>.xml` exists, then it will be read as custom XML description file as if it were explicitly specified via `--martin-xml <filename>.xml`.
+* `--optimizer <filename>`: Specify the main module to be linked.
+If `<filename>.xml` exists, then it will be read as custom XML description file as if it were explicitly specified via `--optimizer-xml <filename>.xml`.
 The optimizer won't actually read `<filename>`, but it needs to know the name of the main module.
 The provided filename will be passed down to the pristine linker via `-a <filename>`, so you don't have to explicitly provide that `-a` argument.
 
 There are also some additional options that you can use:
 
-* `--martin-xml <filename>`: Read `<filename>` as custom XML description.
+* `--optimizer-xml <filename>`: Read `<filename>` as custom XML description.
 The file will be expected to contain _only_ definitions relevant for this module and it will not be passed down to the pristine linker.
 Also please not that XML files provided via `-x` or `-i` will not be regocnized as argument processing will stop once we encounter the first unknown argument.
 
-* `--martin-options <options>`: Command-separated list of options.
-These options will be processed _after_ all XML files have been read (thus overriding anything specified in those XML files) and _before_ the `MARTIN_LINKER_OPTIONS` environment variable.
+* `--optimizer-options <options>`: Command-separated list of options.
+These options will be processed _after_ all XML files have been read (thus overriding anything specified in those XML files) and _before_ the `LINKER_OPTIMIZER_OPTIONS` environment variable.
 
-If the `--martin` argument has not been given, then the pristine linker will be invoked, without registering the optimizer.
+If the `--optimizer` argument has not been given, then the pristine linker will be invoked, without registering the optimizer.
 
 Otherwise, we will register ourselves by adding a `--custom-step` argument to run our initialization step immediately after the `TypeMapStep`.

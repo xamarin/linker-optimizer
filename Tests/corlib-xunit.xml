@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options all-modules="true" analyze-all="true" preprocess="true" />
+<linker-optimizer>
+	<options all-modules="true" analyze-all="true" preprocessor="full" />
 
-		<type name="HebrewNumber" action="fail" />
+	<type name="HebrewNumber" action="fail" />
 
-		<method substring="System.DateTimeParse::TryParse" action="debug"/>
-		<method substring="DateTimeParse::MatchHebrewDigits" action="debug"/>
-		<method substring="DateTimeFormatInfo::TryParseHebrewNumber" action="debug"/>
+	<method substring="System.DateTimeParse::TryParse" action="debug"/>
+	<method substring="DateTimeParse::MatchHebrewDigits" action="debug"/>
+	<method substring="DateTimeFormatInfo::TryParseHebrewNumber" action="debug"/>
 
-		<features>
-			<feature name="globalization" enabled="false" />
-			<feature name="collator" enabled="false" />
-		</features>
-	</martin>
-</linker>
+	<features>
+		<feature name="globalization" enabled="false" />
+		<feature name="collator" enabled="false" />
+	</features>
+</linker-optimizer>

@@ -58,7 +58,7 @@ namespace Mono.Linker.Optimizer
 		public void MarkAsContainingConditionals (MethodDefinition method)
 		{
 			if (method.DeclaringType.DeclaringType != null)
-				throw new NotSupportedException ($"Conditionals in nested classes are not supported yet.");
+				throw new OptimizerAssertionException ($"Conditionals in nested classes are not supported yet.");
 
 			GetMethodEntry (method);
 		}
@@ -66,7 +66,7 @@ namespace Mono.Linker.Optimizer
 		public void MarkAsConstantMethod (MethodDefinition method, ConstantValue value)
 		{
 			if (method.DeclaringType.DeclaringType != null)
-				throw new NotSupportedException ($"Conditionals in nested classes are not supported yet.");
+				throw new OptimizerAssertionException ($"Conditionals in nested classes are not supported yet.");
 
 			GetMethodEntry (method).ConstantValue = value;
 		}
@@ -99,7 +99,7 @@ namespace Mono.Linker.Optimizer
 		TypeEntry GetTypeEntry (TypeDefinition type)
 		{
 			if (type.DeclaringType != null)
-				throw new NotSupportedException ("Nested types are not supported yet.");
+				throw new OptimizerAssertionException ("Nested types are not supported yet.");
 
 			if (!_namespace_hash.TryGetValue (type.Namespace, out var entry)) {
 				entry = new TypeEntry (type.Namespace);
@@ -126,16 +126,7 @@ namespace Mono.Linker.Optimizer
 
 		public void WriteReport (XmlWriter xml)
 		{
-			if (_assembly_sizes.Count > 0) {
-				xml.WriteStartElement ("size-report");
-				foreach (var entry in _assembly_sizes) {
-					xml.WriteStartElement ("assembly");
-					xml.WriteAttributeString ("name", entry.Key);
-					xml.WriteAttributeString ("value", entry.Value.ToString ());
-					xml.WriteEndElement ();
-				}
-				xml.WriteEndElement ();
-			}
+			WriteSizeReport (xml);
 
 			foreach (var entry in _namespace_hash.Values) {
 				xml.WriteStartElement ("namespace");
@@ -159,6 +150,22 @@ namespace Mono.Linker.Optimizer
 				}
 				xml.WriteEndElement ();
 			}
+		}
+
+		void WriteSizeReport (XmlWriter xml)
+		{
+			if (_assembly_sizes.Count == 0)
+				return;
+			xml.WriteStartElement ("size-check");
+			if (!string.IsNullOrEmpty (Context.Options.ProfileName))
+				xml.WriteAttributeString ("profile", Context.Options.ProfileName);
+			foreach (var entry in _assembly_sizes) {
+				xml.WriteStartElement ("assembly");
+				xml.WriteAttributeString ("name", entry.Key);
+				xml.WriteAttributeString ("size", entry.Value.ToString ());
+				xml.WriteEndElement ();
+			}
+			xml.WriteEndElement ();
 		}
 
 		void WriteMethodEntry (XmlWriter xml, MethodEntry entry)

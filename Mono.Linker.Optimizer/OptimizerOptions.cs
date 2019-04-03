@@ -43,7 +43,7 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
-		public bool Preprocess {
+		public PreprocessorMode Preprocessor {
 			get; set;
 		}
 
@@ -71,16 +71,21 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public string ProfileName {
+			get; set;
+		}
+
 		readonly List<TypeEntry> _type_actions;
 		readonly List<MethodEntry> _method_actions;
 		readonly Dictionary<MonoLinkerFeature, bool> _enabled_features;
+		readonly Dictionary<string, SizeCheckEntry> _size_check_entries;
 
 		public OptimizerOptions ()
 		{
-			AutoDebugMain = true;
 			NoConditionalRedefinition = true;
 			_type_actions = new List<TypeEntry> ();
 			_method_actions = new List<MethodEntry> ();
+			_size_check_entries = new Dictionary<string, SizeCheckEntry> ();
 			_enabled_features = new Dictionary<MonoLinkerFeature, bool> {
 				[MonoLinkerFeature.Unknown] = false,
 				[MonoLinkerFeature.Martin] = false
@@ -92,6 +97,27 @@ namespace Mono.Linker.Optimizer
 			var parts = options.Split (',');
 			for (int i = 0; i < parts.Length; i++) {
 				var part = parts [i];
+
+				var pos = part.IndexOf ('=');
+				if (pos > 0) {
+					var name = part.Substring (0, pos);
+					var value = part.Substring (pos + 1);
+
+					switch (name) {
+					case "profile":
+						ProfileName = value;
+						continue;
+					default:
+						throw new OptimizerException ($"Unknown option `{part}`.");
+					}
+				}
+
+				switch (part) {
+				case "preprocess":
+					SetPreprocessorMode (part);
+					continue;
+				}
+
 				bool? enabled = null;
 				if (part [0] == '+') {
 					part = part.Substring (1);
@@ -110,9 +136,6 @@ namespace Mono.Linker.Optimizer
 					break;
 				case "analyze-all":
 					AnalyzeAll = enabled ?? true;
-					break;
-				case "preprocess":
-					Preprocess = enabled ?? true;
 					break;
 				case "no-conditional-redefinition":
 					NoConditionalRedefinition = enabled ?? true;
@@ -133,6 +156,13 @@ namespace Mono.Linker.Optimizer
 			}
 		}
 
+		public void SetPreprocessorMode (string argument)
+		{
+			if (!Enum.TryParse (argument, true, out PreprocessorMode mode))
+			throw new OptimizerException ($"Invalid preprocessor mode: `{argument}`.");
+			Preprocessor = mode;
+		}
+
 		public bool IsFeatureEnabled (MonoLinkerFeature feature)
 		{
 			if (_enabled_features.TryGetValue (feature, out var value))
@@ -143,7 +173,7 @@ namespace Mono.Linker.Optimizer
 		public void SetFeatureEnabled (MonoLinkerFeature feature, bool enabled)
 		{
 			if (feature == MonoLinkerFeature.Unknown)
-				throw new NotSupportedException ($"Cannot modify `{nameof (MonoLinkerFeature.Unknown)}`.");
+				throw new OptimizerException ($"Cannot modify `{nameof (MonoLinkerFeature.Unknown)}`.");
 			_enabled_features [feature] = enabled;
 		}
 
@@ -162,7 +192,7 @@ namespace Mono.Linker.Optimizer
 				return MonoLinkerFeature.Martin;
 			default:
 				if (!Enum.TryParse<MonoLinkerFeature> (name, true, out var feature))
-					throw new NotSupportedException ($"Unknown linker feature `{name}`.");
+					throw new OptimizerException ($"Unknown linker feature `{name}`.");
 				return feature;
 			}
 		}
@@ -266,7 +296,7 @@ namespace Mono.Linker.Optimizer
 			context.DumpTracerStack ();
 			context.LogMessage (MessageImportance.High, Environment.NewLine);
 			if (fail != null)
-				throw new NotSupportedException (message + original_message + ".");
+				throw new OptimizerException (message + original_message + ".");
 		}
 
 		public void CheckFailList (OptimizerContext context, MethodDefinition method)
@@ -285,7 +315,7 @@ namespace Mono.Linker.Optimizer
 			context.DumpTracerStack ();
 			context.LogMessage (MessageImportance.High, Environment.NewLine);
 			if (fail != null)
-				throw new NotSupportedException (message + ".");
+				throw new OptimizerException (message + ".");
 		}
 
 		static void DumpFailEntry (OptimizerContext context, TypeEntry entry)
@@ -312,6 +342,16 @@ namespace Mono.Linker.Optimizer
 		public void AddMethodEntry (string name, MatchKind match, MethodAction action, TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
 		{
 			_method_actions.Add (new MethodEntry (name, match, action, parent, conditional));
+
+			switch (action) {
+			case MethodAction.ReturnFalse:
+			case MethodAction.ReturnTrue:
+			case MethodAction.ReturnNull:
+			case MethodAction.Throw:
+				if (Preprocessor == PreprocessorMode.None)
+					Preprocessor = PreprocessorMode.Automatic;
+				break;
+			}
 		}
 
 		public bool HasTypeEntry (TypeDefinition type, TypeAction action)
@@ -506,6 +546,69 @@ namespace Mono.Linker.Optimizer
 			public override string ToString ()
 			{
 				return $"[{GetType ().Name} {Name}:{Match}:{Action}]";
+			}
+		}
+
+		public enum PreprocessorMode
+		{
+			None,
+			Disabled,
+			Automatic,
+			Full
+		}
+
+		public void AddSizeCheckEntry (SizeCheckEntry entry)
+		{
+			_size_check_entries.Add (entry.Profile, entry);
+		}
+
+		public SizeCheckEntry GetSizeCheckEntry (string profile)
+		{
+			_size_check_entries.TryGetValue (profile, out var entry);
+			return entry;
+		}
+
+		public class SizeCheckEntry
+		{
+			public string Profile {
+				get;
+			}
+
+			public List<AssemblySizeEntry> Assemblies {
+				get;
+			}
+
+			public SizeCheckEntry (string profile)
+			{
+				Profile = profile;
+				Assemblies = new List<AssemblySizeEntry> ();
+			}
+		}
+
+		public class AssemblySizeEntry
+		{
+			public string Name {
+				get;
+			}
+
+			public int Size {
+				get;
+			}
+
+			public float? Tolerance {
+				get;
+			}
+
+			public AssemblySizeEntry (string name, int size, float? tolerance = null)
+			{
+				Name = name;
+				Size = size;
+				Tolerance = tolerance;
+			}
+
+			public override string ToString ()
+			{
+				return $"[{GetType ().Name}: {Name} {Size} {Tolerance}]";
 			}
 		}
 	}

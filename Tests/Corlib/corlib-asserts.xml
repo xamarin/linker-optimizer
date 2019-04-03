@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker-optimizer>
-	<options all-modules="true" analyze-all="true" preprocessor="full" report-size="true" />
+	<conditional feature="collator" enabled="false">
+		<type fullname="Mono.Globalization.Unicode.SimpleCollator" action="fail" />
+	</conditional>>
 
 	<conditional feature="globalization" enabled="false">
 		<namespace name="System.Globalization">
-			<type name="GlobalizationMode" debug="true">
-				<method name="get_Invariant" action="return-true" />
-			</type>
-
 			<type name="HebrewNumber" action="fail" />
 			<type name="JapaneseCalendar" action="fail" />
 			<type name="TaiwanCalendar" action="fail" />
@@ -19,8 +17,4 @@
 			<method name="MatchHebrewDigits" action="fail"/>
 		</type>
 	</conditional>
-
-	<features>
-		<feature name="globalization" enabled="false" />
-	</features>
 </linker-optimizer>

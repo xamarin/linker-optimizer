@@ -53,9 +53,9 @@ namespace Mono.Linker.Optimizer.Conditionals
 		public static IsFeatureSupportedConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index)
 		{
 			if (bb.Instructions.Count == 1)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 			if (index + 1 >= scanner.Body.Instructions.Count)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			/*
 			 * `bool MonoLinkerSupport.IsFeatureSupported (MonoLinkerFeature feature)`

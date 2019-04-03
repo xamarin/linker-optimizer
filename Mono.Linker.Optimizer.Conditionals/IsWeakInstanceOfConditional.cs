@@ -64,9 +64,9 @@ namespace Mono.Linker.Optimizer.Conditionals
 		public static IsWeakInstanceOfConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index, TypeDefinition type)
 		{
 			if (bb.Instructions.Count == 1)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 			if (index + 1 >= scanner.Body.Instructions.Count)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			/*
 			 * `bool MonoLinkerSupport.IsWeakInstance<T> (object instance)`

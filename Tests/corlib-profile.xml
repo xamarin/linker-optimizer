@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options all-modules="true" analyze-all="true" preprocess="false" />
-	</martin>
-</linker>
+<linker-optimizer>
+	<options all-modules="true" analyze-all="true" preprocessor="disabled" />
+</linker-optimizer>

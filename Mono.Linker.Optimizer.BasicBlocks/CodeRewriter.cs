@@ -66,7 +66,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 		public void ReplaceWithBranch (ref BasicBlock block, int stackDepth, bool condition)
 		{
 			if (!CecilHelper.IsBranch (block.BranchType))
-				throw new NotSupportedException ($"{nameof (ReplaceWithBranch)} used on non-branch block.");
+				throw new OptimizerAssertionException ($"{nameof (ReplaceWithBranch)} used on non-branch block.");
 
 			Instruction branch = null;
 			if (condition)
@@ -108,7 +108,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 				BlockList.TryMergeBlock (ref block);
 				break;
 			default:
-				throw new NotSupportedException ($"{nameof (ReplaceWithConstant)} called on unsupported block type `{block.BranchType}`.");
+				throw new OptimizerAssertionException ($"{nameof (ReplaceWithConstant)} called on unsupported block type `{block.BranchType}`.");
 			}
 		}
 
@@ -332,7 +332,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 		static Exception ThrowUnsupported (MethodDefinition method, string message)
 		{
-			throw new NotSupportedException ($"Code refactoring error in `{method}`: {message}");
+			throw new OptimizerAssertionException ($"Code refactoring error in `{method}`: {message}");
 		}
 	}
 }

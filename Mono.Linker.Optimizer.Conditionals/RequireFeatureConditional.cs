@@ -66,7 +66,7 @@ namespace Mono.Linker.Optimizer.Conditionals
 			var pns = Context.Context.GetType ("System.PlatformNotSupportedException");
 			var ctor = pns?.Methods.FirstOrDefault (m => m.Name == ".ctor");
 			if (ctor == null)
-				throw new NotSupportedException ($"Can't find `System.PlatformNotSupportedException`.");
+				throw new OptimizerAssertionException ($"Can't find `System.PlatformNotSupportedException`.");
 
 			Scanner.LogDebug (1, $"REWRITE FEATURE CONDITIONAL #1: {pns} {ctor}");
 
@@ -79,9 +79,9 @@ namespace Mono.Linker.Optimizer.Conditionals
 		public static RequireFeatureConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index)
 		{
 			if (bb.Instructions.Count == 1)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 			if (index + 1 >= scanner.Body.Instructions.Count)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			/*
 			 * `void MonoLinkerSupport.RequireFeature (MonoLinkerFeature feature)`

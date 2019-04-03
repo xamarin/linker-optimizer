@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <StartAction>Project</StartAction>
-    <StartArguments>--martin test-globalization-1 --martin-report martin-report.xml -out output -b true -d /Workspace/mono-work/mcs/class/lib/net_4_x -d /Workspace/linker-research/Tests/TestHelpers -c link -l none  --exclude-feature sre --exclude-feature security --exclude-feature globalization --dump-dependencies</StartArguments>
+    <StartArguments>--optimizer test-size-check-collator --optimizer-report optimizer-report.xml -out output -b true -d /Workspace/mono-work/mcs/class/lib/net_4_x -d /Workspace/linker-research/Tests/TestHelpers -c link -l none  --exclude-feature sre --exclude-feature security --exclude-feature globalization --dump-dependencies</StartArguments>
     <StartWorkingDirectory>Tests\Corlib</StartWorkingDirectory>
     <ConsolePause>true</ConsolePause>
   </PropertyGroup>

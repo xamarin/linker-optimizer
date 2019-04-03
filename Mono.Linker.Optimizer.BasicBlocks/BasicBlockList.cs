@@ -250,7 +250,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			block.AddJumpOrigin (new JumpOrigin (block, current, origin));
 		}
 
-		Exception CannotRemoveTarget => throw new NotSupportedException ("Attempted to remove a basic block that's being jumped to.");
+		Exception CannotRemoveTarget => throw new OptimizerAssertionException ("Attempted to remove a basic block that's being jumped to.");
 
 		public bool SplitBlockAt (ref BasicBlock block, int position)
 		{

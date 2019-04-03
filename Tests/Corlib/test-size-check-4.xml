@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options all-modules="true" preprocess="true" report-size="true" analyze-all="true" main-debug="false" />
+<linker-optimizer>
+	<options all-modules="true" preprocessor="full" report-size="true" analyze-all="true" />
 
-		<features>
-			<feature name="collator" enabled="false" />
-			<feature name="globalization" enabled="false" />
-		</features>
-	</martin>
-</linker>
+	<features>
+		<feature name="collator" enabled="false" />
+		<feature name="globalization" enabled="false" />
+	</features>
+</linker-optimizer>

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<features>
-			<feature name="martin" enabled="false" />
-		</features>
-	</martin>
-</linker>
+<linker-optimizer>
+	<features>
+		<feature name="martin" enabled="false" />
+	</features>
+</linker-optimizer>

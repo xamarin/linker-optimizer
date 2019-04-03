@@ -91,9 +91,9 @@ namespace Mono.Linker.Optimizer.Conditionals
 		public static AsWeakInstanceOfConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index, TypeDefinition type)
 		{
 			if (bb.Instructions.Count < 2)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 			if (index + 1 >= scanner.Body.Instructions.Count)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			/*
 			 * `bool MonoLinkerSupport.AsWeakInstance<T> (object obj, out T instance)`
@@ -105,14 +105,14 @@ namespace Mono.Linker.Optimizer.Conditionals
 			scanner.LogDebug (1, $"WEAK INSTANCE OF: {bb} {index} {type} - {load} {output}");
 
 			if (!CecilHelper.IsSimpleLoad (load))
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 			if (output.OpCode.Code != Code.Ldloca && output.OpCode.Code != Code.Ldloca_S)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			if (bb.Instructions.Count > 3)
 				scanner.BlockList.SplitBlockAt (ref bb, bb.Instructions.Count - 2);
 			var instanceType = CecilHelper.GetWeakInstanceArgument (bb.Instructions [2]);
-			var variable = ((VariableReference)output.Operand).Resolve () ?? throw new NotSupportedException ();
+			var variable = ((VariableReference)output.Operand).Resolve () ?? throw new OptimizerAssertionException ();
 
 			var instance = new AsWeakInstanceOfConditional (scanner, instanceType, variable);
 			bb.LinkerConditional = instance;

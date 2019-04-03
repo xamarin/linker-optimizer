@@ -25,6 +25,7 @@
 // THE SOFTWARE.
 using System;
 using System.IO;
+using System.Linq;
 using Mono.Cecil;
 using System.Collections.Generic;
 
@@ -46,17 +47,23 @@ namespace Mono.Linker.Optimizer
 
 		protected override void Process ()
 		{
+			bool result = true;
+
 			foreach (var assembly in GetAssemblies ()) {
-				ReportSize (assembly);
+				result &= CheckAndReportSize (assembly);
 				foreach (var type in assembly.MainModule.Types) {
 					ProcessType (type);
 				}
 			}
 
-			Report ();
+			if (Context.ReportWriter == null)
+				Report ();
+
+			if (!result)
+				throw new OptimizerException ("Size check failed.");
 		}
 
-		void ReportSize (AssemblyDefinition assembly)
+		bool CheckAndReportSize (AssemblyDefinition assembly)
 		{
 			var action = Annotations.GetAction (assembly);
 			switch (action) {
@@ -66,26 +73,52 @@ namespace Mono.Linker.Optimizer
 			case AssemblyAction.Copy:
 				break;
 			default:
-				return;
+				return true;
 			}
 
 			var file = new FileInfo (assembly.MainModule.FileName).Name;
 			var output = Path.Combine (Context.Context.OutputDirectory, file);
 			if (!File.Exists (output)) {
 				Context.LogMessage (MessageImportance.High, $"Output file does not exist: {output}");
-				return;
+				return true;
 			}
 
 			var outputInfo = new FileInfo (output);
-			Context?.ReportWriter.ReportAssemblySize (assembly, outputInfo.Length);
+			Context.ReportWriter?.ReportAssemblySize (assembly, (int)outputInfo.Length);
+
+			return CheckSize (assembly, (int)outputInfo.Length);
 		}
 
-		static FileInfo GetOriginalAssemblyFileInfo (AssemblyDefinition assembly)
+		bool CheckSize (AssemblyDefinition assembly, int size)
 		{
-			return new FileInfo (assembly.MainModule.FileName);
+			var entry = Options.GetSizeCheckEntry (Options.ProfileName);
+			if (entry == null) {
+				if (Options.ProfileName == null)
+					return true;
+				Context.LogMessage (MessageImportance.High, $"Cannot find size entries for profile `{Options.ProfileName}`.");
+				return false;
+			}
+
+			var asmEntry = entry.Assemblies.FirstOrDefault (e => e.Name == assembly.Name.Name);
+			if (asmEntry == null)
+				return true;
+
+			Context.LogDebug ($"SIZE CHECK: {asmEntry} {size}");
+			var tolerance = asmEntry.Tolerance ?? 0.005f;
+
+			var maxSize = asmEntry.Size * (1f + tolerance);
+			var minSize = asmEntry.Size * (1f - tolerance);
+			if (size < minSize) {
+				Context.LogMessage (MessageImportance.High, $"Assembly `{asmEntry.Name}` size below minimum: expected {asmEntry.Size} (tolerance {tolerance:p}), got {size}.");
+				return false;
+			}
+			if (size > maxSize) {
+				Context.LogMessage (MessageImportance.High, $"Assembly `{asmEntry.Name}` size above maximum: expected {asmEntry.Size} (tolerance {tolerance:p}), got {size}.");
+				return false;
+			}
+
+			return true;
 		}
-
-
 
 		struct SizeEntry : IComparable<SizeEntry>
 		{

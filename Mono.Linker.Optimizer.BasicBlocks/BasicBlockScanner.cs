@@ -187,7 +187,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 					break;
 
 				default:
-					throw new NotSupportedException ();
+					throw new OptimizerAssertionException ();
 				}
 			}
 

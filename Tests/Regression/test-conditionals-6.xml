@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options preprocess="true" />
-	</martin>
-</linker>
+<linker-optimizer>
+	<options preprocessor="full" />
+</linker-optimizer>

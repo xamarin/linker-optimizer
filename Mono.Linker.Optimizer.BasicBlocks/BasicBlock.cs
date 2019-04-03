@@ -112,7 +112,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 		public void AddInstruction (Instruction instruction)
 		{
 			if (BranchType != BranchType.None)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			_instructions.Add (instruction);
 			Update ();

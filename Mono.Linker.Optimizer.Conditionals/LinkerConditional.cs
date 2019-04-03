@@ -173,7 +173,7 @@ namespace Mono.Linker.Optimizer.Conditionals
 		protected static void LookAheadAfterConditional (BasicBlockList blocks, ref BasicBlock bb, ref int index)
 		{
 			if (index + 1 >= blocks.Body.Instructions.Count)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			/*
 			 * Look ahead at the instruction immediately following the call to the

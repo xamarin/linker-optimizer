@@ -50,7 +50,7 @@ namespace Mono.Linker.Optimizer
 			var arguments = ProcessResponseFile (args);
 			ParseArguments (arguments);
 
-			var env = Environment.GetEnvironmentVariable ("MARTIN_LINKER_OPTIONS");
+			var env = Environment.GetEnvironmentVariable ("LINKER_OPTIMIZER_OPTIONS");
 			if (!string.IsNullOrEmpty (env)) {
 				moduleEnabled = true;
 				options.ParseOptions (env);
@@ -75,14 +75,27 @@ namespace Mono.Linker.Optimizer
 			try {
 				var driver = new Driver (arguments.ToArray ());
 				driver.Run ();
+			} catch (OptimizerException ex) {
+				Console.Error.WriteLine ($"Fatal error in {ProgramName}: {ex.Message}");
+				Console.Error.WriteLine ();
+				return 1;
+			} catch (MarkException ex) {
+				if (ex.InnerException is OptimizerException optimizerException) {
+					Console.Error.WriteLine ($"Fatal error in {ProgramName}: {optimizerException.Message}");
+					Console.Error.WriteLine ();
+					return 1;
+				}
+				throw;
 			} catch (Exception ex) {
 				Console.Error.WriteLine ($"Fatal error in {ProgramName}: {ex.Message}");
+				Console.Error.WriteLine ();
 				throw;
 			}
 
 			watch.Stop ();
 
 			Console.Error.WriteLine ($"{ProgramName} finished in {watch.Elapsed}.");
+			Console.Error.WriteLine ();
 
 			return 0;
 		}
@@ -111,14 +124,14 @@ namespace Mono.Linker.Optimizer
 		{
 			while (arguments.Count > 0) {
 				var token = arguments[0];
-				if (!token.StartsWith ("--martin", StringComparison.Ordinal))
+				if (!token.StartsWith ("--optimizer", StringComparison.Ordinal))
 					break;
 
 				arguments.RemoveAt (0);
 				switch (token) {
-				case "--martin":
+				case "--optimizer":
 					if (mainModule != null) {
-						Console.Error.WriteLine ($"Duplicate --martin argument.");
+						Console.Error.WriteLine ($"Duplicate --optimizer argument.");
 						Environment.Exit (1);
 					}
 					mainModule = arguments[0];
@@ -126,18 +139,18 @@ namespace Mono.Linker.Optimizer
 					LoadFile (mainModule);
 					moduleEnabled = true;
 					continue;
-				case "--martin-xml":
+				case "--optimizer-xml":
 					var filename = arguments[0];
 					arguments.RemoveAt (0);
 					OptionsReader.Read (options, filename);
 					moduleEnabled = true;
 					break;
-				case "--martin-options":
+				case "--optimizer-options":
 					options.ParseOptions (arguments[0]);
 					arguments.RemoveAt (0);
 					moduleEnabled = true;
 					break;
-				case "--martin-report":
+				case "--optimizer-report":
 					filename = arguments [0];
 					arguments.RemoveAt (0);
 					options.ReportFileName = filename;

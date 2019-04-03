@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options preprocess="true" />
+<linker-optimizer>
+	<options preprocessor="full" />
 
-		<features>
-			<feature name="martin" enabled="false" />
-		</features>
-	</martin>
-</linker>
+	<features>
+		<feature name="martin" enabled="false" />
+	</features>
+</linker-optimizer>

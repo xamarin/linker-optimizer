@@ -5,9 +5,9 @@ ROOTDIR := $(abspath $(makefile_dir)/../..)
 
 include $(ROOTDIR)/build/rules.make
 
-LOCAL_LINKER_ARGS := --martin-options -main-debug --martin-report $(LINKER_OUTPUT)/martin-report.xml
+LOCAL_LINKER_ARGS := --optimizer-report $(LINKER_OUTPUT)/martin-report.xml --optimizer-options profile=$(PROFILE)
 
-TEST_CASES := \
+BROKEN_TEST_CASES := \
 	test-globalization-1.cs \
 	test-globalization-2.cs \
 	test-globalization-3.cs \
@@ -23,9 +23,14 @@ TEST_CASES := \
 	test-size-check-4.cs \
 	test-size-check-5.cs
 
-AOTTEST_CASES := \
+BROKEN_AOTTEST_CASES := \
 	aottest-crypto-1.cs \
 	aottest-remoting-1.cs
+
+TEST_CASES := \
+	test-size-check-collator.cs \
+	test-size-check-full.cs \
+	test-size-check-globalization.cs
 
 include $(ROOTDIR)/build/tests.make
 

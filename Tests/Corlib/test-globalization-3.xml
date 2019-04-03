@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options all-modules="true" analyze-all="true" preprocess="true" report-size="true" main-debug="false" />
+<linker-optimizer>
+	<options all-modules="true" analyze-all="true" preprocessor="full" report-size="true" />
 
-		<type fullname="System.DateTimeParse" action="size" />
-		<type fullname="System.Globalization.DateTimeFormatInfo" action="size" />
-		<type fullname="System.Globalization.DateTimeFormatInfoScanner" action="size" />
-		<method substring="ProcessHebrewTerminalState" action="fail" />
-		<method substring="CreateTokenHashTable" action="none" />
-		<method substring="Main" action="none" />
+	<type fullname="System.DateTimeParse" action="size" />
+	<type fullname="System.Globalization.DateTimeFormatInfo" action="size" />
+	<type fullname="System.Globalization.DateTimeFormatInfoScanner" action="size" />
+	<method substring="ProcessHebrewTerminalState" action="fail" />
+	<method substring="CreateTokenHashTable" action="none" />
+	<method substring="Main" action="none" />
 
-		<features>
-			<feature name="remoting" enabled="false" />
-			<feature name="encoding" enabled="false" />
-			<feature name="collator" enabled="false" />
-			<feature name="globalization" enabled="false" />
-		</features>
-	</martin>
-</linker>
+	<features>
+		<feature name="remoting" enabled="false" />
+		<feature name="encoding" enabled="false" />
+		<feature name="collator" enabled="false" />
+		<feature name="globalization" enabled="false" />
+	</features>
+</linker-optimizer>

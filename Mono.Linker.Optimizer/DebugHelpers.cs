@@ -34,16 +34,16 @@ namespace Mono.Linker.Optimizer
 
 	static class DebugHelpers
 	{
-		public static Exception AssertFail (string message) => throw new MartinAssertException (message);
+		public static Exception AssertFail (string message) => throw new OptimizerAssertionException (message);
 
 		public static Exception AssertFail (MethodDefinition method, string message , [CallerMemberName] string caller = null)
 		{
-			throw new MartinAssertException ($"Assertion failed in `{method}`: {message}{(!string.IsNullOrEmpty (caller) ? " (at " + caller + ")" : "")}");
+			throw new OptimizerAssertionException ($"Assertion failed in `{method}`: {message}{(!string.IsNullOrEmpty (caller) ? " (at " + caller + ")" : "")}");
 		}
 
 		public static Exception AssertFail (MethodDefinition method, BasicBlock block, string message, [CallerMemberName] string caller = null)
 		{
-			throw new MartinAssertException ($"Assertion failed in `{method}` ({block}): {message}{(!string.IsNullOrEmpty (caller) ? " (at " + caller + ")" : "")}");
+			throw new OptimizerAssertionException ($"Assertion failed in `{method}` ({block}): {message}{(!string.IsNullOrEmpty (caller) ? " (at " + caller + ")" : "")}");
 		}
 
 		public static Exception AssertFailUnexpected (MethodDefinition method, BasicBlock block, object unexpected, [CallerMemberName] string caller = null)
@@ -62,7 +62,7 @@ namespace Mono.Linker.Optimizer
 		public static void Assert (bool condition, [CallerMemberName] string caller = null)
 		{
 			if (!condition)
-				throw new MartinAssertException ($"Assertion failed{(!string.IsNullOrEmpty (caller) ? " in " + caller : "")}.");
+				throw new OptimizerAssertionException ($"Assertion failed{(!string.IsNullOrEmpty (caller) ? " in " + caller : "")}.");
 		}
 	}
 }

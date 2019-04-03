@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker-optimizer>
+	<options all-modules="true" preprocessor="full" report-size="true" analyze-all="true" />
+
+	<include filename="corlib-api.xml" />
+	<include filename="corlib-asserts.xml" />
+
+	<size-check profile="net_4_x">
+		<assembly name="mscorlib" size="1568256" />
+	</size-check>
+	<size-check profile="testing_aot_full">
+		<assembly name="mscorlib" size="1495040" />
+	</size-check>
+	<size-check profile="wasm">
+		<assembly name="mscorlib" size="1081344" />
+	</size-check>
+</linker-optimizer>

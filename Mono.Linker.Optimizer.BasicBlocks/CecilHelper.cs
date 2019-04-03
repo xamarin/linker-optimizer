@@ -66,7 +66,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			case Code.Ldc_I4_S:
 				return (sbyte)instruction.Operand;
 			default:
-				throw new NotSupportedException ($"Invalid opcode `{instruction}` used as `MonoLinkerSupport.IsFeatureSupported()` argument.");
+				throw new OptimizerAssertionException ($"Invalid opcode `{instruction}` used as `MonoLinkerSupport.IsFeatureSupported()` argument.");
 			}
 		}
 
@@ -626,7 +626,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			case Code.Readonly:
 				break;
 			default:
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 			}
 		}
 	}

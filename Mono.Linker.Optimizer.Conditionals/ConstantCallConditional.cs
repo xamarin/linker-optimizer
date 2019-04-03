@@ -63,7 +63,7 @@ namespace Mono.Linker.Optimizer.Conditionals
 		public static ConstantCallConditional Create (BasicBlockScanner scanner, ref BasicBlock bb, ref int index, MethodDefinition target, ConstantValue constant)
 		{
 			if (index + 1 >= scanner.Body.Instructions.Count)
-				throw new NotSupportedException ();
+				throw new OptimizerAssertionException ();
 
 			/*
 			 * Calling a constant property.

@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using System.IO;
 using System.Xml;
 using System.Xml.XPath;
 using Mono.Cecil;
@@ -36,38 +37,39 @@ namespace Mono.Linker.Optimizer
 			get;
 		}
 
-		public static void Read (OptimizerOptions options, XPathDocument document)
-		{
-			var reader = new OptionsReader (options);
-			reader.Read (document);
+		public string FileName {
+			get;
 		}
 
 		public static void Read (OptimizerOptions options, string filename)
 		{
-			var reader = new OptionsReader (options);
 			var settings = new XmlReaderSettings ();
+			var reader = new OptionsReader (options, filename);
 			using (var xml = XmlReader.Create (filename, settings)) {
+				Console.WriteLine ($"Reading XML description from {filename}.");
 				reader.Read (new XPathDocument (xml));
 			}
-			Console.WriteLine ($"Read XML description from {filename}.");
 		}
 
-		OptionsReader (OptimizerOptions options)
+		OptionsReader (OptimizerOptions options, string filename)
 		{
 			Options = options;
+			FileName = filename;
 		}
 
 		void Read (XPathDocument document)
 		{
 			var nav = document.CreateNavigator ();
 
-			var root = nav.SelectSingleNode ("/linker/martin");
+			var root = nav.SelectSingleNode ("/linker-optimizer");
 			if (root == null)
 				return;
 
-			var node = root.SelectSingleNode ("options");
-			if (node != null)
-				OnOptions (node);
+			var options = root.SelectSingleNode ("options");
+			if (options != null)
+				OnOptions (options);
+
+			ProcessChildren (root, "include", OnInclude);
 
 			ProcessChildren (root, "features/feature", OnFeature);
 			ProcessChildren (root, "conditional", OnConditional);
@@ -75,6 +77,22 @@ namespace Mono.Linker.Optimizer
 			ProcessChildren (root, "namespace", child => OnNamespaceEntry (child));
 			ProcessChildren (root, "type", child => OnTypeEntry (child, null));
 			ProcessChildren (root, "method", child => OnMethodEntry (child));
+
+			ProcessChildren (root, "size-check", OnSizeCheck);
+		}
+
+		void OnInclude (XPathNavigator nav)
+		{
+			var file = GetAttribute (nav, "filename") ?? throw ThrowError ("<include> requires `filename` argument.");
+
+			if (!Path.IsPathRooted (file)) {
+				var directory = Path.GetDirectoryName (Path.GetFullPath (FileName));
+				file = Path.Combine (directory, file);
+			}
+
+			if (!File.Exists (file))
+				throw ThrowError ($"Include file `{file}` does not exist.");	
+			Read (Options, file);
 		}
 
 		void OnOptions (XPathNavigator nav)
@@ -88,8 +106,12 @@ namespace Mono.Linker.Optimizer
 			if (GetBoolAttribute (nav, "analyze-all", out value))
 				Options.AnalyzeAll = value;
 
-			if (GetBoolAttribute (nav, "preprocess", out value))
-				Options.Preprocess = value;
+			if (GetAttribute (nav, "preprocess") != null)
+				throw ThrowError ("NEED TO REMOVE preprocess");
+
+			var preprocess = GetAttribute (nav, "preprocessor");
+			if (preprocess != null)
+				Options.SetPreprocessorMode (preprocess);
 
 			if (GetBoolAttribute (nav, "no-conditional-redefinition", out value))
 				Options.NoConditionalRedefinition = value;
@@ -99,6 +121,30 @@ namespace Mono.Linker.Optimizer
 
 			if (GetBoolAttribute (nav, "report-size", out value))
 				Options.ReportSize = value;
+
+			var profile = GetAttribute (nav, "profile");
+			if (profile != null)
+				Options.ProfileName = profile;
+		}
+
+		void OnSizeCheck (XPathNavigator nav)
+		{
+			var profile = GetAttribute (nav, "profile") ?? "default";
+			var entry = new OptimizerOptions.SizeCheckEntry (profile);
+			Options.AddSizeCheckEntry (entry);
+
+			ProcessChildren (nav, "assembly", child => {
+				var name = GetAttribute (child, "name") ?? throw ThrowError ("<assembly> requires `name` attribute.");
+				var sizeAttr = GetAttribute (child, "size");
+				if (sizeAttr == null || !int.TryParse (sizeAttr, out var size))
+					throw ThrowError ("<assembly> requires `name` attribute.");
+				float? tolerance = null;
+				var toleranceAttr = GetAttribute (child, "tolerance");
+				if (toleranceAttr != null)
+					tolerance = float.Parse (toleranceAttr);
+
+				entry.Assemblies.Add (new OptimizerOptions.AssemblySizeEntry (name, size, tolerance));
+			});
 		}
 
 		void OnFeature (XPathNavigator nav)
@@ -106,7 +152,7 @@ namespace Mono.Linker.Optimizer
 			var name = GetAttribute (nav, "name");
 			var value = GetAttribute (nav, "enabled");
 
-			if (string.IsNullOrEmpty (value) || !bool.TryParse (value, out var enabled))
+			if (value == null || !bool.TryParse (value, out var enabled))
 				enabled = true;
 
 			Options.SetFeatureEnabled (name, enabled);
@@ -115,7 +161,7 @@ namespace Mono.Linker.Optimizer
 		void OnConditional (XPathNavigator nav)
 		{
 			var name = GetAttribute (nav, "feature");
-			if (string.IsNullOrEmpty (name) || !GetBoolAttribute (nav, "enabled", out var enabled))
+			if (name == null || !GetBoolAttribute (nav, "enabled", out var enabled))
 				throw ThrowError ("<conditional> needs both `feature` and `enabled` arguments.");
 
 			var feature = OptimizerOptions.FeatureByName (name);
@@ -130,7 +176,7 @@ namespace Mono.Linker.Optimizer
 		bool GetBoolAttribute (XPathNavigator nav, string name, out bool value)
 		{
 			var attr = GetAttribute (nav, name);
-			if (!string.IsNullOrEmpty (attr) && bool.TryParse (attr, out value))
+			if (attr != null && bool.TryParse (attr, out value))
 				return true;
 			value = false;
 			return false;
@@ -142,18 +188,18 @@ namespace Mono.Linker.Optimizer
 			var fullname = GetAttribute (nav, "fullname");
 			var substring = GetAttribute (nav, "substring");
 
-			if (!string.IsNullOrEmpty (fullname)) {
+			if (fullname != null) {
 				match = OptimizerOptions.MatchKind.FullName;
-				if (!string.IsNullOrEmpty (name) || !string.IsNullOrEmpty (substring))
+				if (name != null || substring != null)
 					return false;
 				name = fullname;
-			} else if (!string.IsNullOrEmpty (name)) {
+			} else if (name != null) {
 				match = OptimizerOptions.MatchKind.Name;
-				if (!string.IsNullOrEmpty (fullname) || !string.IsNullOrEmpty (substring))
+				if (fullname != null || substring != null)
 					return false;
-			} else if (!string.IsNullOrEmpty (substring)) {
+			} else if (substring != null) {
 				match = OptimizerOptions.MatchKind.Substring;
-				if (!string.IsNullOrEmpty (name) || !string.IsNullOrEmpty (fullname))
+				if (name != null || fullname != null)
 					return false;
 				name = substring;
 			} else {
@@ -166,13 +212,11 @@ namespace Mono.Linker.Optimizer
 
 		void OnNamespaceEntry (XPathNavigator nav, Func<MemberReference, bool> conditional = null)
 		{
-			var name = GetAttribute (nav, "name");
-			if (string.IsNullOrEmpty (name))
-				throw ThrowError ("<namespace> entry needs `name` attribute.");
+			var name = GetAttribute (nav, "name") ?? throw ThrowError ("<namespace> entry needs `name` attribute.");
 
 			OptimizerOptions.TypeEntry entry;
 			var action = GetAttribute (nav, "action");
-			if (!string.IsNullOrEmpty (action))
+			if (action != null)
 				entry = AddTypeEntry (name, OptimizerOptions.MatchKind.Namespace, action, null, conditional);
 			else
 				entry = Options.AddTypeEntry (name, OptimizerOptions.MatchKind.Namespace, OptimizerOptions.TypeAction.None, null, conditional);
@@ -188,7 +232,7 @@ namespace Mono.Linker.Optimizer
 
 			OptimizerOptions.TypeEntry entry;
 			var action = GetAttribute (nav, "action");
-			if (!string.IsNullOrEmpty (action))
+			if (action != null)
 				entry = AddTypeEntry (name, match, action, parent, conditional);
 			else
 				entry = Options.AddTypeEntry (name, match, OptimizerOptions.TypeAction.None, parent, conditional);
@@ -209,9 +253,7 @@ namespace Mono.Linker.Optimizer
 			if (!GetName (nav, out var name, out var match))
 				throw ThrowError ($"Ambiguous name in method entry `{nav.OuterXml}`.");
 
-			var action = GetAttribute (nav, "action");
-			if (string.IsNullOrEmpty (action))
-				throw ThrowError ($"Missing `action` attribute in {nav.OuterXml}.");
+			var action = GetAttribute (nav, "action") ?? throw ThrowError ($"Missing `action` attribute in {nav.OuterXml}.");
 
 			if (!OptimizerOptions.TryParseMethodAction (action, out var methodAction))
 				throw ThrowError ($"Invalid `action` attribute in {nav.OuterXml}.");
@@ -221,7 +263,7 @@ namespace Mono.Linker.Optimizer
 
 		Exception ThrowError (string message)
 		{
-			throw new NotSupportedException ($"Invalid XML: {message}");
+			throw new OptimizerException ($"Invalid XML: {message}");
 		}
 
 		static void ProcessChildren (XPathNavigator nav, string children, Action<XPathNavigator> action)
@@ -233,7 +275,8 @@ namespace Mono.Linker.Optimizer
 
 		static string GetAttribute (XPathNavigator nav, string attribute)
 		{
-			return nav.GetAttribute (attribute, string.Empty);
+			var attr = nav.GetAttribute (attribute, string.Empty);
+			return string.IsNullOrWhiteSpace (attr) ? null : attr;
 		}
 	}
 }

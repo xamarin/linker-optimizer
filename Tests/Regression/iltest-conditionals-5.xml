@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<linker>
-	<martin>
-		<options preprocess="true" />
+<linker-optimizer>
+	<type name="Foo" action="fail" />
 
-		<type name="Foo" action="fail" />
-
-		<method name="ConvertToReturnFalse" action="return-false" />
-		<method name="ConvertToInstanceReturnFalse" action="return-false" />
-	</martin>
-</linker>
+	<method name="ConvertToReturnFalse" action="return-false" />
+	<method name="ConvertToInstanceReturnFalse" action="return-false" />
+</linker-optimizer>
