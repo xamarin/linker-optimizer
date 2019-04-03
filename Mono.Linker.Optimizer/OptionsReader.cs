@@ -107,6 +107,7 @@ namespace Mono.Linker.Optimizer
 			CheckAttribute (nav, "check-size", value => Options.CheckSize = value);
 			CheckAttribute (nav, "size-check-tolerance", value => Options.SizeCheckTolerance = value);
 			CheckAttribute (nav, "profile", value => Options.ProfileName = value);
+			CheckAttribute (nav, "disable-all", value => Options.DisableAll = value);
 		}
 
 		void OnSizeCheck (XPathNavigator nav)

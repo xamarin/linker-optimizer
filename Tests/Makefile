@@ -39,6 +39,12 @@ corlib-test-globalization: build
 corlib-test-collator: build
 	$(MAKE) corlib-test LINKER_OPTIMIZER_OPTIONS="collator" EXTRA_NUNIT_EXCLUDES=",ManagedCollator"
 
+corlib-test-reflection-emit: build
+	$(MAKE) corlib-test LINKER_OPTIMIZER_OPTIONS="reflection-emit" EXTRA_NUNIT_EXCLUDES=",ReflectionEmit"
+
+corlib-test-remove-all: build
+	$(MAKE) corlib-test LINKER_OPTIMIZER_OPTIONS="disable-all" EXTRA_NUNIT_EXCLUDES=",ReflectionEmit,LinkerGlobalization,ManagedCollator"
+
 run-corlib-test:
 	(cd $(LINKER_OUTPUT); MONO_PATH=.:$(PROFILE_PATH) $(RUNTIME) $(RUNTIME_FLAGS) --debug $(PROFILE_PATH)/nunit-lite-console.exe net_4_x_corlib_test.dll $(NUNIT_ARGS) $(TESTNAME_ARG))
 

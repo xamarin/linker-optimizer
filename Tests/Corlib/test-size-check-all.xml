@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker-optimizer>
-	<options all-modules="true" preprocessor="full" check-size="true" analyze-all="true" />
+	<options all-modules="true" preprocessor="full" check-size="true" analyze-all="true" disable-all="true" />
 
 	<include filename="corlib-api.xml" />
 	<include filename="corlib-asserts.xml" />
@@ -14,12 +14,4 @@
 	<size-check profile="wasm">
 		<assembly name="mscorlib" size="558080" />
 	</size-check>
-
-	<features>
-		<feature name="collator" enabled="false" />
-		<feature name="globalization" enabled="false" />
-		<feature name="security" enabled="false" />
-		<feature name="remoting" enabled="false" />
-		<feature name="reflection-emit" enabled="false" />
-	</features>
 </linker-optimizer>

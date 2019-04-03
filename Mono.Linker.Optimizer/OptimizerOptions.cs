@@ -83,6 +83,10 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public bool DisableAll {
+			get; set;
+		}
+
 		readonly List<TypeEntry> _type_actions;
 		readonly List<MethodEntry> _method_actions;
 		readonly Dictionary<MonoLinkerFeature, bool> _enabled_features;
@@ -163,6 +167,9 @@ namespace Mono.Linker.Optimizer
 				case "disable-module":
 					DisableModule = enabled ?? true;
 					break;
+				case "disable-all":
+					DisableAll = enabled ?? true;
+					break;
 				default:
 					SetFeatureEnabled (part, enabled ?? false);
 					break;
@@ -181,7 +188,7 @@ namespace Mono.Linker.Optimizer
 		{
 			if (_enabled_features.TryGetValue (feature, out var value))
 				return value;
-			return true;
+			return !DisableAll;
 		}
 
 		public void SetFeatureEnabled (MonoLinkerFeature feature, bool enabled)
