@@ -38,7 +38,7 @@ namespace Mono.Linker.Optimizer
 		static string mainModule;
 		static bool moduleEnabled;
 
-		const string ProgramName = "Mono Linker Optimizer";
+		internal const string ProgramName = "Mono Linker Optimizer";
 
 		public static int Main (string[] args)
 		{

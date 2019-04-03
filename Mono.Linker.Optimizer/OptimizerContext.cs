@@ -75,8 +75,6 @@ namespace Mono.Linker.Optimizer
 
 		public static void Initialize (LinkContext linkContext, string mainModule, OptimizerOptions options)
 		{
-			linkContext.Logger.LogMessage (MessageImportance.Normal, "Enabling Martin's Playground");
-
 			var context = new OptimizerContext (linkContext, options);
 
 			context.Initialize (mainModule);
@@ -107,7 +105,7 @@ namespace Mono.Linker.Optimizer
 
 		void Initialize (string mainModule)
 		{
-			LogMessage (MessageImportance.High, "Initializing Martin's Playground");
+			LogMessage (MessageImportance.High, $"Initializing {Program.ProgramName}.");
 
 			var mainName = Path.GetFileNameWithoutExtension (mainModule);
 

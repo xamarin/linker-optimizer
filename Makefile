@@ -12,10 +12,10 @@ CLEAN_DIRECTORIES += output
 ifdef STANDALONE_MAKE
 
 standalone-build::
-	msbuild /nologo /verbosity:minimal $(ROOTDIR)/Mono.Linker.Optimizer.sln
+	msbuild /nologo /verbosity:quiet $(ROOTDIR)/Mono.Linker.Optimizer.sln
 
 standalone-build-release::
-	msbuild /nologo /verbosity:minimal /p:Configuration=Release $(ROOTDIR)/Mono.Linker.Optimizer.sln
+	msbuild /nologo /verbosity:quiet /p:Configuration=Release $(ROOTDIR)/Mono.Linker.Optimizer.sln
 
 endif
 

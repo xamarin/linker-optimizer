@@ -40,7 +40,7 @@ namespace Mono.Linker.Optimizer {
 		{
 			RemoveFeatures ();
 
-			Context.LogMessage (MessageImportance.Normal, $"Preprocessor mode: {Options.Preprocessor}.");
+			Context.LogDebug ($"Preprocessor mode: {Options.Preprocessor}.");
 
 			switch (Options.Preprocessor) {
 			case OptimizerOptions.PreprocessorMode.Automatic:

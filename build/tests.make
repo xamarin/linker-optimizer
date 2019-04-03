@@ -34,46 +34,40 @@ iltest-$(1): build $(patsubst %.il,%,$(filter iltest-$(1)-%.il,$(ILTEST_CASES)))
 endef
 
 test-%: test-%.exe standalone-build
-	@echo RUN TEST $@
+	@echo Running test $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
-	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
-	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
-	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
-	MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
+	$(if $(V),,@) $(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
+	@MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
+	@MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
+	@MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
 	@! grep AssertRemoved $(LINKER_OUTPUT)/$(@F).il
-	@ls -lR $(LINKER_OUTPUT)
+	$(if $(V),ls -lR $(LINKER_OUTPUT))
 	(cd $(LINKER_OUTPUT); MONO_PATH=. $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot ./$(@F).exe)
-	#@rm -rf $(LINKER_OUTPUT)
 
 aottest-%: aottest-%.exe standalone-build
-	@echo RUN TEST $@
+	@echo Running test $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_AOT) --dump-dependencies
-	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
-	MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
-	MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
-	MONO_PATH=$(AOTPROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
+	$(if $(V),,@) $(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_AOT) --dump-dependencies
+	@MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
+	@MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
+	@MONO_PATH=$(AOTPROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
 	@! grep AssertRemoved $(LINKER_OUTPUT)/$(@F).il
-	@ls -lR $(LINKER_OUTPUT)
+	$(if $(V),ls -lR $(LINKER_OUTPUT))
 	(cd $(LINKER_OUTPUT); MONO_PATH=. $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot ./$(@F).exe)
-	#@rm -rf $(LINKER_OUTPUT)
 
 iltest-%: iltest-%.exe standalone-build
-	@echo RUN TEST $@
+	@echo Running test $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
-	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
-	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
-	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
-	MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
+	$(if $(V),,@) $(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
+	@MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
+	@MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
+	@MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
 	@! grep AssertRemoved $(LINKER_OUTPUT)/$(@F).il
-	@ls -lR $(LINKER_OUTPUT)
+	$(if $(V),ls -lR $(LINKER_OUTPUT))
 	(cd $(LINKER_OUTPUT); MONO_PATH=. $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot ./$(@F).exe)
-	#@rm -rf $(LINKER_OUTPUT)
 
 standalone-build::
 	$(MAKE) -C $(ROOTDIR) standalone-build

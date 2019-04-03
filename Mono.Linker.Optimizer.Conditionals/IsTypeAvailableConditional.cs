@@ -68,7 +68,7 @@ namespace Mono.Linker.Optimizer.Conditionals
 		{
 			var evaluated = EvaluateConditional ();
 
-			Scanner.LogDebug (0, $"REWRITE TYPE AVAILABLE CONDITIONAL: {this} {evaluated}");
+			Scanner.LogDebug (1, $"REWRITE TYPE AVAILABLE CONDITIONAL: {this} {evaluated}");
 
 			RewriteConditional (ref block, 0, evaluated ? ConstantValue.True : ConstantValue.False);
 		}
