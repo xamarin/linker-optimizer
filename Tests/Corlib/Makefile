@@ -5,7 +5,7 @@ ROOTDIR := $(abspath $(makefile_dir)/../..)
 
 include $(ROOTDIR)/build/rules.make
 
-LOCAL_LINKER_ARGS := --optimizer-report $(LINKER_OUTPUT)/martin-report.xml --optimizer-options profile=$(PROFILE)
+TEST_LINKER_ARGS := --optimizer-report $(LINKER_OUTPUT)/martin-report.xml --optimizer-options profile=$(PROFILE)
 
 BROKEN_TEST_CASES := \
 	test-globalization-2.cs \

@@ -92,7 +92,7 @@ namespace Mono.Linker.Optimizer
 			case "false":
 				return true;
 			case "true":
-				profile = Options.ProfileName;
+				profile = Options.ProfileName ?? "default";
 				break;
 			default:
 				profile = Options.CheckSize;
@@ -111,17 +111,24 @@ namespace Mono.Linker.Optimizer
 			if (asmEntry == null)
 				return true;
 
-			Context.LogDebug ($"SIZE CHECK: {asmEntry} {size}");
-			var tolerance = asmEntry.Tolerance ?? 0.005f;
+			int tolerance;
+			string toleranceValue = asmEntry.Tolerance ?? Options.SizeCheckTolerance ?? "0.05%";
 
-			var maxSize = asmEntry.Size * (1f + tolerance);
-			var minSize = asmEntry.Size * (1f - tolerance);
-			if (size < minSize) {
-				Context.LogMessage (MessageImportance.High, $"Assembly `{asmEntry.Name}` size below minimum: expected {asmEntry.Size} (tolerance {tolerance:p}), got {size}.");
+			if (toleranceValue.EndsWith ("%", StringComparison.Ordinal)) {
+				var percent = float.Parse (toleranceValue.Substring (0, toleranceValue.Length - 1));
+				tolerance = (int)(asmEntry.Size * percent / 100.0f);
+			} else {
+				tolerance = int.Parse (toleranceValue);
+			}
+
+			Context.LogDebug ($"Size check: {asmEntry.Name}, actual={size}, expected={asmEntry.Size} (tolerance {toleranceValue})");
+
+			if (size < asmEntry.Size - tolerance) {
+				Context.LogMessage (MessageImportance.High, $"Assembly `{asmEntry.Name}` size below minimum: expected {asmEntry.Size} (tolerance {toleranceValue}), got {size}.");
 				return false;
 			}
-			if (size > maxSize) {
-				Context.LogMessage (MessageImportance.High, $"Assembly `{asmEntry.Name}` size above maximum: expected {asmEntry.Size} (tolerance {tolerance:p}), got {size}.");
+			if (size > asmEntry.Size + tolerance) {
+				Context.LogMessage (MessageImportance.High, $"Assembly `{asmEntry.Name}` size above maximum: expected {asmEntry.Size} (tolerance {toleranceValue}), got {size}.");
 				return false;
 			}
 

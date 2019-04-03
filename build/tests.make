@@ -10,6 +10,8 @@ $(LINKER_EXE):
 
 CLEAN_DIRECTORIES += $(LINKER_OUTPUT)
 
+TEST_LINKER_ARGS := $(TEST_LINKER_ARGS) $(LOCAL_LINKER_ARGS)
+
 .NOTPARALLEL:
 
 compile-tests:: $(TEST_CASES:.cs=.exe) $(ILTEST_CASES:.il=.exe) $(AOTTEST_CASES:.cs=.exe) $(BROKEN_TESTS:.cs=.exe) $(TEST_HELPERS_LIBRARY) $(LINKER_EXE)
@@ -37,7 +39,7 @@ test-%: test-%.exe standalone-build
 	@echo Running test $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(if $(V),,@) $(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
+	$(if $(V),,@) $(LINKER) --optimizer $@ $(TEST_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
 	@MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	@MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
 	@MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
@@ -49,7 +51,7 @@ aottest-%: aottest-%.exe standalone-build
 	@echo Running test $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(if $(V),,@) $(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_AOT) --dump-dependencies
+	$(if $(V),,@) $(LINKER) --optimizer $@ $(TEST_LINKER_ARGS) $(LINKER_ARGS_AOT) --dump-dependencies
 	@MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	@MONO_PATH=$(AOTPROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
 	@MONO_PATH=$(AOTPROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
@@ -61,7 +63,7 @@ iltest-%: iltest-%.exe standalone-build
 	@echo Running test $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(if $(V),,@) $(LINKER) --optimizer $@ $(LOCAL_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
+	$(if $(V),,@) $(LINKER) --optimizer $@ $(TEST_LINKER_ARGS) $(LINKER_ARGS_DEFAULT) --dump-dependencies
 	@MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	@MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/$(@F).exe > $(LINKER_OUTPUT)/$(@F).il
 	@MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt

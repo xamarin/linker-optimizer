@@ -6,16 +6,16 @@
 	<include filename="corlib-asserts.xml" />
 
 	<size-check profile="net_4_x">
-		<assembly name="mscorlib" size="1210368" />
+		<assembly name="mscorlib" size="1545728" />
 	</size-check>
 	<size-check profile="testing_aot_full">
-		<assembly name="mscorlib" size="1135104" />
+		<assembly name="mscorlib" size="1495040" />
 	</size-check>
 	<size-check profile="wasm">
-		<assembly name="mscorlib" size="1088000" />
+		<assembly name="mscorlib" size="1064448" />
 	</size-check>
 
 	<features>
-		<feature name="collator" enabled="false" />
+		<feature name="reflection-emit" enabled="false" />
 	</features>
 </linker-optimizer>

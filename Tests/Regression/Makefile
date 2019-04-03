@@ -5,7 +5,7 @@ ROOTDIR := $(abspath $(makefile_dir)/../..)
 
 include $(ROOTDIR)/build/rules.make
 
-LOCAL_LINKER_ARGS := --optimizer-options -all-modules,analyze-all
+TEST_LINKER_ARGS := --optimizer-options -all-modules,analyze-all
 
 TEST_CASES := \
 	test-weak-instances-1.cs \

@@ -104,8 +104,9 @@ namespace Mono.Linker.Optimizer
 			CheckAttribute (nav, "no-conditional-redefinition", value => Options.NoConditionalRedefinition = value);
 			CheckAttribute (nav, "ignore-resolution-errors", value => Options.IgnoreResolutionErrors = value);
 			CheckAttribute (nav, "report-size", value => Options.ReportSize = value);
-			CheckAttribute (nav, "check-size", a => Options.CheckSize = a);
-			CheckAttribute (nav, "profile", a => Options.ProfileName = a);
+			CheckAttribute (nav, "check-size", value => Options.CheckSize = value);
+			CheckAttribute (nav, "size-check-tolerance", value => Options.SizeCheckTolerance = value);
+			CheckAttribute (nav, "profile", value => Options.ProfileName = value);
 		}
 
 		void OnSizeCheck (XPathNavigator nav)
@@ -119,12 +120,8 @@ namespace Mono.Linker.Optimizer
 				var sizeAttr = GetAttribute (child, "size");
 				if (sizeAttr == null || !int.TryParse (sizeAttr, out var size))
 					throw ThrowError ("<assembly> requires `name` attribute.");
-				float? tolerance = null;
 				var toleranceAttr = GetAttribute (child, "tolerance");
-				if (toleranceAttr != null)
-					tolerance = float.Parse (toleranceAttr);
-
-				entry.Assemblies.Add (new OptimizerOptions.AssemblySizeEntry (name, size, tolerance));
+				entry.Assemblies.Add (new OptimizerOptions.AssemblySizeEntry (name, size, toleranceAttr));
 			});
 		}
 

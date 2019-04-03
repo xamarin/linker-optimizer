@@ -26,9 +26,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using Mono.Linker.Steps;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Mono.Linker.Steps;
 
 namespace Mono.Linker.Optimizer
 {
@@ -67,6 +68,15 @@ namespace Mono.Linker.Optimizer
 				arguments.Insert (1, mainModule);
 				arguments.Insert (2, "--custom-step");
 				arguments.Insert (3, $"TypeMapStep:{typeof (InitializeStep).AssemblyQualifiedName}");
+
+				if (!options.IsFeatureEnabled (MonoLinkerFeature.ReflectionEmit)) {
+					arguments.Add ("--exclude-feature");
+					arguments.Add ("sre");
+				}
+				if (!options.IsFeatureEnabled (MonoLinkerFeature.Security)) {
+					arguments.Add ("--exclude-feature");
+					arguments.Add ("security");
+				}
 			}
 
 			var watch = new Stopwatch ();

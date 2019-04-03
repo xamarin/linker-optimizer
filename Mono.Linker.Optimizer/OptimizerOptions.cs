@@ -63,6 +63,10 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public string SizeCheckTolerance {
+			get; set;
+		}
+
 		public bool AutoDebugMain {
 			get; set;
 		}
@@ -113,6 +117,9 @@ namespace Mono.Linker.Optimizer
 						continue;
 					case "check-size":
 						CheckSize = value;
+						continue;
+					case "size-check-tolerance":
+						SizeCheckTolerance = value;
 						continue;
 					default:
 						throw new OptimizerException ($"Unknown option `{part}`.");
@@ -194,6 +201,7 @@ namespace Mono.Linker.Optimizer
 		{
 			switch (name.ToLowerInvariant ()) {
 			case "sre":
+			case "reflection-emit":
 				return MonoLinkerFeature.ReflectionEmit;
 			case "martin":
 				return MonoLinkerFeature.Martin;
@@ -602,11 +610,11 @@ namespace Mono.Linker.Optimizer
 				get;
 			}
 
-			public float? Tolerance {
+			public string Tolerance {
 				get;
 			}
 
-			public AssemblySizeEntry (string name, int size, float? tolerance = null)
+			public AssemblySizeEntry (string name, int size, string tolerance)
 			{
 				Name = name;
 				Size = size;

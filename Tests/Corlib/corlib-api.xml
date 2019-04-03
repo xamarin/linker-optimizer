@@ -15,4 +15,7 @@
 			</type>
 		</namespace>
 	</conditional>
+
+	<conditional feature="reflection-emit" enabled="false">
+	</conditional>
 </linker-optimizer>

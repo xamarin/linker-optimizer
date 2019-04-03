@@ -265,8 +265,6 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 		{
 			if (method.IsAbstract || method.IsVirtual || method.IsConstructor || !method.IsIL)
 				throw ThrowUnsupported (method, "Cannot rewrite method of this type into throwing an exception.");
-			if (method.HasParameters)
-				throw ThrowUnsupported (method, "Can only rewrite parameterless methods into throwing an exception.");
 			method.Body.Instructions.Clear ();
 			method.Body.Instructions.Add (context.CreateNewPlatformNotSupportedException (method));
 			method.Body.Instructions.Add (Instruction.Create (OpCodes.Throw));

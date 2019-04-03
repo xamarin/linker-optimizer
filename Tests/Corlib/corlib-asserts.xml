@@ -17,4 +17,8 @@
 			<method name="MatchHebrewDigits" action="fail"/>
 		</type>
 	</conditional>
+
+	<conditional feature="reflection-emit" enabled="false">
+		<namespace name="System.Reflection.Emit" action="fail" />
+	</conditional>
 </linker-optimizer>
