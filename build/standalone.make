@@ -20,9 +20,9 @@ LINKER = MONO_PATH=$(MONO_ROOT)/mcs/class/lib/build $(RUNTIME) $(RUNTIME_FLAGS) 
 
 LINKER_ARGS = -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH) -d $(ROOTDIR)/Tests/TestHelpers
 LINKER_ARGS_DEFAULT = $(LINKER_ARGS) -c link -l none
-LINKER_ARGS_CORLIB_TEST = $(LINKER_ARGS) -c copy -p link mscorlib -l none --exclude-feature sre
+LINKER_ARGS_CORLIB_TEST = $(LINKER_ARGS) -c copy -p link mscorlib -l none
 LINKER_ARGS_AOT = -out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH) -c link -l none
 
 TEST_EXEC = MONO_PATH=$(LINKER_OUTPUT) $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot
-NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,ReflectionEmit,NotWorking,CAS,LinkerNotWorking,$(EXTRA_NUNIT_EXCLUDES)
+NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,NotWorking,CAS,LinkerNotWorking,$(EXTRA_NUNIT_EXCLUDES)
 XUNIT_ARGS := -noappdomain -noshadow -parallel none -notrait category=failing -notrait category=nonmonotests -notrait Benchmark=true -notrait category=outerloop -notrait category=nonosxtests
