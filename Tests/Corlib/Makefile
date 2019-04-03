@@ -12,7 +12,6 @@ BROKEN_TEST_CASES := \
 	test-globalization-3.cs \
 	test-globalization-4.cs \
 	test-globalization-5.cs \
-	test-crypto-1.cs \
 	test-security-1.cs \
 	test-remoting-1.cs \
 	test-remoting-2.cs \
@@ -23,11 +22,14 @@ BROKEN_TEST_CASES := \
 	test-size-check-5.cs
 
 BROKEN_AOTTEST_CASES := \
-	aottest-crypto-1.cs \
 	aottest-remoting-1.cs
+
+AOTTEST_CASES := \
+	aottest-crypto-1.cs
 
 TEST_CASES := \
 	test-globalization-1.cs \
+	test-crypto-1.cs \
 	test-size-check-collator.cs \
 	test-size-check-full.cs \
 	test-size-check-globalization.cs

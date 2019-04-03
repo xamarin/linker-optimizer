@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker-optimizer>
-	<options all-modules="true" analyze-all="true" ignore-resolution-errors="true" preprocessor="full" report-size="true" />
+	<options all-modules="true" analyze-all="true" preprocessor="full" report-size="true" />
 
 	<conditional feature="crypto" enabled="true">
 		<namespace name="System.Security.Cryptography">
