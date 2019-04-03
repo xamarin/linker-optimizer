@@ -83,7 +83,7 @@ namespace Mono.Linker.Optimizer
 
 			linkContext.Pipeline.AddStepBefore (typeof (MarkStep), new PreprocessStep (context));
 			linkContext.Pipeline.ReplaceStep (typeof (MarkStep), new ConditionalMarkStep (context));
-			if (options.ReportSize)
+			if (options.ReportSize || options.CheckSize != null)
 				linkContext.Pipeline.AddStepAfter (typeof (OutputStep), new SizeReportStep (context));
 			if (options.ReportFileName != null)
 				linkContext.Pipeline.AppendStep (new WriteReportStep (context));

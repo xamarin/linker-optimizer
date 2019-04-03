@@ -97,34 +97,15 @@ namespace Mono.Linker.Optimizer
 
 		void OnOptions (XPathNavigator nav)
 		{
-			if (GetBoolAttribute (nav, "main-debug", out var value))
-				Options.AutoDebugMain = value;
-
-			if (GetBoolAttribute (nav, "all-modules", out value))
-				Options.ScanAllModules = value;
-
-			if (GetBoolAttribute (nav, "analyze-all", out value))
-				Options.AnalyzeAll = value;
-
-			if (GetAttribute (nav, "preprocess") != null)
-				throw ThrowError ("NEED TO REMOVE preprocess");
-
-			var preprocess = GetAttribute (nav, "preprocessor");
-			if (preprocess != null)
-				Options.SetPreprocessorMode (preprocess);
-
-			if (GetBoolAttribute (nav, "no-conditional-redefinition", out value))
-				Options.NoConditionalRedefinition = value;
-
-			if (GetBoolAttribute (nav, "ignore-resolution-errors", out value))
-				Options.IgnoreResolutionErrors = value;
-
-			if (GetBoolAttribute (nav, "report-size", out value))
-				Options.ReportSize = value;
-
-			var profile = GetAttribute (nav, "profile");
-			if (profile != null)
-				Options.ProfileName = profile;
+			CheckAttribute (nav, "main-debug", value => Options.AutoDebugMain = value);
+			CheckAttribute (nav, "all-modules", value => Options.ScanAllModules = value);
+			CheckAttribute (nav, "analyze-all", value => Options.AnalyzeAll = value);
+			CheckAttribute (nav, "preprocessor", value => Options.SetPreprocessorMode (value));
+			CheckAttribute (nav, "no-conditional-redefinition", value => Options.NoConditionalRedefinition = value);
+			CheckAttribute (nav, "ignore-resolution-errors", value => Options.IgnoreResolutionErrors = value);
+			CheckAttribute (nav, "report-size", value => Options.ReportSize = value);
+			CheckAttribute (nav, "check-size", a => Options.CheckSize = a);
+			CheckAttribute (nav, "profile", a => Options.ProfileName = a);
 		}
 
 		void OnSizeCheck (XPathNavigator nav)
@@ -171,6 +152,23 @@ namespace Mono.Linker.Optimizer
 			ProcessChildren (nav, "method", child => OnMethodEntry (child, null, Conditional));
 
 			bool Conditional (MemberReference reference) => Options.IsFeatureEnabled (feature) == enabled;
+		}
+
+		void CheckAttribute (XPathNavigator nav, string name, Action<bool> action, bool required = false)
+		{
+			if (GetBoolAttribute (nav, name, out var value))
+				action (value);
+			else if (required)
+				throw ThrowError ($"Missing `{name}` attribute.");
+		}
+
+		void CheckAttribute (XPathNavigator nav, string name, Action<string> action, bool required = false)
+		{
+			var attr = GetAttribute (nav, name);
+			if (attr != null)
+				action (attr);
+			else if (required)
+				throw ThrowError ($"Missing `{name}` attribute.");
 		}
 
 		bool GetBoolAttribute (XPathNavigator nav, string name, out bool value)

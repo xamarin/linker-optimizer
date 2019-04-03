@@ -83,19 +83,27 @@ namespace Mono.Linker.Optimizer
 				return true;
 			}
 
-			var outputInfo = new FileInfo (output);
-			Context.ReportWriter?.ReportAssemblySize (assembly, (int)outputInfo.Length);
+			var size = (int)new FileInfo (output).Length;
+			Context.ReportWriter?.ReportAssemblySize (assembly, size);
 
-			return CheckSize (assembly, (int)outputInfo.Length);
-		}
+			string profile;
+			switch (Options.CheckSize) {
+			case null:
+			case "false":
+				return true;
+			case "true":
+				profile = Options.ProfileName;
+				break;
+			default:
+				profile = Options.CheckSize;
+				break;
+			}
 
-		bool CheckSize (AssemblyDefinition assembly, int size)
-		{
-			var entry = Options.GetSizeCheckEntry (Options.ProfileName);
+			var entry = Options.GetSizeCheckEntry (profile);
 			if (entry == null) {
-				if (Options.ProfileName == null)
+				if (profile == null)
 					return true;
-				Context.LogMessage (MessageImportance.High, $"Cannot find size entries for profile `{Options.ProfileName}`.");
+				Context.LogMessage (MessageImportance.High, $"Cannot find size entries for profile `{profile}`.");
 				return false;
 			}
 

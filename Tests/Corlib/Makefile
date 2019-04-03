@@ -8,7 +8,6 @@ include $(ROOTDIR)/build/rules.make
 LOCAL_LINKER_ARGS := --optimizer-report $(LINKER_OUTPUT)/martin-report.xml --optimizer-options profile=$(PROFILE)
 
 BROKEN_TEST_CASES := \
-	test-globalization-1.cs \
 	test-globalization-2.cs \
 	test-globalization-3.cs \
 	test-globalization-4.cs \
@@ -28,6 +27,7 @@ BROKEN_AOTTEST_CASES := \
 	aottest-remoting-1.cs
 
 TEST_CASES := \
+	test-globalization-1.cs \
 	test-size-check-collator.cs \
 	test-size-check-full.cs \
 	test-size-check-globalization.cs

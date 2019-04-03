@@ -2,23 +2,8 @@
 <linker-optimizer>
 	<options all-modules="true" analyze-all="true" preprocessor="full" report-size="true" />
 
-	<conditional feature="globalization" enabled="false">
-		<namespace name="System.Globalization">
-			<type name="GlobalizationMode" debug="true">
-				<method name="get_Invariant" action="return-true" />
-			</type>
-
-			<type name="HebrewNumber" action="fail" />
-			<type name="JapaneseCalendar" action="fail" />
-			<type name="TaiwanCalendar" action="fail" />
-			<type name="DateTimeFormatInfo">
-				<method substring="DateTimeFormatInfo::TryParseHebrewNumber" action="fail"/>
-			</type>
-		</namespace>
-		<type fullname="System.DateTimeParse">
-			<method name="MatchHebrewDigits" action="fail"/>
-		</type>
-	</conditional>
+	<include filename="corlib-api.xml" />
+	<include filename="corlib-asserts.xml" />
 
 	<features>
 		<feature name="globalization" enabled="false" />

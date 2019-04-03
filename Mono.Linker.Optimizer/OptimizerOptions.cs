@@ -59,6 +59,10 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public string CheckSize {
+			get; set;
+		}
+
 		public bool AutoDebugMain {
 			get; set;
 		}
@@ -106,6 +110,9 @@ namespace Mono.Linker.Optimizer
 					switch (name) {
 					case "profile":
 						ProfileName = value;
+						continue;
+					case "check-size":
+						CheckSize = value;
 						continue;
 					default:
 						throw new OptimizerException ($"Unknown option `{part}`.");
