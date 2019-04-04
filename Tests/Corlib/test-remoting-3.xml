@@ -12,6 +12,16 @@
 		</type>
 	</namespace>
 
+	<namespace name="System.Runtime.Remoting.Channels" action="fail" />
+
+	<namespace name="System.Runtime.Remoting.Messaging">
+		<type name="AsyncResult" action="warn" />
+		<type name="MonoMethodMessage" action="warn" />
+		<type name="LogicalCallContext" action="fail" />
+	</namespace>
+
+	<type fullname="System.Threading.ExecutionContext" />
+
 	<type name="Foo" action="preserve" />
 
 	<features>

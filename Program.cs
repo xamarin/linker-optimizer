@@ -77,6 +77,10 @@ namespace Mono.Linker.Optimizer
 					arguments.Add ("--exclude-feature");
 					arguments.Add ("security");
 				}
+				if (!options.IsFeatureEnabled (MonoLinkerFeature.Remoting)) {
+					arguments.Add ("--exclude-feature");
+					arguments.Add ("remoting");
+				}
 			}
 
 			var watch = new Stopwatch ();
