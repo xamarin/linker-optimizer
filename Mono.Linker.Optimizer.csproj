@@ -67,6 +67,7 @@
     <Compile Include="Mono.Linker.Optimizer\ReportWriter.cs" />
     <Compile Include="Mono.Linker.Optimizer\WriteReportStep.cs" />
     <Compile Include="Mono.Linker.Optimizer\OptimizerException.cs" />
+    <Compile Include="Mono.Linker.Optimizer\SizeReport.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="external\linker\src\linker\Mono.Linker.csproj">

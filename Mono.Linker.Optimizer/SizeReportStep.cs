@@ -86,53 +86,10 @@ namespace Mono.Linker.Optimizer
 			var size = (int)new FileInfo (output).Length;
 			Context.ReportWriter?.ReportAssemblySize (assembly, size);
 
-			string profile;
-			switch (Options.CheckSize) {
-			case null:
-			case "false":
-				return true;
-			case "true":
-				profile = Options.ProfileName ?? "default";
-				break;
-			default:
-				profile = Options.CheckSize;
-				break;
-			}
-
-			var entry = Options.GetSizeCheckEntry (profile);
-			if (entry == null) {
-				if (profile == null)
-					return true;
-				Context.LogMessage (MessageImportance.High, $"Cannot find size entries for profile `{profile}`.");
-				return false;
-			}
-
-			var asmEntry = entry.Assemblies.FirstOrDefault (e => e.Name == assembly.Name.Name);
-			if (asmEntry == null)
+			if (!Options.SizeReport.IsEnabled)
 				return true;
 
-			int tolerance;
-			string toleranceValue = asmEntry.Tolerance ?? Options.SizeCheckTolerance ?? "0.05%";
-
-			if (toleranceValue.EndsWith ("%", StringComparison.Ordinal)) {
-				var percent = float.Parse (toleranceValue.Substring (0, toleranceValue.Length - 1));
-				tolerance = (int)(asmEntry.Size * percent / 100.0f);
-			} else {
-				tolerance = int.Parse (toleranceValue);
-			}
-
-			Context.LogDebug ($"Size check: {asmEntry.Name}, actual={size}, expected={asmEntry.Size} (tolerance {toleranceValue})");
-
-			if (size < asmEntry.Size - tolerance) {
-				Context.LogMessage (MessageImportance.High, $"Assembly `{asmEntry.Name}` size below minimum: expected {asmEntry.Size} (tolerance {toleranceValue}), got {size}.");
-				return false;
-			}
-			if (size > asmEntry.Size + tolerance) {
-				Context.LogMessage (MessageImportance.High, $"Assembly `{asmEntry.Name}` size above maximum: expected {asmEntry.Size} (tolerance {toleranceValue}), got {size}.");
-				return false;
-			}
-
-			return true;
+			return Options.SizeReport.CheckAssemblySize (Context, assembly.Name.Name, size);
 		}
 
 		struct SizeEntry : IComparable<SizeEntry>

@@ -39,18 +39,20 @@ namespace Mono.Linker.Optimizer
 			get;
 		}
 
+		public OptimizerOptions Options => Context.Options;
+
 		readonly Dictionary<string, TypeEntry> _namespace_hash;
-		readonly Dictionary<string, long> _assembly_sizes;
+		readonly Dictionary<string, int> _assembly_sizes;
 
 		public ReportWriter (OptimizerContext context)
 		{
 			Context = context;
 
 			_namespace_hash = new Dictionary<string, TypeEntry> ();
-			_assembly_sizes = new Dictionary<string, long> ();
+			_assembly_sizes = new Dictionary<string, int> ();
 		}
 
-		public void ReportAssemblySize (AssemblyDefinition assembly, long size)
+		public void ReportAssemblySize (AssemblyDefinition assembly, int size)
 		{
 			_assembly_sizes.Add (assembly.Name.Name, size);
 		}
@@ -154,18 +156,13 @@ namespace Mono.Linker.Optimizer
 
 		void WriteSizeReport (XmlWriter xml)
 		{
-			if (_assembly_sizes.Count == 0)
+			if (_assembly_sizes.Count == 0 || !Options.SizeReport.IsEnabled)
 				return;
-			xml.WriteStartElement ("size-check");
-			if (!string.IsNullOrEmpty (Context.Options.ProfileName))
-				xml.WriteAttributeString ("profile", Context.Options.ProfileName);
-			foreach (var entry in _assembly_sizes) {
-				xml.WriteStartElement ("assembly");
-				xml.WriteAttributeString ("name", entry.Key);
-				xml.WriteAttributeString ("size", entry.Value.ToString ());
-				xml.WriteEndElement ();
-			}
-			xml.WriteEndElement ();
+
+			foreach (var entry in _assembly_sizes)
+				Options.SizeReport.ReportAssemblySize (entry.Key, entry.Value);
+
+			Options.SizeReport.Write (xml);
 		}
 
 		void WriteMethodEntry (XmlWriter xml, MethodEntry entry)

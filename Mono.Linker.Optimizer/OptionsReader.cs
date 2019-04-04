@@ -78,7 +78,7 @@ namespace Mono.Linker.Optimizer
 			ProcessChildren (root, "type", child => OnTypeEntry (child, null));
 			ProcessChildren (root, "method", child => OnMethodEntry (child));
 
-			ProcessChildren (root, "size-check", OnSizeCheck);
+			ProcessChildren (root, "size-check", Options.SizeReport.Read);
 		}
 
 		void OnInclude (XPathNavigator nav)
@@ -105,25 +105,10 @@ namespace Mono.Linker.Optimizer
 			CheckAttribute (nav, "ignore-resolution-errors", value => Options.IgnoreResolutionErrors = value);
 			CheckAttribute (nav, "report-size", value => Options.ReportSize = value);
 			CheckAttribute (nav, "check-size", value => Options.CheckSize = value);
+			CheckAttribute (nav, "size-check-configuration", value => Options.SizeCheckConfiguration = value);
 			CheckAttribute (nav, "size-check-tolerance", value => Options.SizeCheckTolerance = value);
 			CheckAttribute (nav, "profile", value => Options.ProfileName = value);
 			CheckAttribute (nav, "disable-all", value => Options.DisableAll = value);
-		}
-
-		void OnSizeCheck (XPathNavigator nav)
-		{
-			var profile = GetAttribute (nav, "profile") ?? "default";
-			var entry = new OptimizerOptions.SizeCheckEntry (profile);
-			Options.AddSizeCheckEntry (entry);
-
-			ProcessChildren (nav, "assembly", child => {
-				var name = GetAttribute (child, "name") ?? throw ThrowError ("<assembly> requires `name` attribute.");
-				var sizeAttr = GetAttribute (child, "size");
-				if (sizeAttr == null || !int.TryParse (sizeAttr, out var size))
-					throw ThrowError ("<assembly> requires `name` attribute.");
-				var toleranceAttr = GetAttribute (child, "tolerance");
-				entry.Assemblies.Add (new OptimizerOptions.AssemblySizeEntry (name, size, toleranceAttr));
-			});
 		}
 
 		void OnFeature (XPathNavigator nav)
@@ -257,19 +242,19 @@ namespace Mono.Linker.Optimizer
 			Options.AddMethodEntry (name, match, methodAction, parent, conditional);
 		}
 
-		Exception ThrowError (string message)
+		internal static Exception ThrowError (string message)
 		{
 			throw new OptimizerException ($"Invalid XML: {message}");
 		}
 
-		static void ProcessChildren (XPathNavigator nav, string children, Action<XPathNavigator> action)
+		internal static void ProcessChildren (XPathNavigator nav, string children, Action<XPathNavigator> action)
 		{
 			var iterator = nav.Select (children);
 			while (iterator.MoveNext ())
 				action (iterator.Current);
 		}
 
-		static string GetAttribute (XPathNavigator nav, string attribute)
+		internal static string GetAttribute (XPathNavigator nav, string attribute)
 		{
 			var attr = nav.GetAttribute (attribute, string.Empty);
 			return string.IsNullOrWhiteSpace (attr) ? null : attr;

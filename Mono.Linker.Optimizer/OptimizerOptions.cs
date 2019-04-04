@@ -63,6 +63,10 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public string SizeCheckConfiguration {
+			get; set;
+		}
+
 		public string SizeCheckTolerance {
 			get; set;
 		}
@@ -87,21 +91,24 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public SizeReport SizeReport {
+			get;
+		}
+
 		readonly List<TypeEntry> _type_actions;
 		readonly List<MethodEntry> _method_actions;
 		readonly Dictionary<MonoLinkerFeature, bool> _enabled_features;
-		readonly Dictionary<string, SizeCheckEntry> _size_check_entries;
 
 		public OptimizerOptions ()
 		{
 			NoConditionalRedefinition = true;
 			_type_actions = new List<TypeEntry> ();
 			_method_actions = new List<MethodEntry> ();
-			_size_check_entries = new Dictionary<string, SizeCheckEntry> ();
 			_enabled_features = new Dictionary<MonoLinkerFeature, bool> {
 				[MonoLinkerFeature.Unknown] = false,
 				[MonoLinkerFeature.Martin] = false
 			};
+			SizeReport = new SizeReport (this);
 		}
 
 		internal void ParseOptions (string options)
@@ -121,6 +128,9 @@ namespace Mono.Linker.Optimizer
 						continue;
 					case "check-size":
 						CheckSize = value;
+						continue;
+					case "size-check-configuration":
+						SizeCheckConfiguration = value;
 						continue;
 					case "size-check-tolerance":
 						SizeCheckTolerance = value;
@@ -577,61 +587,6 @@ namespace Mono.Linker.Optimizer
 			Disabled,
 			Automatic,
 			Full
-		}
-
-		public void AddSizeCheckEntry (SizeCheckEntry entry)
-		{
-			_size_check_entries.Add (entry.Profile, entry);
-		}
-
-		public SizeCheckEntry GetSizeCheckEntry (string profile)
-		{
-			_size_check_entries.TryGetValue (profile, out var entry);
-			return entry;
-		}
-
-		public class SizeCheckEntry
-		{
-			public string Profile {
-				get;
-			}
-
-			public List<AssemblySizeEntry> Assemblies {
-				get;
-			}
-
-			public SizeCheckEntry (string profile)
-			{
-				Profile = profile;
-				Assemblies = new List<AssemblySizeEntry> ();
-			}
-		}
-
-		public class AssemblySizeEntry
-		{
-			public string Name {
-				get;
-			}
-
-			public int Size {
-				get;
-			}
-
-			public string Tolerance {
-				get;
-			}
-
-			public AssemblySizeEntry (string name, int size, string tolerance)
-			{
-				Name = name;
-				Size = size;
-				Tolerance = tolerance;
-			}
-
-			public override string ToString ()
-			{
-				return $"[{GetType ().Name}: {Name} {Size} {Tolerance}]";
-			}
 		}
 	}
 }
