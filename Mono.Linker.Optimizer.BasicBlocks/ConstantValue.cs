@@ -30,6 +30,8 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 		False,
 		True,
 		Throw,
-		Null
+		Null,
+		Zero,
+		One
 	}
 }

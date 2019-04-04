@@ -254,6 +254,9 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			for (int i = 0; i < Method.Body.Variables.Count; i++) {
 				var variable = new VariableEntry (Method.Body.Variables [i], i);
 				variables.Add (variable.Variable, variable);
+
+				if (Scanner.DebugLevel > 1)
+					Scanner.LogDebug (2, $"  VARIABLE: {variable}");
 			}
 
 			foreach (var block in BlockList.Blocks) {
@@ -309,10 +312,13 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 					var load = block.Instructions [i - 1];
 					switch (block.Instructions [i - 1].OpCode.Code) {
 					case Code.Ldc_I4_0:
-						entry.SetConstant (block, load, 0);
+						entry.SetConstant (block, load, ConstantValue.Zero);
 						break;
 					case Code.Ldc_I4_1:
-						entry.SetConstant (block, load, 1);
+						entry.SetConstant (block, load, ConstantValue.One);
+						break;
+					case Code.Ldnull:
+						entry.SetConstant (block, load, ConstantValue.Null);
 						break;
 					default:
 						entry.SetModified ();
@@ -462,7 +468,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 				private set;
 			}
 
-			public int Value {
+			public ConstantValue Value {
 				get;
 				private set;
 			}
@@ -481,7 +487,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 				Value = 0;
 			}
 
-			public void SetConstant (BasicBlock block, Instruction instruction, int value)
+			public void SetConstant (BasicBlock block, Instruction instruction, ConstantValue value)
 			{
 				if (Modified)
 					throw new InvalidOperationException ();
@@ -492,7 +498,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 			public override string ToString ()
 			{
-				return $"[{Variable}: used={Used}, modified={Modified}, constant={IsConstant}]";
+				return $"[{Variable}: type={Variable.VariableType}, used={Used}, modified={Modified}, constant={IsConstant}]";
 			}
 		}
 	}

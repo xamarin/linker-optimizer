@@ -315,6 +315,22 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			}
 		}
 
+		public static Instruction CreateConstantLoad (ConstantValue value)
+		{
+			switch (value) {
+			case ConstantValue.Null:
+				return Instruction.Create (OpCodes.Ldnull);
+			case ConstantValue.False:
+			case ConstantValue.Zero:
+				return Instruction.Create (OpCodes.Ldc_I4_0);
+			case ConstantValue.True:
+			case ConstantValue.One:
+				return Instruction.Create (OpCodes.Ldc_I4_1);
+			default:
+				throw DebugHelpers.AssertFail ($"Invalid constant valud `{value}`.");
+			}
+		}
+
 		public static Instruction CreateConstantLoad (int value)
 		{
 			switch (value) {
