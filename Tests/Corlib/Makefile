@@ -29,6 +29,8 @@ AOTTEST_CASES := \
 
 TEST_CASES := \
 	test-globalization-1.cs \
+	test-globalization-2.cs \
+	test-globalization-3.cs \
 	test-crypto-1.cs \
 	test-size-check-collator.cs \
 	test-size-check-globalization.cs \

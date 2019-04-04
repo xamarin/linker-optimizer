@@ -10,11 +10,12 @@
 			<type name="JapaneseCalendar" action="fail" />
 			<type name="TaiwanCalendar" action="fail" />
 			<type name="DateTimeFormatInfo">
-				<method substring="DateTimeFormatInfo::TryParseHebrewNumber" action="fail"/>
+				<method substring="DateTimeFormatInfo::TryParseHebrewNumber" action="fail" />
 			</type>
 		</namespace>
 		<type fullname="System.DateTimeParse">
-			<method name="MatchHebrewDigits" action="fail"/>
+			<method name="MatchHebrewDigits" action="fail" />
+			<method name="ProcessHebrewTerminalState" action="fail" />
 		</type>
 	</conditional>
 

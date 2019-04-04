@@ -2,12 +2,12 @@
 <linker-optimizer>
 	<options all-modules="true" analyze-all="true" preprocessor="full" report-size="true" />
 
+	<include filename="corlib-api.xml" />
+	<include filename="corlib-asserts.xml" />
+
 	<type fullname="System.DateTimeParse" action="size" />
 	<type fullname="System.Globalization.DateTimeFormatInfo" action="size" />
 	<type fullname="System.Globalization.DateTimeFormatInfoScanner" action="size" />
-	<method substring="ProcessHebrewTerminalState" action="fail" />
-	<method substring="CreateTokenHashTable" action="none" />
-	<method substring="Main" action="none" />
 
 	<features>
 		<feature name="remoting" enabled="false" />
