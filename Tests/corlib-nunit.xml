@@ -2,8 +2,6 @@
 <linker-optimizer>
 	<options all-modules="true" analyze-all="true" ignore-resolution-errors="true" preprocessor="full" />
 
-	<type fullname="System.Globalization.GlobalizationSupport" action="preserve" />
-
 	<type fullname="Mono.Runtime" action="preserve" />
 
 	<conditional feature="sre" enabled="true">

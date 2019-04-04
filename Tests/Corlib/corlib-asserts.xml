@@ -19,7 +19,53 @@
 		</type>
 	</conditional>
 
+	<conditional feature="security" enabled="false">
+		<type fullname="System.Security.Policy.Evidence">
+			<method substring="GetDefaultHostEvidence" action="fail" />
+		</type>
+		<type fullname="System.AppDomain">
+			<method name="get_DefaultPrincipal" action="fail" />
+		</type>
+	</conditional>
+
 	<conditional feature="reflection-emit" enabled="false">
 		<namespace name="System.Reflection.Emit" action="fail" />
 	</conditional>
+
+	<conditional feature="remoting" enabled="false">
+		<namespace name="System.Runtime.Remoting.Activation">
+			<type name="AppDomainLevelActivator" action="fail" />
+			<type name="ActivationServices">
+				<method name="CreateConstructionCall" action="fail" />
+			</type>
+		</namespace>
+		<namespace name="System.Runtime.Remoting.Contexts">
+			<type name="SynchronizationAttribute" action="fail" />
+		</namespace>
+		<namespace name="System.Runtime.Remoting.Channels">
+			<type name="CADSerializer" action="fail" />
+			<type name="CrossAppDomainSink" action="fail" />
+		</namespace>
+		<namespace name="System.Runtime.Remoting.Proxies">
+			<type name="RemotingProxy" action="fail" />
+		</namespace>
+		<namespace name="System.Runtime.Remoting">
+			<!-- this one has a preserve entry -->
+			<type name="RemotingServices">
+				<method name="CreateClientProxyForContextBound" action="fail" />
+				<method name="GetOrCreateClientIdentity" action="fail" />
+				<method name="GetRemoteObject" action="fail" />
+				<method name="Unmarshal" action="fail" />
+			</type>
+			<type name="ObjRef">
+				<method name="GetRealObject" action="fail" />
+			</type>
+		</namespace>
+		<namespace name="System.Runtime.Serialization">
+			<type name="FormatterServices">
+				<method name="GetSafeUninitializedObject" action="fail" />
+			</type>
+		</namespace>
+	</conditional>
+
 </linker-optimizer>
