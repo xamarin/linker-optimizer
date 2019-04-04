@@ -31,8 +31,11 @@ TEST_CASES := \
 	test-globalization-1.cs \
 	test-crypto-1.cs \
 	test-size-check-collator.cs \
+	test-size-check-globalization.cs \
 	test-size-check-full.cs \
-	test-size-check-globalization.cs
+	test-size-check-reflection-emit.cs \
+	test-size-check-remoting.cs \
+	test-size-check-security.cs
 
 include $(ROOTDIR)/build/tests.make
 

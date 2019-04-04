@@ -12,7 +12,7 @@
 		<assembly name="mscorlib" size="1495040" />
 	</size-check>
 	<size-check profile="wasm">
-		<assembly name="mscorlib" size="1064960" />
+		<assembly name="mscorlib" size="1064448" />
 	</size-check>
 
 	<features>
