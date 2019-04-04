@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker-optimizer>
+	<options all-modules="true" analyze-all="true" preprocessor="full" />
+
+	<include filename="corlib-api.xml" />
+	<include filename="corlib-asserts.xml" />
+
+	<namespace name="System.Runtime.Serialization.Formatters.Binary">
+		<type name="ObjectReader" action="fail" />
+		<type name="BinaryFormatter">
+			<method name="Deserialize" action="fail" />
+		</type>
+	</namespace>
+
+	<type name="Foo" action="preserve" />
+
+	<features>
+		<feature name="remoting" enabled="false" />
+		<feature name="serialization" enabled="false" />
+		<feature name="security" enabled="false" />
+	</features>
+</linker-optimizer>
