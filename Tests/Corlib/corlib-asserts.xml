@@ -33,10 +33,14 @@
 	</conditional>
 
 	<conditional feature="remoting" enabled="false">
+		<type fullname="System.RuntimeType">
+			<method name="ActivationCreateInstance" action="fail" />
+		</type>
 		<namespace name="System.Runtime.Remoting.Activation">
 			<type name="AppDomainLevelActivator" action="fail" />
 			<type name="ActivationServices">
 				<method name="CreateConstructionCall" action="fail" />
+				<method name="CreateProxyFromAttributes" action="fail" />
 			</type>
 		</namespace>
 		<namespace name="System.Runtime.Remoting.Contexts">

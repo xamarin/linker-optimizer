@@ -10,7 +10,13 @@ $(LINKER_EXE):
 
 CLEAN_DIRECTORIES += $(LINKER_OUTPUT)
 
+LINKER_ARGS = -out $(LINKER_OUTPUT) -b true -d $(PROFILE_PATH) -d $(ROOTDIR)/Tests/TestHelpers
+LINKER_ARGS_DEFAULT = $(LINKER_ARGS) -c link -l none
+LINKER_ARGS_AOT = -out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH) -c link -l none
+
 TEST_LINKER_ARGS := $(TEST_LINKER_ARGS) $(LOCAL_LINKER_ARGS)
+
+NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,NotWorking,CAS,LinkerNotWorking$(EXTRA_NUNIT_EXCLUDES)
 
 .NOTPARALLEL:
 
