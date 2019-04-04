@@ -8,32 +8,28 @@ include $(ROOTDIR)/build/rules.make
 TEST_LINKER_ARGS := --optimizer-report $(LINKER_OUTPUT)/martin-report.xml --optimizer-options profile=$(PROFILE)
 
 BROKEN_TEST_CASES := \
-	test-globalization-3.cs \
-	test-globalization-4.cs \
-	test-size-check-1.cs \
-	test-size-check-2.cs \
-	test-size-check-3.cs \
-	test-size-check-4.cs \
-	test-size-check-5.cs
+	test-encoding-1.cs \
+	test-globalization-4.cs
 
 AOTTEST_CASES := \
 	aottest-crypto-1.cs \
 	aottest-remoting-1.cs
 
 TEST_CASES := \
+	test-crypto-1.cs \
 	test-globalization-1.cs \
 	test-globalization-2.cs \
 	test-globalization-3.cs \
-	test-crypto-1.cs \
 	test-remoting-1.cs \
 	test-remoting-2.cs \
 	test-security-1.cs \
+	test-size-check-full.cs \
 	test-size-check-collator.cs \
 	test-size-check-globalization.cs \
-	test-size-check-full.cs \
 	test-size-check-reflection-emit.cs \
+	test-size-check-security.cs \
 	test-size-check-remoting.cs \
-	test-size-check-security.cs
+	test-size-check-all.cs \
 
 include $(ROOTDIR)/build/tests.make
 
