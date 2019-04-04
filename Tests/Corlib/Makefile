@@ -44,3 +44,8 @@ $(eval $(call RunTests,crypto))
 $(eval $(call RunTests,security))
 $(eval $(call RunTests,remoting))
 $(eval $(call RunTests,size-check))
+
+all-size-checks::
+	$(MAKE) LOCAL_LINKER_ARGS='--optimizer-options size-check-tolerance=0' test-size-check
+	$(MAKE) LOCAL_LINKER_ARGS='--optimizer-options size-check-tolerance=0' aot-test-size-check
+	$(MAKE) LOCAL_LINKER_ARGS='--optimizer-options size-check-tolerance=0' wasm-test-size-check
