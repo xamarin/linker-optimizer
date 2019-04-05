@@ -50,7 +50,7 @@ namespace Mono.Linker.Optimizer
 
 			using (var xml = XmlWriter.Create (Options.ReportFileName, settings)) {
 				xml.WriteStartDocument ();
-				xml.WriteStartElement ("martin-report");
+				xml.WriteStartElement ("optimizer-report");
 				Context.ReportWriter.WriteReport (xml);
 				xml.WriteEndElement ();
 				xml.WriteEndDocument ();

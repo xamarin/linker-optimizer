@@ -86,10 +86,7 @@ namespace Mono.Linker.Optimizer
 			var size = (int)new FileInfo (output).Length;
 			Context.ReportWriter?.ReportAssemblySize (assembly, size);
 
-			if (!Options.SizeReport.IsEnabled)
-				return true;
-
-			return Options.SizeReport.CheckAssemblySize (Context, assembly.Name.Name, size);
+			return Options.SizeReport.CheckAndReportAssemblySize (Context, assembly, size);
 		}
 
 		struct SizeEntry : IComparable<SizeEntry>

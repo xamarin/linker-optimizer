@@ -1,6 +1,8 @@
 MONO_ROOT = $(abspath $(ROOTDIR)/../../../..)
 include $(MONO_ROOT)/mcs/build/rules.make
 
+RUNTIME_BINARY = $(MONO_ROOT)/mono/mini/mono
+
 LINKER_OUTPUT := output
 PROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/$(PROFILE_DIRECTORY))
 AOTPROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/testing_aot_full)

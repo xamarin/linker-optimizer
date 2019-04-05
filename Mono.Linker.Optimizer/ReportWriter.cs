@@ -43,6 +43,7 @@ namespace Mono.Linker.Optimizer
 
 		readonly Dictionary<string, TypeEntry> _namespace_hash;
 		readonly Dictionary<string, int> _assembly_sizes;
+		readonly List<FailListEntry> _fail_list;
 
 		public ReportWriter (OptimizerContext context)
 		{
@@ -50,6 +51,7 @@ namespace Mono.Linker.Optimizer
 
 			_namespace_hash = new Dictionary<string, TypeEntry> ();
 			_assembly_sizes = new Dictionary<string, int> ();
+			_fail_list = new List<FailListEntry> ();
 		}
 
 		public void ReportAssemblySize (AssemblyDefinition assembly, int size)
@@ -98,6 +100,37 @@ namespace Mono.Linker.Optimizer
 			GetMethodEntry (method).DeadCodeMode |= DeadCodeMode.RemovedDeadVariables;
 		}
 
+		public void ReportFailListEntry (TypeDefinition type, OptimizerOptions.TypeEntry entry, string original, List<string> stack)
+		{
+			var fail = new FailListEntry (type.FullName) {
+				Original = original
+			};
+			fail.TracerStack.AddRange (stack);
+			_fail_list.Add (fail);
+
+			while (entry != null) {
+				fail.EntryStack.Add (entry.ToString ());
+				entry = entry.Parent;
+			}
+		}
+
+		public void ReportFailListEntry (MethodDefinition method, OptimizerOptions.MethodEntry entry, List<string> stack)
+		{
+			var fail = new FailListEntry (method.FullName);
+			fail.TracerStack.AddRange (stack);
+			_fail_list.Add (fail);
+
+			if (entry != null) {
+				fail.EntryStack.Add (entry.ToString ());
+
+				var type = entry.Parent;
+				while (type != null) {
+					fail.EntryStack.Add (type.ToString ());
+					type = type.Parent;
+				}
+			}
+		}
+
 		TypeEntry GetTypeEntry (TypeDefinition type)
 		{
 			if (type.DeclaringType != null)
@@ -128,8 +161,15 @@ namespace Mono.Linker.Optimizer
 
 		public void WriteReport (XmlWriter xml)
 		{
-			WriteSizeReport (xml);
+			WriteActionReport (xml);
 
+			WriteFailReport (xml);
+
+			WriteSizeReport (xml);
+		}
+
+		void WriteActionReport (XmlWriter xml)
+		{
 			foreach (var entry in _namespace_hash.Values) {
 				xml.WriteStartElement ("namespace");
 				xml.WriteAttributeString ("name", entry.Name);
@@ -154,11 +194,35 @@ namespace Mono.Linker.Optimizer
 			}
 		}
 
-		void WriteSizeReport (XmlWriter xml)
+		void WriteFailReport (XmlWriter xml)
 		{
-			if (_assembly_sizes.Count == 0 || !Options.SizeReport.IsEnabled)
+			if (_fail_list == null || _fail_list.Count == 0)
 				return;
 
+			xml.WriteStartElement ("fail-list");
+			foreach (var fail in _fail_list) {
+				xml.WriteStartElement ("fail");
+				xml.WriteAttributeString ("name", fail.Name);
+				if (fail.Original != null)
+					xml.WriteAttributeString ("full-name", fail.Original);
+				foreach (var entry in fail.EntryStack) {
+					xml.WriteStartElement ("entry");
+					xml.WriteAttributeString ("name", entry);
+					xml.WriteEndElement ();
+				}
+				foreach (var entry in fail.TracerStack) {
+					xml.WriteStartElement ("stack");
+					xml.WriteAttributeString ("name", entry);
+					xml.WriteEndElement ();
+				}
+				xml.WriteEndElement ();
+			}
+
+			xml.WriteEndElement ();
+		}
+
+		void WriteSizeReport (XmlWriter xml)
+		{
 			foreach (var entry in _assembly_sizes)
 				Options.SizeReport.ReportAssemblySize (entry.Key, entry.Value);
 
@@ -250,6 +314,21 @@ namespace Mono.Linker.Optimizer
 			RemovedDeadJumps		= 4,
 			RemovedConstantJumps		= 8,
 			RemovedDeadVariables		= 16
+		}
+
+		class FailListEntry
+		{
+			public readonly string Name;
+			public string Original;
+			public readonly List<string> EntryStack;
+			public readonly List<string> TracerStack;
+
+			public FailListEntry (string name)
+			{
+				Name = name;
+				EntryStack = new List<string> ();
+				TracerStack = new List<string> ();
+			}
 		}
 	}
 }

@@ -8,6 +8,7 @@ AOTPROFILE_PATH := $(abspath $(MONO_ROOT)/mcs/class/lib/testing_aot_full)
 MCS = csc
 ILASM = ilasm
 RUNTIME = $(MONO_ROOT)/runtime/mono-wrapper
+RUNTIME_BINARY = $(MONO_ROOT)/mono/mini/mono
 RUNTIME_FLAGS =
 
 PROFILER_FLAGS := --profile=log:calls,calldepth=100

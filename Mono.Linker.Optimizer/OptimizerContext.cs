@@ -299,13 +299,17 @@ namespace Mono.Linker.Optimizer
 			return "Other:" + o;
 		}
 
-		internal void DumpTracerStack ()
+		internal List<string> DumpTracerStack ()
 		{
 			var stack = (Stack<object>)_tracer_stack_field.GetValue (Context.Tracer);
 			LogMessage (MessageImportance.Normal, "Dependency Stack:");
+			var list = new List<string> ();
 			foreach (var dependency in stack) {
-				LogMessage (MessageImportance.Normal, $"  {TokenString (dependency)}");
+				var formatted = TokenString (dependency);
+				list.Add (formatted);
+				LogMessage (MessageImportance.Normal, "  " + formatted);
 			}
+			return list;
 		}
 
 		class SupportMethodRegistration

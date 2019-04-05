@@ -77,6 +77,9 @@ iltest-%: iltest-%.exe standalone-build
 	$(if $(V),ls -lR $(LINKER_OUTPUT))
 	(cd $(LINKER_OUTPUT); MONO_PATH=. $(RUNTIME) $(RUNTIME_FLAGS) --debug -O=-aot ./$(@F).exe)
 
+lldb-test:
+	(cd $(LINKER_OUTPUT); MONO_PATH=. lldb $(RUNTIME_BINARY) -- $(RUNTIME_FLAGS) --debug -O=-aot $(notdir $(wildcard $(LINKER_OUTPUT)/*.exe)))
+
 standalone-build::
 	$(MAKE) -C $(ROOTDIR) standalone-build
 
