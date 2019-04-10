@@ -25,14 +25,18 @@
 	</conditional>
 
 	<conditional feature="remoting" enabled="false">
-		<type fullname="System.AppDomain">
-			<method name="get_IsRemotingSupported" action="return-false" />
-		</type>
+		<namespace name="System.Runtime.CompilerServices">
+			<type name="RuntimeFeature">
+				<method name="get_IsRemotingSupported" action="return-false" />
+			</type>
+		</namespace>
 	</conditional>
 
 	<conditional feature="security" enabled="false">
-		<type fullname="System.AppDomain">
-			<method name="get_IsSecuritySupported" action="return-false" />
-		</type>
+		<namespace name="System.Runtime.CompilerServices">
+			<type name="RuntimeFeature">
+				<method name="get_IsSecuritySupported" action="return-false" />
+			</type>
+		</namespace>
 	</conditional>
 </linker-optimizer>

@@ -17,7 +17,7 @@
 	<namespace name="System.Runtime.Remoting.Messaging">
 		<type name="AsyncResult" action="warn" />
 		<type name="MonoMethodMessage" action="warn" />
-		<type name="LogicalCallContext" action="fail" />
+		<type name="LogicalCallContext" action="warn" />
 	</namespace>
 
 	<type fullname="System.Threading.ExecutionContext" />
