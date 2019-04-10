@@ -77,10 +77,12 @@ namespace Mono.Linker.Optimizer
 					arguments.Add ("--exclude-feature");
 					arguments.Add ("security");
 				}
+#if MARTIN_FIXME
 				if (!options.IsFeatureEnabled (MonoLinkerFeature.Remoting)) {
 					arguments.Add ("--exclude-feature");
 					arguments.Add ("remoting");
 				}
+#endif
 			}
 
 			var watch = new Stopwatch ();
