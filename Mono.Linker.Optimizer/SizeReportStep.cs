@@ -84,8 +84,6 @@ namespace Mono.Linker.Optimizer
 			}
 
 			var size = (int)new FileInfo (output).Length;
-			Context.ReportWriter?.ReportAssemblySize (assembly, size);
-
 			return Options.SizeReport.CheckAndReportAssemblySize (Context, assembly, size);
 		}
 

@@ -42,7 +42,6 @@ namespace Mono.Linker.Optimizer
 		public OptimizerOptions Options => Context.Options;
 
 		readonly Dictionary<string, TypeEntry> _namespace_hash;
-		readonly Dictionary<string, int> _assembly_sizes;
 		readonly List<FailListEntry> _fail_list;
 
 		public ReportWriter (OptimizerContext context)
@@ -50,13 +49,7 @@ namespace Mono.Linker.Optimizer
 			Context = context;
 
 			_namespace_hash = new Dictionary<string, TypeEntry> ();
-			_assembly_sizes = new Dictionary<string, int> ();
 			_fail_list = new List<FailListEntry> ();
-		}
-
-		public void ReportAssemblySize (AssemblyDefinition assembly, int size)
-		{
-			_assembly_sizes.Add (assembly.Name.Name, size);
 		}
 
 		public void MarkAsContainingConditionals (MethodDefinition method)
@@ -165,7 +158,7 @@ namespace Mono.Linker.Optimizer
 
 			WriteFailReport (xml);
 
-			WriteSizeReport (xml);
+			Options.SizeReport.Write (xml);
 		}
 
 		void WriteActionReport (XmlWriter xml)
@@ -219,14 +212,6 @@ namespace Mono.Linker.Optimizer
 			}
 
 			xml.WriteEndElement ();
-		}
-
-		void WriteSizeReport (XmlWriter xml)
-		{
-			foreach (var entry in _assembly_sizes)
-				Options.SizeReport.ReportAssemblySize (entry.Key, entry.Value);
-
-			Options.SizeReport.Write (xml);
 		}
 
 		void WriteMethodEntry (XmlWriter xml, MethodEntry entry)
