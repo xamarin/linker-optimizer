@@ -31,6 +31,8 @@ using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer
 {
+	using Configuration;
+
 	class OptionsReader
 	{
 		public OptimizerOptions Options {
@@ -72,13 +74,9 @@ namespace Mono.Linker.Optimizer
 			ProcessChildren (root, "include", OnInclude);
 
 			ProcessChildren (root, "features/feature", OnFeature);
-			ProcessChildren (root, "conditional", OnConditional);
 
-			ProcessChildren (root, "namespace", child => OnNamespaceEntry (child));
-			ProcessChildren (root, "type", child => OnTypeEntry (child, null));
-			ProcessChildren (root, "method", child => OnMethodEntry (child));
-
-			ProcessChildren (root, "size-check", Options.SizeReport.Read);
+			var reader = new ConfigurationReader (Options);
+			reader.Read (root);
 		}
 
 		void OnInclude (XPathNavigator nav)
@@ -91,7 +89,7 @@ namespace Mono.Linker.Optimizer
 			}
 
 			if (!File.Exists (file))
-				throw ThrowError ($"Include file `{file}` does not exist.");	
+				throw ThrowError ($"Include file `{file}` does not exist.");
 			Read (Options, file);
 		}
 
@@ -103,11 +101,12 @@ namespace Mono.Linker.Optimizer
 			CheckAttribute (nav, "preprocessor", value => Options.SetPreprocessorMode (value));
 			CheckAttribute (nav, "no-conditional-redefinition", value => Options.NoConditionalRedefinition = value);
 			CheckAttribute (nav, "ignore-resolution-errors", value => Options.IgnoreResolutionErrors = value);
-			CheckAttribute (nav, "report-size", value => Options.ReportSize = value);
 			CheckAttribute (nav, "check-size", value => Options.CheckSize = value);
-			CheckAttribute (nav, "size-check-configuration", value => Options.SizeCheckConfiguration = value);
+			CheckAttribute (nav, "report-mode", value => Options.SetReportMode (value));
+			CheckAttribute (nav, "report-configuration", value => Options.ReportConfiguration = value);
+			CheckAttribute (nav, "report-profile", value => Options.ReportProfile = value);
 			CheckAttribute (nav, "size-check-tolerance", value => Options.SizeCheckTolerance = value);
-			CheckAttribute (nav, "profile", value => Options.ProfileName = value);
+			CheckAttribute (nav, "compare-size-with", value => Options.CompareSizeWith = value);
 			CheckAttribute (nav, "disable-all", value => Options.DisableAll = value);
 		}
 
@@ -120,21 +119,6 @@ namespace Mono.Linker.Optimizer
 				enabled = true;
 
 			Options.SetFeatureEnabled (name, enabled);
-		}
-
-		void OnConditional (XPathNavigator nav)
-		{
-			var name = GetAttribute (nav, "feature");
-			if (name == null || !GetBoolAttribute (nav, "enabled", out var enabled))
-				throw ThrowError ("<conditional> needs both `feature` and `enabled` arguments.");
-
-			var feature = OptimizerOptions.FeatureByName (name);
-
-			ProcessChildren (nav, "namespace", child => OnNamespaceEntry (child, Conditional));
-			ProcessChildren (nav, "type", child => OnTypeEntry (child, null, Conditional));
-			ProcessChildren (nav, "method", child => OnMethodEntry (child, null, Conditional));
-
-			bool Conditional (MemberReference reference) => Options.IsFeatureEnabled (feature) == enabled;
 		}
 
 		void CheckAttribute (XPathNavigator nav, string name, Action<bool> action, bool required = false)
@@ -163,83 +147,32 @@ namespace Mono.Linker.Optimizer
 			return false;
 		}
 
-		bool GetName (XPathNavigator nav, out string name, out OptimizerOptions.MatchKind match)
+		bool GetName (XPathNavigator nav, out string name, out MatchKind match)
 		{
 			name = GetAttribute (nav, "name");
 			var fullname = GetAttribute (nav, "fullname");
 			var substring = GetAttribute (nav, "substring");
 
 			if (fullname != null) {
-				match = OptimizerOptions.MatchKind.FullName;
+				match = MatchKind.FullName;
 				if (name != null || substring != null)
 					return false;
 				name = fullname;
 			} else if (name != null) {
-				match = OptimizerOptions.MatchKind.Name;
+				match = MatchKind.Name;
 				if (fullname != null || substring != null)
 					return false;
 			} else if (substring != null) {
-				match = OptimizerOptions.MatchKind.Substring;
+				match = MatchKind.Substring;
 				if (name != null || fullname != null)
 					return false;
 				name = substring;
 			} else {
-				match = OptimizerOptions.MatchKind.Name;
+				match = MatchKind.Name;
 				return false;
 			}
 
 			return true;
-		}
-
-		void OnNamespaceEntry (XPathNavigator nav, Func<MemberReference, bool> conditional = null)
-		{
-			var name = GetAttribute (nav, "name") ?? throw ThrowError ("<namespace> entry needs `name` attribute.");
-
-			OptimizerOptions.TypeEntry entry;
-			var action = GetAttribute (nav, "action");
-			if (action != null)
-				entry = AddTypeEntry (name, OptimizerOptions.MatchKind.Namespace, action, null, conditional);
-			else
-				entry = Options.AddTypeEntry (name, OptimizerOptions.MatchKind.Namespace, OptimizerOptions.TypeAction.None, null, conditional);
-
-			ProcessChildren (nav, "type", child => OnTypeEntry (child, entry, conditional));
-			ProcessChildren (nav, "method", child => OnMethodEntry (child, entry, conditional));
-		}
-
-		void OnTypeEntry (XPathNavigator nav, OptimizerOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
-		{
-			if (!GetName (nav, out var name, out var match))
-				throw ThrowError ($"Ambiguous name in type entry `{nav.OuterXml}`.");
-
-			OptimizerOptions.TypeEntry entry;
-			var action = GetAttribute (nav, "action");
-			if (action != null)
-				entry = AddTypeEntry (name, match, action, parent, conditional);
-			else
-				entry = Options.AddTypeEntry (name, match, OptimizerOptions.TypeAction.None, parent, conditional);
-
-			ProcessChildren (nav, "method", child => OnMethodEntry (child, entry, conditional));
-		}
-
-		OptimizerOptions.TypeEntry AddTypeEntry (string name, OptimizerOptions.MatchKind match, string action, OptimizerOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
-		{
-			if (!OptimizerOptions.TryParseTypeAction (action, out var typeAction))
-				throw ThrowError ($"Invalid `action` attribute: `{action}`.");
-
-			return Options.AddTypeEntry (name, match, typeAction, parent, conditional);
-		}
-
-		void OnMethodEntry (XPathNavigator nav, OptimizerOptions.TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
-		{
-			if (!GetName (nav, out var name, out var match))
-				throw ThrowError ($"Ambiguous name in method entry `{nav.OuterXml}`.");
-
-			var action = GetAttribute (nav, "action") ?? throw ThrowError ($"Missing `action` attribute in {nav.OuterXml}.");
-
-			if (!OptimizerOptions.TryParseMethodAction (action, out var methodAction))
-				throw ThrowError ($"Invalid `action` attribute in {nav.OuterXml}.");
-
-			Options.AddMethodEntry (name, match, methodAction, parent, conditional);
 		}
 
 		internal static Exception ThrowError (string message)

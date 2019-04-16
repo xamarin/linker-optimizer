@@ -5,7 +5,7 @@ ROOTDIR := $(abspath $(makefile_dir)/../..)
 
 include $(ROOTDIR)/build/rules.make
 
-TEST_LINKER_ARGS := --optimizer-report $(LINKER_OUTPUT)/martin-report.xml --optimizer-options profile=$(PROFILE)
+TEST_LINKER_ARGS := --optimizer-report $(LINKER_OUTPUT)/martin-report.xml --optimizer-options report-profile=$(PROFILE)
 
 BROKEN_TEST_CASES := \
 	test-encoding-1.cs \
@@ -23,6 +23,7 @@ TEST_CASES := \
 	test-remoting-1.cs \
 	test-remoting-2.cs \
 	test-remoting-3.cs \
+	test-remoting-4.cs \
 	test-security-1.cs \
 	test-size-check-full.cs \
 	test-size-check-collator.cs \

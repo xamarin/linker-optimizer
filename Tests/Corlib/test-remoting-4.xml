@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker-optimizer>
+
+	<options report-configuration="remoting" report-profile="net_4_x" detailed-size-report="true" check-size="true" />
+
+	<options all-modules="true" analyze-all="true" />
+
+	<include filename="corlib-api.xml" />
+	<include filename="corlib-asserts.xml" />
+	<include filename="test-remoting-4-size.xml" />
+
+	<size-check configuration="remoting">
+		<profile name="net_4_x">
+			<assembly name="mscorlib" size="945664" />
+		</profile>
+	</size-check>
+
+	<features>
+		<feature name="remoting" enabled="false" />
+		<feature name="collator" enabled="false" />
+		<feature name="globalization" enabled="false" />
+	</features>
+</linker-optimizer>

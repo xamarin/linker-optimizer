@@ -31,7 +31,7 @@ using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer
 {
-	using BasicBlocks;
+	using Configuration;
 
 	public class OptimizerOptions
 	{
@@ -55,15 +55,19 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
-		public bool ReportSize {
+		public bool CheckSize {
 			get; set;
 		}
 
-		public string CheckSize {
+		public string ReportConfiguration {
 			get; set;
 		}
 
-		public string SizeCheckConfiguration {
+		public string ReportProfile {
+			get; set;
+		}
+
+		public string CompareSizeWith {
 			get; set;
 		}
 
@@ -83,32 +87,34 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
-		public string ProfileName {
-			get; set;
-		}
-
 		public bool DisableAll {
 			get; set;
 		}
 
-		public SizeReport SizeReport {
+		public ReportMode ReportMode {
+			get; set;
+		}
+
+		public OptimizerConfiguration OptimizerConfiguration {
 			get;
 		}
 
-		readonly List<TypeEntry> _type_actions;
-		readonly List<MethodEntry> _method_actions;
+		public OptimizerReport OptimizerReport {
+			get;
+		}
+
 		readonly Dictionary<MonoLinkerFeature, bool> _enabled_features;
 
 		public OptimizerOptions ()
 		{
 			NoConditionalRedefinition = true;
-			_type_actions = new List<TypeEntry> ();
-			_method_actions = new List<MethodEntry> ();
 			_enabled_features = new Dictionary<MonoLinkerFeature, bool> {
 				[MonoLinkerFeature.Unknown] = false,
 				[MonoLinkerFeature.Martin] = false
 			};
-			SizeReport = new SizeReport (this);
+
+			OptimizerConfiguration = new OptimizerConfiguration ();
+			OptimizerReport = new OptimizerReport (this);
 		}
 
 		internal void ParseOptions (string options)
@@ -121,29 +127,31 @@ namespace Mono.Linker.Optimizer
 				if (pos > 0) {
 					var name = part.Substring (0, pos);
 					var value = part.Substring (pos + 1);
+					if (string.IsNullOrWhiteSpace (value))
+						value = null;
 
 					switch (name) {
-					case "profile":
-						ProfileName = value;
+					case "preprocess":
+						SetPreprocessorMode (value);
 						continue;
-					case "check-size":
-						CheckSize = value;
+					case "report-configuration":
+						ReportConfiguration = value;
 						continue;
-					case "size-check-configuration":
-						SizeCheckConfiguration = value;
+					case "report-profile":
+						ReportProfile = value;
 						continue;
 					case "size-check-tolerance":
 						SizeCheckTolerance = value;
 						continue;
+					case "compare-size-with":
+						CompareSizeWith = value;
+						continue;
+					case "report-mode":
+						SetReportMode (value);
+						continue;
 					default:
 						throw new OptimizerException ($"Unknown option `{part}`.");
 					}
-				}
-
-				switch (part) {
-				case "preprocess":
-					SetPreprocessorMode (part);
-					continue;
 				}
 
 				bool? enabled = null;
@@ -171,9 +179,9 @@ namespace Mono.Linker.Optimizer
 				case "ignore-resolution-errors":
 					IgnoreResolutionErrors = enabled ?? true;
 					break;
-				case "report-size":
-					ReportSize = enabled ?? true;
-					break;
+				case "check-size":
+					CheckSize = enabled ?? true;
+					continue;
 				case "disable-module":
 					DisableModule = enabled ?? true;
 					break;
@@ -190,9 +198,26 @@ namespace Mono.Linker.Optimizer
 		public void SetPreprocessorMode (string argument)
 		{
 			if (!Enum.TryParse (argument, true, out PreprocessorMode mode))
-			throw new OptimizerException ($"Invalid preprocessor mode: `{argument}`.");
+				throw new OptimizerException ($"Invalid preprocessor mode: `{argument}`.");
 			Preprocessor = mode;
 		}
+
+		public void SetReportMode (string argument)
+		{
+			var parts = argument.Split ('+');
+			for (int i = 0; i < parts.Length; i++) {
+				switch (parts[i].ToLowerInvariant ()) {
+				case "dead-code":
+					ReportMode |= ReportMode.DeadCode;
+					continue;
+				}
+				if (!Enum.TryParse (parts[i], true, out ReportMode mode))
+					throw new OptimizerException ($"Invalid report mode: `{argument}`.");
+				ReportMode |= mode;
+			}
+		}
+
+		public bool IsFeatureEnabled (string feature) => IsFeatureEnabled (FeatureByName (feature));
 
 		public bool IsFeatureEnabled (MonoLinkerFeature feature)
 		{
@@ -265,10 +290,10 @@ namespace Mono.Linker.Optimizer
 			}
 		}
 
-		public bool EnableDebugging (TypeDefinition type)
+		public bool EnableDebugging (OptimizerContext context, TypeDefinition type)
 		{
 			if (type.DeclaringType != null)
-				return EnableDebugging (type.DeclaringType);
+				return EnableDebugging (context, type.DeclaringType);
 
 			if (DontDebugThis (type))
 				return false;
@@ -280,14 +305,14 @@ namespace Mono.Linker.Optimizer
 					return true;
 			}
 
-			return _type_actions.Any (t => t.Matches (type, TypeAction.Debug));
+			return context.GetTypeEntries (type)?.Any (t => t.Action == TypeAction.Debug) ?? false;
 		}
 
-		public bool EnableDebugging (MethodDefinition method)
+		public bool EnableDebugging (OptimizerContext context, MethodDefinition method)
 		{
 			if (DontDebugThis (method.DeclaringType))
 				return false;
-			if (EnableDebugging (method.DeclaringType))
+			if (EnableDebugging (context, method.DeclaringType))
 				return true;
 
 			if (AutoDebugMain) {
@@ -297,38 +322,24 @@ namespace Mono.Linker.Optimizer
 					return true;
 			}
 
-			return _method_actions.Any (e => e.Matches (method, MethodAction.Debug));
-		}
-
-		public bool FailOnMethod (MethodDefinition method)
-		{
-			if (HasTypeEntry (method.DeclaringType, TypeAction.Fail))
-				return true;
-
-			return _method_actions.Any (e => e.Matches (method, MethodAction.Fail));
+			return context.GetMethodEntries (method)?.Any (m => m.Action == MethodAction.Debug) ?? false;
 		}
 
 		public void CheckFailList (OptimizerContext context, TypeDefinition type, string original = null)
 		{
-			if (type.DeclaringType != null) {
-				CheckFailList (context, type.DeclaringType, original ?? type.FullName);
-				return;
-			}
-
-			var fail = _type_actions.FirstOrDefault (e => e.Matches (type, TypeAction.Fail));
-			var warn = _type_actions.FirstOrDefault (e => e.Matches (type, TypeAction.Warn));
-			if (fail == null && warn == null)
+			var entry = context.GetTypeEntries (type)?.FirstOrDefault (t => t.Action == TypeAction.Warn || t.Action == TypeAction.Fail);
+			if (entry == null)
 				return;
 
 			var original_message = original != null ? $" while parsing `{original}`" : string.Empty;
 			var message = $"Found fail-listed type `{type.FullName}`";
 			context.LogMessage (MessageImportance.High, Environment.NewLine);
 			context.LogMessage (MessageImportance.High, message + ":");
-			DumpFailEntry (context, fail ?? warn);
+			DumpFailEntry (context, entry);
 			var stack = context.DumpTracerStack ();
-			context.ReportWriter?.ReportFailListEntry (type, fail ?? warn, original, stack);
+			OptimizerReport.FailList.Add (new FailListEntry (type, entry, original, stack));
 			context.LogMessage (MessageImportance.High, Environment.NewLine);
-			if (fail != null)
+			if (entry.Action == TypeAction.Fail)
 				throw new OptimizerException (message + original_message + ".");
 		}
 
@@ -336,251 +347,33 @@ namespace Mono.Linker.Optimizer
 		{
 			CheckFailList (context, method.DeclaringType, method.FullName);
 
-			var fail = _method_actions.FirstOrDefault (e => e.Matches (method, MethodAction.Fail));
-			var warn = _method_actions.FirstOrDefault (e => e.Matches (method, MethodAction.Warn));
-			if (fail == null && warn == null)
+			var entry = context.GetMethodEntries (method)?.FirstOrDefault (m => m.Action == MethodAction.Warn || m.Action == MethodAction.Fail);
+			if (entry == null)
 				return;
 
 			var message = $"Found fail-listed method `{method.FullName}`";
 			context.LogMessage (MessageImportance.High, Environment.NewLine);
 			context.LogMessage (MessageImportance.High, message + ":");
-			DumpFailEntry (context, fail ?? warn);
+			DumpFailEntry (context, entry);
 			var stack = context.DumpTracerStack ();
-			context.ReportWriter?.ReportFailListEntry (method, fail ?? warn, stack);
+			OptimizerReport.FailList.Add (new FailListEntry (method, entry, stack));
 			context.LogMessage (MessageImportance.High, Environment.NewLine);
-			if (fail != null)
+			if (entry.Action == MethodAction.Fail)
 				throw new OptimizerException (message + ".");
 		}
 
-		static void DumpFailEntry (OptimizerContext context, TypeEntry entry)
+		static void DumpFailEntry (OptimizerContext context, Type type)
 		{
-			context.LogMessage (MessageImportance.High, "  " + entry);
-			if (entry.Parent != null)
-				DumpFailEntry (context, entry.Parent);
+			context.LogMessage (MessageImportance.High, "  " + type);
+			if (type.Parent != null)
+				DumpFailEntry (context, type.Parent);
 		}
 
-		static void DumpFailEntry (OptimizerContext context, MethodEntry entry)
+		static void DumpFailEntry (OptimizerContext context, Method method)
 		{
-			context.LogMessage (MessageImportance.High, "  " + entry);
-			if (entry.Parent != null)
-				DumpFailEntry (context, entry.Parent);
-		}
-
-		public TypeEntry AddTypeEntry (string name, MatchKind match, TypeAction action, TypeEntry parent, Func<MemberReference, bool> conditional)
-		{
-			var entry = new TypeEntry (name, match, action, parent, conditional);
-			_type_actions.Add (entry);
-			return entry;
-		}
-
-		public void AddMethodEntry (string name, MatchKind match, MethodAction action, TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
-		{
-			_method_actions.Add (new MethodEntry (name, match, action, parent, conditional));
-
-			switch (action) {
-			case MethodAction.ReturnFalse:
-			case MethodAction.ReturnTrue:
-			case MethodAction.ReturnNull:
-			case MethodAction.Throw:
-				if (Preprocessor == PreprocessorMode.None)
-					Preprocessor = PreprocessorMode.Automatic;
-				break;
-			}
-		}
-
-		public bool HasTypeEntry (TypeDefinition type, TypeAction action)
-		{
-			if (type.DeclaringType != null)
-				return HasTypeEntry (type.DeclaringType, action);
-			return _type_actions.Any (e => e.Matches (type, action));
-		}
-
-		public void ProcessTypeEntries (TypeDefinition type, Action<TypeAction> action)
-		{
-			if (type.DeclaringType != null) {
-				ProcessTypeEntries (type.DeclaringType, action);
-				return;
-			}
-			foreach (var entry in _type_actions) {
-				if (entry.Action != TypeAction.None && entry.Matches (type))
-					action (entry.Action);
-			}
-		}
-
-		public void ProcessTypeEntries (TypeDefinition type, TypeAction filter, Action action)
-		{
-			if (type.DeclaringType != null) {
-				ProcessTypeEntries (type.DeclaringType, filter, action);
-				return;
-			}
-			foreach (var entry in _type_actions) {
-				if (entry.Action == filter && entry.Matches (type))
-					action ();
-			}
-		}
-
-		public void ProcessMethodEntries (MethodDefinition method, Action<MethodAction> action)
-		{
-			foreach (var entry in _method_actions) {
-				if (entry.Action != MethodAction.None && entry.Matches (method))
-					action (entry.Action);
-			}
-		}
-
-		public void ProcessMethodEntries (MethodDefinition method, MethodAction filter, Action action)
-		{
-			foreach (var entry in _method_actions) {
-				if (entry.Action == filter && entry.Matches (method))
-					action ();
-			}
-		}
-
-		public enum TypeAction
-		{
-			None,
-			Debug,
-			Fail,
-			Warn,
-			Size,
-			Preserve
-		}
-
-		public enum MethodAction
-		{
-			None,
-			Debug,
-			Fail,
-			Warn,
-			Throw,
-			ReturnFalse,
-			ReturnTrue,
-			ReturnNull
-		}
-
-		public enum MatchKind
-		{
-			Name,
-			FullName,
-			Substring,
-			Namespace
-		}
-
-		public class TypeEntry
-		{
-			public string Name {
-				get;
-			}
-
-			public MatchKind Match {
-				get;
-			}
-
-			public TypeAction Action {
-				get;
-			}
-
-			public TypeEntry Parent {
-				get;
-			}
-
-			public Func<TypeDefinition, bool> Conditional {
-				get;
-			}
-
-			public bool Matches (TypeDefinition type, TypeAction? action = null)
-			{
-				if (action != null && action.Value != Action)
-					return false;
-				if (Conditional != null && !Conditional (type))
-					return false;
-				if (Parent != null && !Parent.Matches (type))
-					return false;
-
-				switch (Match) {
-				case MatchKind.FullName:
-					return type.FullName == Name;
-				case MatchKind.Substring:
-					return type.FullName.Contains (Name);
-				case MatchKind.Namespace:
-					return type.Namespace.StartsWith (Name, StringComparison.InvariantCulture);
-				default:
-					return type.Name == Name;
-				}
-			}
-
-			public TypeEntry (string name, MatchKind match, TypeAction action, TypeEntry parent, Func<MemberReference, bool> conditional)
-			{
-				Name = name;
-				Match = match;
-				Action = action;
-				Parent = parent;
-				Conditional = conditional;
-			}
-
-			public override string ToString ()
-			{
-				return $"[{GetType ().Name} {Name} {Match} {Action}]";
-			}
-		}
-
-		public class MethodEntry
-		{
-			public string Name {
-				get;
-			}
-
-			public MatchKind Match {
-				get;
-			}
-
-			public MethodAction Action {
-				get;
-			}
-
-			public TypeEntry Parent {
-				get;
-			}
-
-			public Func<MethodDefinition, bool> Conditional {
-				get;
-			}
-
-			public bool Matches (MethodDefinition method, MethodAction? action = null)
-			{
-				if (action != null && action.Value != Action)
-					return false;
-				if (Conditional != null && !Conditional (method))
-					return false;
-				if (Parent != null && !Parent.Matches (method.DeclaringType))
-					return false;
-
-				switch (Match) {
-				case MatchKind.FullName:
-					return method.FullName == Name;
-				case MatchKind.Substring:
-					return method.FullName.Contains (Name);
-				default:
-					if (Name.Contains ('('))
-						return method.Name + CecilHelper.GetMethodSignature (method) == Name;
-					return method.Name == Name;
-				}
-			}
-
-			public bool Matches (MethodDefinition method, MethodAction action) => Action == action && Matches (method);
-
-			public MethodEntry (string name, MatchKind match, MethodAction action, TypeEntry parent = null, Func<MemberReference, bool> conditional = null)
-			{
-				Name = name;
-				Match = match;
-				Action = action;
-				Parent = parent;
-				Conditional = conditional;
-			}
-
-			public override string ToString ()
-			{
-				return $"[{GetType ().Name} {Name}:{Match}:{Action}]";
-			}
+			context.LogMessage (MessageImportance.High, "  " + method);
+			if (method.Parent != null)
+				DumpFailEntry (context, method.Parent);
 		}
 
 		public enum PreprocessorMode

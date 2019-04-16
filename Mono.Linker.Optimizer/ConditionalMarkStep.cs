@@ -136,7 +136,7 @@ namespace Mono.Linker.Optimizer
 			if (Annotations.IsProcessed (type))
 				return null;
 
-			if (OptimizerContext.Options.EnableDebugging (type)) {
+			if (OptimizerContext.Options.EnableDebugging (OptimizerContext, type)) {
 				OptimizerContext.LogMessage (MessageImportance.Normal, $"MARK TYPE: {type}");
 				OptimizerContext.Debug ();
 			}
@@ -151,7 +151,7 @@ namespace Mono.Linker.Optimizer
 
 		protected override void EnqueueMethod (MethodDefinition method)
 		{
-			if (OptimizerContext.Options.EnableDebugging (method)) {
+			if (OptimizerContext.Options.EnableDebugging (OptimizerContext, method)) {
 				OptimizerContext.LogMessage (MessageImportance.Normal, $"ENQUEUE METHOD: {method}");
 				OptimizerContext.Debug ();
 			}

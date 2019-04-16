@@ -31,6 +31,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -41,7 +42,6 @@
     <Compile Include="Mono.Linker.Optimizer\OptimizerContext.cs" />
     <Compile Include="Mono.Linker.Optimizer\OptimizerOptions.cs" />
     <Compile Include="Mono.Linker.Optimizer\PreprocessStep.cs" />
-    <Compile Include="Mono.Linker.Optimizer\SizeReportStep.cs" />
     <Compile Include="Mono.Linker.Optimizer\OptionsReader.cs" />
     <Compile Include="Mono.Linker.Optimizer\OptimizerBaseStep.cs" />
     <Compile Include="System.Runtime.CompilerServices\MonoLinkerFeature.cs" />
@@ -64,10 +64,35 @@
     <Compile Include="Mono.Linker.Optimizer.BasicBlocks\ConstantValue.cs" />
     <Compile Include="Mono.Linker.Optimizer.BasicBlocks\DeadCodeEliminator.cs" />
     <Compile Include="Mono.Linker.Optimizer.Conditionals\RequireFeatureConditional.cs" />
-    <Compile Include="Mono.Linker.Optimizer\ReportWriter.cs" />
-    <Compile Include="Mono.Linker.Optimizer\WriteReportStep.cs" />
+    <Compile Include="Mono.Linker.Optimizer\GenerateReportStep.cs" />
     <Compile Include="Mono.Linker.Optimizer\OptimizerException.cs" />
-    <Compile Include="Mono.Linker.Optimizer\SizeReport.cs" />
+    <Compile Include="Mono.Linker.Optimizer\OldOptimizerReport.cs" />
+    <Compile Include="Mono.Linker.Optimizer\ReportMode.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\Node.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\IVisitor.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\Method.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\Type.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\Assembly.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\OptimizerConfiguration.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\FailList.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\FailListEntry.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\SizeReport.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\TypeAction.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\MethodAction.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\MatchKind.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\NodeList.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\NodeHelper.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\XElementWriter.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\ConfigurationReader.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\ActionList.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\ActionVisitor.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\OptimizerReport.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\FailListNode.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\ReportWriter.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\DeadCodeMode.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\SizeCheck.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\Configuration.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\Profile.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="external\linker\src\linker\Mono.Linker.csproj">
@@ -82,6 +107,7 @@
   <ItemGroup>
     <Folder Include="Mono.Linker.Optimizer.Conditionals\" />
     <Folder Include="Mono.Linker.Optimizer.BasicBlocks\" />
+    <Folder Include="Mono.Linker.Optimizer.Configuration\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

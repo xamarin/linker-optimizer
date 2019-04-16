@@ -28,13 +28,14 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Linker.Steps;
 
 namespace Mono.Linker.Optimizer
 {
-	using System.Reflection;
+	using Configuration;
 	using BasicBlocks;
 
 	public class OptimizerContext
@@ -47,24 +48,22 @@ namespace Mono.Linker.Optimizer
 			get;
 		}
 
-		public ReportWriter ReportWriter {
-			get;
-		}
-
 		public AnnotationStore Annotations => Context.Annotations;
 
 		OptimizerContext (LinkContext context, OptimizerOptions options)
 		{
 			Context = context;
 			Options = options;
-
-			if (options.ReportFileName != null)
-				ReportWriter = new ReportWriter (this);
 		}
 
 		public void LogMessage (MessageImportance importance, string message)
 		{
 			Context.Logger.LogMessage (importance, message);
+		}
+
+		public void LogWarning (string message)
+		{
+			Context.Logger.LogMessage (MessageImportance.High, message);
 		}
 
 		[Conditional ("DEBUG")]
@@ -79,12 +78,18 @@ namespace Mono.Linker.Optimizer
 
 			context.Initialize (mainModule);
 
+			if (options.CheckSize)
+				options.ReportMode |= ReportMode.Size;
+
+			if (options.OptimizerReport.IsEnabled (ReportMode.Detailed) || options.OptimizerReport.IsEnabled (ReportMode.Size)) {
+				options.AnalyzeAll = options.ScanAllModules = true;
+				if (options.Preprocessor == OptimizerOptions.PreprocessorMode.None)
+					options.Preprocessor = OptimizerOptions.PreprocessorMode.Automatic;
+			}
+
 			linkContext.Pipeline.AddStepBefore (typeof (MarkStep), new PreprocessStep (context));
 			linkContext.Pipeline.ReplaceStep (typeof (MarkStep), new ConditionalMarkStep (context));
-			if (options.ReportSize || options.CheckSize != null)
-				linkContext.Pipeline.AddStepAfter (typeof (OutputStep), new SizeReportStep (context));
-			if (options.ReportFileName != null)
-				linkContext.Pipeline.AppendStep (new WriteReportStep (context));
+			linkContext.Pipeline.AppendStep (new GenerateReportStep (context));
 		}
 
 		const string LinkerSupportType = "System.Runtime.CompilerServices.MonoLinkerSupport";
@@ -182,12 +187,12 @@ namespace Mono.Linker.Optimizer
 
 		public bool IsEnabled (MethodDefinition method)
 		{
-			return Options.ScanAllModules || method.Module.Assembly == MainAssembly || Options.EnableDebugging (method.DeclaringType);
+			return Options.ScanAllModules || method.Module.Assembly == MainAssembly || Options.EnableDebugging (this, method.DeclaringType);
 		}
 
 		internal int GetDebugLevel (MethodDefinition method)
 		{
-			return Options.EnableDebugging (method) ? 5 : 0;
+			return Options.EnableDebugging (this, method) ? 5 : 0;
 		}
 
 		internal void Debug ()
@@ -195,6 +200,8 @@ namespace Mono.Linker.Optimizer
 
 		readonly HashSet<TypeDefinition> conditional_types = new HashSet<TypeDefinition> ();
 		readonly Dictionary<MethodDefinition, ConstantValue> constant_methods = new Dictionary<MethodDefinition, ConstantValue> ();
+		readonly Dictionary<TypeDefinition, List<Type>> type_entries = new Dictionary<TypeDefinition, List<Type>> ();
+		readonly Dictionary<MethodDefinition, List<Method>> method_entries = new Dictionary<MethodDefinition, List<Method>> ();
 
 		public bool IsConditionalTypeMarked (TypeDefinition type)
 		{
@@ -204,6 +211,38 @@ namespace Mono.Linker.Optimizer
 		public void MarkConditionalType (TypeDefinition type)
 		{
 			conditional_types.Add (type);
+		}
+
+		internal void AddTypeEntry (TypeDefinition type, Type entry)
+		{
+			if (!type_entries.TryGetValue (type, out var list)) {
+				list = new List<Type> ();
+				type_entries.Add (type, list);
+			}
+			list.Add (entry);
+		}
+
+		internal List<Type> GetTypeEntries (TypeDefinition type)
+		{
+			if (type_entries.TryGetValue (type, out var list))
+				return list;
+			return null;
+		}
+
+		internal void AddMethodEntry (MethodDefinition method, Method entry)
+		{
+			if (!method_entries.TryGetValue (method, out var list)) {
+				list = new List<Method> ();
+				method_entries.Add (method, list);
+			}
+			list.Add (entry);
+		}
+
+		internal List<Method> GetMethodEntries (MethodDefinition method)
+		{
+			if (method_entries.TryGetValue (method, out var list))
+				return list;
+			return null;
 		}
 
 		internal void AttemptingToRedefineConditional (TypeDefinition type)
@@ -217,7 +256,7 @@ namespace Mono.Linker.Optimizer
 		internal void MarkAsConstantMethod (MethodDefinition method, ConstantValue value)
 		{
 			constant_methods.Add (method, value);
-			ReportWriter?.MarkAsConstantMethod (method, value);
+			Options.OptimizerReport?.MarkAsConstantMethod (method, value);
 		}
 
 		internal bool TryGetConstantMethod (MethodDefinition method, out ConstantValue value)
@@ -301,9 +340,11 @@ namespace Mono.Linker.Optimizer
 
 		internal List<string> DumpTracerStack ()
 		{
-			var stack = (Stack<object>)_tracer_stack_field.GetValue (Context.Tracer);
-			LogMessage (MessageImportance.Normal, "Dependency Stack:");
 			var list = new List<string> ();
+			var stack = (Stack<object>)_tracer_stack_field.GetValue (Context.Tracer);
+			if (stack == null)
+				return list;
+			LogMessage (MessageImportance.Normal, "Dependency Stack:");
 			foreach (var dependency in stack) {
 				var formatted = TokenString (dependency);
 				list.Add (formatted);

@@ -1,5 +1,5 @@
 ﻿//
-// WriteReportStep.cs
+// SizeReport.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -24,37 +24,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-using System.Text;
-using System.Xml;
-using System.Xml.XPath;
+using Mono.Cecil;
 
-namespace Mono.Linker.Optimizer
+namespace Mono.Linker.Optimizer.Configuration
 {
-	public class WriteReportStep : OptimizerBaseStep
+	public class SizeReport : Node
 	{
-		public WriteReportStep (OptimizerContext context)
-			: base (context)
+		public NodeList<Assembly> Assemblies { get; } = new NodeList<Assembly> ();
+
+		public Assembly GetAssembly (AssemblyDefinition assembly, bool add)
 		{
+			return GetAssembly (assembly.Name.Name, add);
 		}
 
-		protected override void Process ()
+		public Assembly GetAssembly (string name, bool add)
 		{
-			var settings = new XmlWriterSettings {
-				Indent = true,
-				OmitXmlDeclaration = false,
-				NewLineHandling = NewLineHandling.None,
-				ConformanceLevel = ConformanceLevel.Document,
-				IndentChars = "\t",
-				Encoding = Encoding.Default
-			};
+			return Assemblies.GetAssembly (name, add);
+		}
 
-			using (var xml = XmlWriter.Create (Options.ReportFileName, settings)) {
-				xml.WriteStartDocument ();
-				xml.WriteStartElement ("optimizer-report");
-				Context.ReportWriter.WriteReport (xml);
-				xml.WriteEndElement ();
-				xml.WriteEndDocument ();
-			}
+		public override void Visit (IVisitor visitor)
+		{
+			visitor.Visit (this);
+		}
+
+		public override void VisitChildren (IVisitor visitor)
+		{
+			Assemblies.VisitChildren (visitor);
 		}
 	}
 }

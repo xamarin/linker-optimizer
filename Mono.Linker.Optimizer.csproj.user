@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <StartAction>Project</StartAction>
-    <StartArguments>--optimizer test-remoting-1 -out output -b true -d /Workspace/mono-work/mcs/class/lib/net_4_x -d /Workspace/linker-research/Tests/TestHelpers -c link -l none  --exclude-feature sre --exclude-feature security --exclude-feature globalization --dump-dependencies</StartArguments>
+    <StartArguments>--optimizer test-remoting-4 --optimizer-report martin-report.xml --optimizer-options report-mode=actions+size+all -out output -b true -d /Workspace/mono-work/mcs/class/lib/net_4_x -d /Workspace/linker-research/Tests/TestHelpers -c link -l none</StartArguments>
     <StartWorkingDirectory>Tests\Corlib</StartWorkingDirectory>
     <ConsolePause>true</ConsolePause>
   </PropertyGroup>

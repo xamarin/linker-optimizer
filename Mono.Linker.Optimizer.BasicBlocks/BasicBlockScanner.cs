@@ -229,7 +229,7 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 			LogDebug (1, $"DONE REWRITING CONDITIONALS: {Method.Name}");
 
-			Context.ReportWriter?.MarkAsContainingConditionals (Method);
+			Context.Options.OptimizerReport.MarkAsContainingConditionals (Method);
 
 			EliminateDeadBlocks ();
 		}

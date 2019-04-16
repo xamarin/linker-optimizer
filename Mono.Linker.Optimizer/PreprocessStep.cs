@@ -27,10 +27,13 @@ using System;
 using Mono.Cecil;
 using System.Runtime.CompilerServices;
 
-namespace Mono.Linker.Optimizer {
+namespace Mono.Linker.Optimizer
+{
 	using BasicBlocks;
+	using Configuration;
 
-	public class PreprocessStep : OptimizerBaseStep {
+	public class PreprocessStep : OptimizerBaseStep
+	{
 		public PreprocessStep (OptimizerContext context)
 			: base (context)
 		{
@@ -56,7 +59,7 @@ namespace Mono.Linker.Optimizer {
 				RemoveCollatorResources ();
 		}
 
-		readonly static string [] MonoCollationResources = {
+		readonly static string[] MonoCollationResources = {
 			"collation.cjkCHS.bin",
 			"collation.cjkCHT.bin",
 			"collation.cjkJA.bin",
@@ -85,9 +88,9 @@ namespace Mono.Linker.Optimizer {
 
 		void ProcessType (TypeDefinition type)
 		{
-			Options.ProcessTypeEntries (type, a => ProcessTypeActions (type, a));
+			ActionVisitor.Visit (Options, type, a => ProcessTypeActions (type, a));
 
-			if (type.HasNestedTypes) {
+			if (false && type.HasNestedTypes) {
 				foreach (var nested in type.NestedTypes)
 					ProcessType (nested);
 			}
@@ -105,7 +108,7 @@ namespace Mono.Linker.Optimizer {
 
 		void ProcessMethod (MethodDefinition method)
 		{
-			Options.ProcessMethodEntries (method, a => ProcessMethodActions (method, a));
+			ActionVisitor.Visit (Options, method, a => ProcessMethodActions (method, a));
 		}
 
 		void ProcessProperty (PropertyDefinition property)
@@ -135,42 +138,46 @@ namespace Mono.Linker.Optimizer {
 			Context.Debug ();
 		}
 
-		void ProcessTypeActions (TypeDefinition type, OptimizerOptions.TypeAction action)
+		void ProcessTypeActions (TypeDefinition type, Type entry)
 		{
-			switch (action) {
-			case OptimizerOptions.TypeAction.Debug:
-				Context.LogMessage (MessageImportance.High, $"Debug type: {type} {action}");
+			Context.AddTypeEntry (type, entry);
+
+			switch (entry.Action) {
+			case TypeAction.Debug:
+				Context.LogMessage (MessageImportance.High, $"Debug type: {type} {entry}");
 				Context.Debug ();
 				break;
 
-			case OptimizerOptions.TypeAction.Preserve:
+			case TypeAction.Preserve:
 				Context.Annotations.SetPreserve (type, TypePreserve.All);
 				Context.Annotations.Mark (type);
 				break;
 			}
 		}
 
-		void ProcessMethodActions (MethodDefinition method, OptimizerOptions.MethodAction action)
+		void ProcessMethodActions (MethodDefinition method, Method entry)
 		{
-			switch (action) {
-			case OptimizerOptions.MethodAction.Debug:
-				Context.LogMessage (MessageImportance.High, $"Debug method: {method} {action}");
+			Context.AddMethodEntry (method, entry);
+
+			switch (entry.Action ?? MethodAction.None) {
+			case MethodAction.Debug:
+				Context.LogMessage (MessageImportance.High, $"Debug method: {method}");
 				Context.Debug ();
 				break;
 
-			case OptimizerOptions.MethodAction.Throw:
+			case MethodAction.Throw:
 				CodeRewriter.ReplaceWithPlatformNotSupportedException (Context, method);
 				break;
 
-			case OptimizerOptions.MethodAction.ReturnFalse:
+			case MethodAction.ReturnFalse:
 				CodeRewriter.ReplaceWithReturnFalse (Context, method);
 				break;
 
-			case OptimizerOptions.MethodAction.ReturnTrue:
+			case MethodAction.ReturnTrue:
 				CodeRewriter.ReplaceWithReturnTrue (Context, method);
 				break;
 
-			case OptimizerOptions.MethodAction.ReturnNull:
+			case MethodAction.ReturnNull:
 				CodeRewriter.ReplaceWithReturnNull (Context, method);
 				break;
 			}
