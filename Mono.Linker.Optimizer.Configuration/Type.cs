@@ -49,6 +49,10 @@ namespace Mono.Linker.Optimizer.Configuration
 			get;
 		}
 
+		public int? Size {
+			get; set;
+		}
+
 		public NodeList<Type> Types { get; } = new NodeList<Type> ();
 
 		public NodeList<Method> Methods { get; } = new NodeList<Method> ();

@@ -1,5 +1,5 @@
 ﻿//
-// GenerateReportStep.cs
+// SizeReportStep.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -32,38 +32,48 @@ using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer
 {
-	using Configuration;
-
-	public class GenerateReportStep : OptimizerBaseStep
+	public class SizeReportStep : OptimizerBaseStep
 	{
-		public GenerateReportStep (OptimizerContext context)
+		public SizeReportStep (OptimizerContext context)
 			: base (context)
 		{
 		}
 
 		protected override void Process ()
 		{
-			if (Options.ReportFileName != null)
-				WriteReport (Options.ReportFileName);
+			if (!Options.CheckSize && !Options.OptimizerReport.IsEnabled (ReportMode.Size))
+				return;
+
+			bool result = true;
+			foreach (var assembly in GetAssemblies ()) {
+				result &= CheckAndReportSize (assembly);
+			}
+
+			Context.SizeCheckFailed |= !result;
 		}
 
-		void WriteReport (string filename)
+		bool CheckAndReportSize (AssemblyDefinition assembly)
 		{
-			var settings = new XmlWriterSettings {
-				Indent = true,
-				OmitXmlDeclaration = false,
-				NewLineHandling = NewLineHandling.None,
-				ConformanceLevel = ConformanceLevel.Document,
-				IndentChars = "\t",
-				Encoding = Encoding.Default
-			};
-
-			using (var xml = XmlWriter.Create (filename, settings)) {
-				var document = new XDocument ();
-				var writer = new ReportWriter (document);
-				Options.OptimizerReport.Visit (writer);
-				document.WriteTo (xml);
+			var action = Annotations.GetAction (assembly);
+			switch (action) {
+			case AssemblyAction.Save:
+			case AssemblyAction.Link:
+			case AssemblyAction.AddBypassNGen:
+			case AssemblyAction.Copy:
+				break;
+			default:
+				return true;
 			}
+
+			var file = new FileInfo (assembly.MainModule.FileName).Name;
+			var output = Path.Combine (Context.Context.OutputDirectory, file);
+			if (!File.Exists (output)) {
+				Context.LogMessage (MessageImportance.High, $"Output file does not exist: {output}");
+				return true;
+			}
+
+			var size = (int)new FileInfo (output).Length;
+			return Options.OptimizerReport.CheckAndReportAssemblySize (Context, assembly, size);
 		}
 	}
 }

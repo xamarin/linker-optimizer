@@ -53,6 +53,10 @@ namespace Mono.Linker.Optimizer.Configuration
 			get; set;
 		}
 
+		public int? Size {
+			get; set;
+		}
+
 		public bool Matches (MethodDefinition method, MethodAction? action = null)
 		{
 			if (action != null && Action != null && action.Value != Action)

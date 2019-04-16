@@ -67,10 +67,6 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
-		public string CompareSizeWith {
-			get; set;
-		}
-
 		public string SizeCheckTolerance {
 			get; set;
 		}
@@ -142,9 +138,6 @@ namespace Mono.Linker.Optimizer
 						continue;
 					case "size-check-tolerance":
 						SizeCheckTolerance = value;
-						continue;
-					case "compare-size-with":
-						CompareSizeWith = value;
 						continue;
 					case "report-mode":
 						SetReportMode (value);

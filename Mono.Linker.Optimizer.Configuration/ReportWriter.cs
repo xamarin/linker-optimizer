@@ -88,6 +88,8 @@ namespace Mono.Linker.Optimizer.Configuration
 		protected override bool Visit (Type node, XElement element)
 		{
 			SetName (element, node.Name, node.Match);
+			if (node.Size != null)
+				element.SetAttributeValue ("size", node.Size.Value);
 			return true;
 		}
 
@@ -97,6 +99,8 @@ namespace Mono.Linker.Optimizer.Configuration
 			if (node.Action != null)
 				SetMethodAction (element, node.Action.Value);
 			SetDeadCodeMode (element, node.DeadCodeMode);
+			if (node.Size != null)
+				element.SetAttributeValue ("size", node.Size.Value);
 			return true;
 		}
 

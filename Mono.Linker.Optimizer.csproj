@@ -66,7 +66,6 @@
     <Compile Include="Mono.Linker.Optimizer.Conditionals\RequireFeatureConditional.cs" />
     <Compile Include="Mono.Linker.Optimizer\GenerateReportStep.cs" />
     <Compile Include="Mono.Linker.Optimizer\OptimizerException.cs" />
-    <Compile Include="Mono.Linker.Optimizer\OldOptimizerReport.cs" />
     <Compile Include="Mono.Linker.Optimizer\ReportMode.cs" />
     <Compile Include="Mono.Linker.Optimizer.Configuration\Node.cs" />
     <Compile Include="Mono.Linker.Optimizer.Configuration\IVisitor.cs" />
@@ -93,6 +92,8 @@
     <Compile Include="Mono.Linker.Optimizer.Configuration\SizeCheck.cs" />
     <Compile Include="Mono.Linker.Optimizer.Configuration\Configuration.cs" />
     <Compile Include="Mono.Linker.Optimizer.Configuration\Profile.cs" />
+    <Compile Include="Mono.Linker.Optimizer\SizeReportStep.cs" />
+    <Compile Include="Mono.Linker.Optimizer\FinalCheckStep.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="external\linker\src\linker\Mono.Linker.csproj">

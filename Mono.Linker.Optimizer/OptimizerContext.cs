@@ -89,7 +89,9 @@ namespace Mono.Linker.Optimizer
 
 			linkContext.Pipeline.AddStepBefore (typeof (MarkStep), new PreprocessStep (context));
 			linkContext.Pipeline.ReplaceStep (typeof (MarkStep), new ConditionalMarkStep (context));
+			linkContext.Pipeline.AppendStep (new SizeReportStep (context));
 			linkContext.Pipeline.AppendStep (new GenerateReportStep (context));
+			linkContext.Pipeline.AppendStep (new FinalCheckStep (context));
 		}
 
 		const string LinkerSupportType = "System.Runtime.CompilerServices.MonoLinkerSupport";
@@ -351,6 +353,10 @@ namespace Mono.Linker.Optimizer
 				LogMessage (MessageImportance.Normal, "  " + formatted);
 			}
 			return list;
+		}
+
+		internal bool SizeCheckFailed {
+			get; set;
 		}
 
 		class SupportMethodRegistration

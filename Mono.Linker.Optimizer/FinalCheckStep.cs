@@ -1,5 +1,5 @@
 ﻿//
-// NodeList.cs
+// FinalCheckStep.cs
 //
 // Author:
 //       Martin Baulig <mabaul@microsoft.com>
@@ -23,51 +23,19 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
-using System.Linq;
-using System.Threading;
-using System.Collections.Generic;
-
-namespace Mono.Linker.Optimizer.Configuration
+namespace Mono.Linker.Optimizer
 {
-	public class NodeList<T>
-		where T : Node
+	public class FinalCheckStep : OptimizerBaseStep
 	{
-		public bool IsEmpty => children == null || children.Count == 0;
-
-		public int Count => children?.Count ?? 0;
-
-		public List<T> Children => children;
-
-		public T this [int index] => children [index];
-
-		List<T> children;
-
-		public T GetChild (Func<T, bool> func, Func<T> create) => GetChild (func, create != null, create);
-
-		public T GetChild (Func<T, bool> func, bool add, Func<T> create)
+		public FinalCheckStep (OptimizerContext context)
+			: base (context)
 		{
-			LazyInitializer.EnsureInitialized (ref children);
-			var child = children.FirstOrDefault (func);
-			if (child != null)
-				return child;
-			if (child == null && add) {
-				child = create ();
-				if (child != null)
-					children.Add (child);
-			}
-			return child;
 		}
 
-		public void Add (T item)
+		protected override void Process ()
 		{
-			LazyInitializer.EnsureInitialized (ref children);
-			children.Add (item);
-		}
-
-		public void VisitChildren (IVisitor visitor)
-		{
-			children?.ForEach (child => child.Visit (visitor));
+			if (Context.SizeCheckFailed)
+				throw new OptimizerException ("Size check failed.");
 		}
 	}
 }
