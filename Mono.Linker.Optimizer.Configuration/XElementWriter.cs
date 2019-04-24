@@ -82,6 +82,8 @@ namespace Mono.Linker.Optimizer.Configuration
 
 		void IVisitor.Visit (SizeCheck node) => Visit (node, "size-check", Visit);
 
+		void IVisitor.Visit (SizeComparision node) => Visit (node, "size-comparision", Visit);
+
 		void IVisitor.Visit (OptimizerReport node) => Visit (node, "optimizer-report", Visit);
 
 		void IVisitor.Visit (Configuration node) => Visit (node, "configuration", Visit);
@@ -105,6 +107,8 @@ namespace Mono.Linker.Optimizer.Configuration
 		protected abstract bool Visit (SizeReport node, XElement element);
 
 		protected abstract bool Visit (SizeCheck node, XElement element);
+
+		protected abstract bool Visit (SizeComparision node, XElement element);
 
 		protected abstract bool Visit (OptimizerReport node, XElement element);
 
@@ -138,6 +142,31 @@ namespace Mono.Linker.Optimizer.Configuration
 			default:
 				element.SetAttributeValue ("name", name);
 				break;
+			}
+		}
+
+		protected static void SetTypeAction (XElement element, TypeAction action)
+		{
+			switch (action) {
+			case TypeAction.None:
+				break;
+			case TypeAction.Debug:
+				element.SetAttributeValue ("action", "debug");
+				break;
+			case TypeAction.Warn:
+				element.SetAttributeValue ("action", "warn");
+				break;
+			case TypeAction.Fail:
+				element.SetAttributeValue ("action", "fail");
+				break;
+			case TypeAction.Preserve:
+				element.SetAttributeValue ("action", "preserve");
+				break;
+			case TypeAction.Size:
+				element.SetAttributeValue ("action", "size");
+				break;
+			default:
+				throw DebugHelpers.AssertFail ($"Invalid type action: `{action}`.");
 			}
 		}
 

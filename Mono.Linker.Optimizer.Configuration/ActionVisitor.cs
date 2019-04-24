@@ -102,6 +102,10 @@ namespace Mono.Linker.Optimizer.Configuration
 		{
 		}
 
+		public void Visit (SizeComparision node)
+		{
+		}
+
 		public void Visit (OptimizerReport report)
 		{
 		}

@@ -24,6 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using System.IO;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using System.Collections.Generic;
 
@@ -34,6 +37,37 @@ namespace Mono.Linker.Optimizer.Configuration
 		public ReportWriter (XNode root)
 			: base (root)
 		{
+		}
+
+		static XmlWriterSettings DefaultSettings => new XmlWriterSettings {
+			Indent = true,
+			OmitXmlDeclaration = false,
+			NewLineHandling = NewLineHandling.None,
+			ConformanceLevel = ConformanceLevel.Document,
+			IndentChars = "\t",
+			Encoding = Encoding.Default
+		};
+
+		public static void Write (TextWriter output, Node root)
+		{
+			using (var xml = XmlWriter.Create (output, DefaultSettings)) {
+				var document = new XDocument ();
+				var writer = new ReportWriter (document);
+				root.Visit (writer);
+				document.WriteTo (xml);
+			}
+
+			output.WriteLine ();
+		}
+
+		public static void Write (string filename, Node root)
+		{
+			using (var xml = XmlWriter.Create (filename, DefaultSettings)) {
+				var document = new XDocument ();
+				var writer = new ReportWriter (document);
+				root.Visit (writer);
+				document.WriteTo (xml);
+			}
 		}
 
 		protected override bool Visit (OptimizerConfiguration node, XElement element)
@@ -47,6 +81,11 @@ namespace Mono.Linker.Optimizer.Configuration
 		}
 
 		protected override bool Visit (SizeCheck node, XElement element)
+		{
+			return true;
+		}
+
+		protected override bool Visit (SizeComparision node, XElement element)
 		{
 			return true;
 		}
@@ -80,6 +119,8 @@ namespace Mono.Linker.Optimizer.Configuration
 			element.SetAttributeValue ("name", node.Name);
 			if (node.Size != null)
 				element.SetAttributeValue ("size", node.Size.Value.ToString ());
+			if (node.CodeSize != null)
+				element.SetAttributeValue ("code-size", node.CodeSize.Value.ToString ());
 			if (node.Tolerance != null)
 				element.SetAttributeValue ("tolerance", node.Tolerance);
 			return true;
@@ -88,6 +129,8 @@ namespace Mono.Linker.Optimizer.Configuration
 		protected override bool Visit (Type node, XElement element)
 		{
 			SetName (element, node.Name, node.Match);
+			if (node.Action != null)
+				SetTypeAction (element, node.Action.Value);
 			if (node.Size != null)
 				element.SetAttributeValue ("size", node.Size.Value);
 			return true;

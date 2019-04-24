@@ -90,6 +90,8 @@ namespace Mono.Linker.Optimizer
 			linkContext.Pipeline.AddStepBefore (typeof (MarkStep), new PreprocessStep (context));
 			linkContext.Pipeline.ReplaceStep (typeof (MarkStep), new ConditionalMarkStep (context));
 			linkContext.Pipeline.AppendStep (new SizeReportStep (context));
+			if (options.CompareWith != null)
+				linkContext.Pipeline.AppendStep (new CompareWithReportStep (context));
 			linkContext.Pipeline.AppendStep (new GenerateReportStep (context));
 			linkContext.Pipeline.AppendStep (new FinalCheckStep (context));
 		}

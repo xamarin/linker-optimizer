@@ -25,8 +25,6 @@
 // THE SOFTWARE.
 using System;
 using System.Linq;
-using System.Threading;
-using System.Collections.Generic;
 using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer.Configuration
@@ -41,7 +39,8 @@ namespace Mono.Linker.Optimizer.Configuration
 			get;
 		}
 
-		readonly List<Node> children = new List<Node> ();
+		public NodeList<Node> Children { get; } = new NodeList<Node> ();
+
 		bool? evaluated;
 
 		public ActionList ()
@@ -61,18 +60,18 @@ namespace Mono.Linker.Optimizer.Configuration
 			return evaluated.Value;
 		}
 
-		public void Add (ActionList node) => children.Add (node);
+		public void Add (ActionList node) => Children.Add (node);
 
-		public void Add (Type node) => children.Add (node);
+		public void Add (Type node) => Children.Add (node);
 
-		public void Add (Method node) => children.Add (node);
+		public void Add (Method node) => Children.Add (node);
 
 		public Type GetNamespace (string name, bool add)
 		{
-			var ns = children.OfType<Type> ().FirstOrDefault (t => t.Match == MatchKind.Namespace && t.Name == name);
+			var ns = Children.Children?.OfType<Type> ().FirstOrDefault (t => t.Match == MatchKind.Namespace && t.Name == name);
 			if (add && ns == null) {
-				ns = new Type (null, name, null, MatchKind.Namespace, TypeAction.None);
-				children.Add (ns);
+				ns = new Type (null, name, null, MatchKind.Namespace);
+				Children.Add (ns);
 			}
 			return ns;
 		}
@@ -110,7 +109,7 @@ namespace Mono.Linker.Optimizer.Configuration
 
 		public override void VisitChildren (IVisitor visitor)
 		{
-			children.ForEach (node => node.Visit (visitor));
+			Children.Children?.ForEach (node => node.Visit (visitor));
 		}
 	}
 }

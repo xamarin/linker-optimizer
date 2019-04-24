@@ -44,26 +44,7 @@ namespace Mono.Linker.Optimizer
 		protected override void Process ()
 		{
 			if (Options.ReportFileName != null)
-				WriteReport (Options.ReportFileName);
-		}
-
-		void WriteReport (string filename)
-		{
-			var settings = new XmlWriterSettings {
-				Indent = true,
-				OmitXmlDeclaration = false,
-				NewLineHandling = NewLineHandling.None,
-				ConformanceLevel = ConformanceLevel.Document,
-				IndentChars = "\t",
-				Encoding = Encoding.Default
-			};
-
-			using (var xml = XmlWriter.Create (filename, settings)) {
-				var document = new XDocument ();
-				var writer = new ReportWriter (document);
-				Options.OptimizerReport.Visit (writer);
-				document.WriteTo (xml);
-			}
+				ReportWriter.Write (Options.ReportFileName, Options.OptimizerReport);
 		}
 	}
 }

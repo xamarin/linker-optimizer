@@ -3,6 +3,13 @@
 	<options all-modules="true" analyze-all="true" ignore-resolution-errors="true" preprocessor="full" />
 
 	<type fullname="Mono.Runtime" action="preserve" />
+	<type fullname="System.AppDomain" action="preserve" />
+	<type fullname="System.Environment" action="preserve" />
+	<type fullname="System.EventArgs" action="preserve" />
+	<type fullname="System.Reflection.MethodBase" action="preserve" />
+	<type fullname="System.Runtime.Remoting.Proxies.TransparentProxy" action="preserve" />
+	<type fullname="System.IO.File" action="preserve" />
+	<type fullname="System.IO.TextWriter" action="preserve" />
 
 	<conditional feature="sre" enabled="true">
 		<type fullname="System.Reflection.Emit.TypeBuilder" action="preserve" />

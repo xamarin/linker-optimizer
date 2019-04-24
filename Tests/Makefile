@@ -17,11 +17,11 @@ corlib-test: build
 	@echo RUN CORLIB TEST $@
 	@rm -rf $(LINKER_OUTPUT)
 	@mkdir $(LINKER_OUTPUT)
-	$(LINKER) --optimizer $(PROFILE_PATH)/tests/net_4_x_corlib_test.dll --optimizer-xml corlib-nunit.xml --optimizer-xml Corlib/corlib-api.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml
+	$(LINKER) --optimizer $(PROFILE_PATH)/tests/$(PROFILE)_corlib_test.dll --optimizer-xml corlib-nunit.xml --optimizer-xml Corlib/corlib-api.xml $(LINKER_ARGS_CORLIB_TEST) --dump-dependencies -x $(MONO_ROOT)/mcs/class/corlib/LinkerDescriptor/mscorlib.xml
 	#@gzip -d $(LINKER_OUTPUT)/linker-dependencies.xml.gz
 	MONO_PATH=$(PROFILE_PATH) monodis $(LINKER_OUTPUT)/mscorlib.dll > $(LINKER_OUTPUT)/mscorlib.il
 	MONO_PATH=$(PROFILE_PATH) monodis --typedef $(LINKER_OUTPUT)/mscorlib.dll | sed -e 's,^[0-9]*: ,,g' -e 's,(.*,,g' > $(LINKER_OUTPUT)/mscorlib.txt
-	(cd $(LINKER_OUTPUT); MONO_PATH=.:$(PROFILE_PATH) $(RUNTIME) $(RUNTIME_FLAGS) --debug $(PROFILE_PATH)/nunit-lite-console.exe net_4_x_corlib_test.dll $(NUNIT_ARGS) $(TESTNAME_ARG))
+	(cd $(LINKER_OUTPUT); MONO_PATH=.:$(PROFILE_PATH) $(RUNTIME) $(RUNTIME_FLAGS) --debug $(PROFILE_PATH)/nunit-lite-console.exe $(PROFILE)_corlib_test.dll $(NUNIT_ARGS) $(TESTNAME_ARG))
 
 corlib-test-profiler: build-release
 	@echo RUN CORLIB TEST $@

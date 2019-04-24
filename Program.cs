@@ -59,13 +59,15 @@ namespace Mono.Linker.Optimizer
 
 			moduleEnabled &= !options.DisableModule;
 
+			if (mainModule == null) {
+				Console.Error.WriteLine ("Missing main module argument.");
+				return 1;
+			}
+
+			arguments.Insert (0, "-a");
+			arguments.Insert (1, mainModule);
+
 			if (moduleEnabled) {
-				if (mainModule == null) {
-					Console.Error.WriteLine ("Missing main module argument.");
-					return 1;
-				}
-				arguments.Insert (0, "-a");
-				arguments.Insert (1, mainModule);
 				arguments.Insert (2, "--custom-step");
 				arguments.Insert (3, $"TypeMapStep:{typeof (InitializeStep).AssemblyQualifiedName}");
 

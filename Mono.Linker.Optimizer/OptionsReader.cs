@@ -27,7 +27,6 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Xml.XPath;
-using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer
 {
@@ -75,8 +74,11 @@ namespace Mono.Linker.Optimizer
 
 			ProcessChildren (root, "features/feature", OnFeature);
 
-			var reader = new ConfigurationReader (Options);
+			var reader = new ConfigurationReader (Options.OptimizerConfiguration);
 			reader.Read (root);
+
+			if (reader.NeedPreprocessor && Options.Preprocessor == OptimizerOptions.PreprocessorMode.None)
+				Options.Preprocessor = OptimizerOptions.PreprocessorMode.Automatic;
 		}
 
 		void OnInclude (XPathNavigator nav)
@@ -106,6 +108,7 @@ namespace Mono.Linker.Optimizer
 			CheckAttribute (nav, "report-configuration", value => Options.ReportConfiguration = value);
 			CheckAttribute (nav, "report-profile", value => Options.ReportProfile = value);
 			CheckAttribute (nav, "size-check-tolerance", value => Options.SizeCheckTolerance = value);
+			CheckAttribute (nav, "compare-with", value => Options.CompareWith = value);
 			CheckAttribute (nav, "disable-all", value => Options.DisableAll = value);
 		}
 

@@ -83,6 +83,10 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public string CompareWith {
+			get; set;
+		}
+
 		public bool DisableAll {
 			get; set;
 		}
@@ -141,6 +145,9 @@ namespace Mono.Linker.Optimizer
 						continue;
 					case "report-mode":
 						SetReportMode (value);
+						continue;
+					case "compare-with":
+						CompareWith = value;
 						continue;
 					default:
 						throw new OptimizerException ($"Unknown option `{part}`.");
@@ -202,6 +209,9 @@ namespace Mono.Linker.Optimizer
 				switch (parts[i].ToLowerInvariant ()) {
 				case "dead-code":
 					ReportMode |= ReportMode.DeadCode;
+					continue;
+				case "detailed-methods":
+					ReportMode |= ReportMode.Detailed | ReportMode.DetailedMethods;
 					continue;
 				}
 				if (!Enum.TryParse (parts[i], true, out ReportMode mode))

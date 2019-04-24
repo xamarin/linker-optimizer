@@ -34,6 +34,10 @@ namespace Mono.Linker.Optimizer.Configuration
 	{
 		public SizeReport SizeReport { get; } = new SizeReport ();
 
+		public SizeComparision SizeComparision {
+			get; set;
+		}
+
 		public ActionList ActionList { get; } = new ActionList ();
 
 		public FailList FailList { get; } = new FailList ();
@@ -113,6 +117,14 @@ namespace Mono.Linker.Optimizer.Configuration
 
 		public bool CheckAndReportAssemblySize (OptimizerContext context, AssemblyDefinition assembly, int size)
 		{
+			if (IsEnabled (ReportMode.Detailed)) {
+				var reportEntry = SizeReport.Assemblies.GetAssembly (assembly, true);
+				reportEntry.Size = size;
+
+				GenerateDetailedReport (assembly, reportEntry);
+				CleanupSizeList (reportEntry.Namespaces);
+			}
+
 			if (!Options.CheckSize)
 				return true;
 
@@ -123,17 +135,7 @@ namespace Mono.Linker.Optimizer.Configuration
 			}
 
 			var configEntry = profile.Assemblies.GetAssembly (assembly, true);
-			var sucess = configEntry.Size == null || CheckAssemblySize (context, configEntry, size);
-
-			var reportEntry = SizeReport.Assemblies.GetAssembly (assembly, true);
-			reportEntry.Size = size;
-
-			if (IsEnabled (ReportMode.Detailed)) {
-				GenerateDetailedReport (assembly, reportEntry);
-				CleanupSizeList (reportEntry.Namespaces);
-			}
-
-			return sucess;
+			return configEntry.Size == null || CheckAssemblySize (context, configEntry, size);
 		}
 
 		bool CheckAssemblySize (OptimizerContext context, Assembly assembly, int size)
@@ -164,6 +166,7 @@ namespace Mono.Linker.Optimizer.Configuration
 
 		void GenerateDetailedReport (AssemblyDefinition assembly, Assembly entry)
 		{
+			int totalSize = 0;
 			foreach (var type in assembly.MainModule.Types) {
 				if (type.Name == "<Module>" || string.IsNullOrEmpty (type.Namespace))
 					continue;
@@ -171,20 +174,41 @@ namespace Mono.Linker.Optimizer.Configuration
 				var typeEntry = ns.Types.GetType (ns, type, true);
 				GenerateDetailedReport (type, typeEntry);
 				ns.Size = (ns.Size ?? 0) + typeEntry.Size;
+				totalSize += typeEntry.Size.Value;
 			}
+			entry.CodeSize = totalSize;
 		}
 
 		void GenerateDetailedReport (TypeDefinition type, Type entry)
 		{
 			int size = 0;
+
+			foreach (var field in type.Fields)
+				size += field.Name.Length + 4;
+			foreach (var property in type.Properties)
+				size += property.Name.Length + 4;
+
 			foreach (var method in type.Methods) {
 				if (!method.HasBody)
 					continue;
-				var methodEntry = entry.Methods.GetChild (m => m.Matches (method), () => new Method (entry, method));
-				methodEntry.Size = method.Body.CodeSize;
-				size += methodEntry.Size.Value;
+				var codeSize = GetCodeSize (method);
+				if (IsEnabled (ReportMode.DetailedMethods)) {
+					var methodEntry = entry.Methods.GetChild (m => m.Matches (method), () => new Method (entry, method));
+					methodEntry.Size = codeSize;
+				}
+				size += codeSize;
 			}
 			entry.Size = size;
+		}
+
+		static int GetCodeSize (MethodDefinition method)
+		{
+			var size = method.Body.CodeSize + method.Name.Length + 12;
+			foreach (var arg in method.Parameters)
+				size += arg.Name.Length + 5;
+			if (method.Body.HasVariables)
+				size += 4 * method.Body.Variables.Count;
+			return size;
 		}
 
 		bool CleanupSizeList (NodeList<Type> list)
@@ -195,7 +219,7 @@ namespace Mono.Linker.Optimizer.Configuration
 			for (int i = 0; i < list.Count; i++) {
 				var marked = CleanupSizeList (list[i].Types);
 				marked |= CleanupSizeList (list[i].Methods);
-				marked |= list[i].Size != null || list[i].Action != TypeAction.Preserve;
+				marked |= (list[i].Size ?? 0) > 0;
 				if (marked)
 					continue;
 				list.Children.RemoveAt (i--);
@@ -240,6 +264,7 @@ namespace Mono.Linker.Optimizer.Configuration
 			SizeReport.Visit (visitor);
 			ActionList.Visit (visitor);
 			FailList.Visit (visitor);
+			SizeComparision?.Visit (visitor);
 		}
 	}
 }

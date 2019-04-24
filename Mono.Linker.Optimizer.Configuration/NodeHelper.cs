@@ -45,12 +45,12 @@ namespace Mono.Linker.Optimizer.Configuration
 
 		internal static Type GetNamespace (this NodeList<Type> list, string name, bool add)
 		{
-			return list.GetChild (n => n.Name == name, () => add ? new Type (null, name, null, MatchKind.Namespace, TypeAction.None) : null);
+			return list.GetChild (n => n.Name == name, () => add ? new Type (null, name, null, MatchKind.Namespace) : null);
 		}
 
 		internal static Type GetType (this NodeList<Type> list, Type parent, TypeDefinition type, bool add)
 		{
-			return list.GetChild (t => t.Name == type.Name, () => add ? new Type (parent, type.Name, type.FullName, MatchKind.Name, TypeAction.None) : null);
+			return list.GetChild (t => t.Name == type.Name, () => add ? new Type (parent, type.Name, type.FullName, MatchKind.Name) : null);
 		}
 
 		internal static Method GetMethod (this NodeList<Method> list, Type parent, MethodDefinition method, bool add)
@@ -60,7 +60,7 @@ namespace Mono.Linker.Optimizer.Configuration
 
 		internal static Method GetMethod (this NodeList<Method> list, Type parent, string name, bool add)
 		{
-			return list.GetChild (m => m.Name == name, () => add ? new Method (parent, name, MatchKind.Name, MethodAction.None) : null);
+			return list.GetChild (m => m.Name == name, () => add ? new Method (parent, name, MatchKind.Name) : null);
 		}
 
 		internal static void ProcessChildren (this XPathNavigator nav, string children, Action<XPathNavigator> action)
@@ -68,6 +68,29 @@ namespace Mono.Linker.Optimizer.Configuration
 			var iterator = nav.Select (children);
 			while (iterator.MoveNext ())
 				action (iterator.Current);
+		}
+
+		internal static void ProcessChildren<T> (this XPathNavigator nav, string children, NodeList<T> list, Func<XPathNavigator, T> func)
+			where T : Node
+		{
+			var iterator = nav.Select (children);
+			while (iterator.MoveNext ()) {
+				var child = func (iterator.Current);
+				if (child != null)
+					list.Add (child);
+			}
+		}
+
+		internal static void ProcessChildren<T,U> (this XPathNavigator nav, string children, T parent, NodeList<U> list, Func<XPathNavigator, T, U> func)
+			where T : Node
+			where U : Node
+		{
+			var iterator = nav.Select (children);
+			while (iterator.MoveNext ()) {
+				var child = func (iterator.Current, parent);
+				if (child != null)
+					list.Add (child);
+			}
 		}
 
 		internal static bool GetBoolAttribute (this XPathNavigator nav, string name, out bool value)
@@ -85,28 +108,30 @@ namespace Mono.Linker.Optimizer.Configuration
 			return string.IsNullOrWhiteSpace (attr) ? null : attr;
 		}
 
-		internal static TypeAction GetTypeAction (this XPathNavigator nav, string name)
+		internal static TypeAction? GetTypeAction (this XPathNavigator nav, string name)
 		{
 			if (TryGetTypeAction (nav, name, out var action))
 				return action;
-			return TypeAction.None;
+			return null;
 		}
 
-		internal static bool TryGetTypeAction (this XPathNavigator nav, string name, out TypeAction action)
+		internal static bool TryGetTypeAction (this XPathNavigator nav, string name, out TypeAction? action)
 		{
 			var attribute = GetAttribute (nav, name);
-			if (attribute == null) {
-				action = TypeAction.None;
-				return false;
+			if (attribute != null && Enum.TryParse (attribute, true, out TypeAction result)) {
+				action = result;
+				return true;
 			}
-			return Enum.TryParse (attribute, true, out action);
+
+			action = null;
+			return false;
 		}
 
-		internal static bool TryGetMethodAction (this XPathNavigator nav, string name, out MethodAction action)
+		internal static bool TryGetMethodAction (this XPathNavigator nav, string name, out MethodAction? action)
 		{
 			var attribute = GetAttribute (nav, name);
 			if (attribute == null) {
-				action = MethodAction.None;
+				action = null;
 				return false;
 			}
 
@@ -120,9 +145,15 @@ namespace Mono.Linker.Optimizer.Configuration
 			case "return-true":
 				action = MethodAction.ReturnTrue;
 				return true;
-			default:
-				return Enum.TryParse (attribute, true, out action);
 			}
+
+			if (Enum.TryParse (attribute, true, out MethodAction result)) {
+				action = result;
+				return true;
+			}
+
+			action = null;
+			return false;
 		}
 
 		internal static string GetMethodSignature (MethodDefinition method) => CecilHelper.GetMethodSignature (method);

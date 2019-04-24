@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker-optimizer>
-	<options all-modules="true" preprocessor="full" check-size="true" analyze-all="true" disable-all="true" size-check-configuration="all" />
+	<options all-modules="true" preprocessor="full" check-size="true" analyze-all="true" disable-all="true" report-configuration="all" />
 
 	<include filename="corlib-api.xml" />
 	<include filename="corlib-asserts.xml" />

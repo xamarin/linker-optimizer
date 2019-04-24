@@ -45,7 +45,7 @@ namespace Mono.Linker.Optimizer.Configuration
 			get;
 		}
 
-		public TypeAction Action {
+		public TypeAction? Action {
 			get;
 		}
 
@@ -59,7 +59,7 @@ namespace Mono.Linker.Optimizer.Configuration
 
 		public bool Matches (TypeDefinition type, TypeAction? action = null)
 		{
-			if (action != null && action.Value != Action)
+			if (action != null && Action != null && action.Value != Action)
 				return false;
 
 			switch (Match) {
@@ -74,7 +74,7 @@ namespace Mono.Linker.Optimizer.Configuration
 			}
 		}
 
-		public Type (Type parent, string name, string fullName, MatchKind match, TypeAction action)
+		public Type (Type parent, string name, string fullName, MatchKind match, TypeAction? action = null)
 		{
 			Parent = parent;
 			Name = name;

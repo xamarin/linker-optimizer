@@ -25,35 +25,39 @@
 // THE SOFTWARE.
 using System;
 using System.Xml.XPath;
-using Mono.Cecil;
 
 namespace Mono.Linker.Optimizer.Configuration
 {
 	public class ConfigurationReader
 	{
-		public OptimizerOptions Options {
+		public OptimizerConfiguration Root {
 			get;
 		}
 
-		public OptimizerConfiguration Root => Options.OptimizerConfiguration;
+		public bool NeedPreprocessor {
+			get;
+			private set;
+		}
 
-		public ConfigurationReader (OptimizerOptions options)
+		public ConfigurationReader (OptimizerConfiguration root)
 		{
-			Options = options;
+			Root = root;
 		}
 
 		public void Read (XPathNavigator nav)
 		{
-			nav.ProcessChildren ("conditional", child => OnConditional (child, Root.ActionList));
+			nav.ProcessChildren ("conditional", Root.ActionList.Children, OnConditional);
 
-			nav.ProcessChildren ("namespace", child => OnNamespaceEntry (child, Root.ActionList));
-			nav.ProcessChildren ("type", child => OnTypeEntry (child, Root.ActionList, null));
-			nav.ProcessChildren ("method", child => OnMethodEntry (child, Root.ActionList, null));
+			nav.ProcessChildren ("namespace", Root.ActionList.Children, OnNamespaceEntry);
+			nav.ProcessChildren ("type", (Type)null, Root.ActionList.Children, OnTypeEntry);
+			nav.ProcessChildren ("method", (Type)null, Root.ActionList.Children, OnMethodEntry);
 
-			nav.ProcessChildren ("size-check", child => OnSizeCheckEntry (child));
+			nav.ProcessChildren ("size-check", child => OnSizeCheckEntry (child, Root.SizeCheck));
+
+			nav.ProcessChildren ("size-report", child => OnSizeReportEntry (child, Root.SizeReport));
 		}
 
-		void OnConditional (XPathNavigator nav, ActionList parent)
+		ActionList OnConditional (XPathNavigator nav)
 		{
 			var name = nav.GetAttribute ("feature");
 			if (name == null || !nav.GetBoolAttribute ("enabled", out var enabled))
@@ -62,82 +66,90 @@ namespace Mono.Linker.Optimizer.Configuration
 			OptimizerOptions.FeatureByName (name);
 
 			var conditional = new ActionList (name, enabled);
-			parent.Add (conditional);
 
-			nav.ProcessChildren ("namespace", child => OnNamespaceEntry (child, conditional));
-			nav.ProcessChildren ("type", child => OnTypeEntry (child, conditional, null));
-			nav.ProcessChildren ("method", child => OnMethodEntry (child, conditional, null));
+			nav.ProcessChildren ("namespace", conditional.Children, OnNamespaceEntry);
+			nav.ProcessChildren ("type", (Type)null, conditional.Children, OnTypeEntry);
+			nav.ProcessChildren ("method", (Type)null, conditional.Children, OnMethodEntry);
+
+			return conditional;
 		}
 
-		void OnNamespaceEntry (XPathNavigator nav, ActionList parent)
+		Type OnNamespaceEntry (XPathNavigator nav)
 		{
 			var name = nav.GetAttribute ("name") ?? throw ThrowError ("<namespace> entry needs `name` attribute.");
 
 			var action = nav.GetTypeAction ("action");
 			var node = new Type (null, name, null, MatchKind.Namespace, action);
-			parent.Add (node);
 
-			nav.ProcessChildren ("type", child => OnTypeEntry (child, parent, node));
-			nav.ProcessChildren ("method", child => OnMethodEntry (child, parent, node));
+			nav.ProcessChildren ("type", node, node.Types, OnTypeEntry);
+			nav.ProcessChildren ("method", node, node.Methods, OnMethodEntry);
+
+			return node;
 		}
 
-		void OnTypeEntry (XPathNavigator nav, ActionList list, Type parent)
+		Type OnTypeEntry (XPathNavigator nav, Type parent)
 		{
 			if (!GetName (nav, out var name, out var match))
 				throw ThrowError ($"Ambiguous name in type entry `{nav.OuterXml}`.");
 
 			var action = nav.GetTypeAction ("action");
 			var type = new Type (parent, name, null, match, action);
-			if (parent != null)
-				parent.Types.Add (type);
-			else
-				list.Add (type);
 
-			nav.ProcessChildren ("type", child => OnTypeEntry (nav, list, type));
-			nav.ProcessChildren ("method", child => OnMethodEntry (child, list, type));
+			nav.ProcessChildren ("type", parent, type.Types, OnTypeEntry);
+			nav.ProcessChildren ("method", parent, type.Methods, OnMethodEntry);
+
+			return type;
 		}
 
-		void OnMethodEntry (XPathNavigator nav, ActionList list, Type parent)
+		Method OnMethodEntry (XPathNavigator nav, Type parent)
 		{
 			if (!GetName (nav, out var name, out var match))
 				throw ThrowError ($"Ambiguous name in method entry `{nav.OuterXml}`.");
 
-			if (!nav.TryGetMethodAction ("action", out var action))
-				throw ThrowError ($"Missing `action` attribute in {nav.OuterXml}.");
+			MethodAction? action = null;
+			var attribute = nav.GetAttribute ("action");
+			if (attribute != null && !nav.TryGetMethodAction ("action", out action))
+				throw ThrowError ($"Cannot parse `action` attribute in {nav.OuterXml}.");
 
-			switch (action) {
+			switch (action ?? MethodAction.None) {
 			case MethodAction.ReturnFalse:
 			case MethodAction.ReturnTrue:
 			case MethodAction.ReturnNull:
 			case MethodAction.Throw:
-				if (Options.Preprocessor == OptimizerOptions.PreprocessorMode.None)
-					Options.Preprocessor = OptimizerOptions.PreprocessorMode.Automatic;
+				NeedPreprocessor = true;
 				break;
 			}
 
-			var method = new Method (parent, name, match, action);
-			if (parent != null)
-				parent.Methods.Add (method);
-			else
-				list.Add (method);
+			return new Method (parent, name, match, action);
 		}
 
-		void OnSizeCheckEntry (XPathNavigator nav)
+		void OnSizeCheckEntry (XPathNavigator nav, SizeCheck parent)
 		{
-			var name = nav.GetAttribute ("configuration");
-			var configuration = Root.SizeCheck.Configurations.GetChild (c => c.Name == name, () => new Configuration (name));
-			
-			nav.ProcessChildren ("profile", child => OnProfileEntry (child, configuration));
+			nav.ProcessChildren ("configuration", parent, parent.Configurations, OnConfigurationEntry);
 		}
 
-		void OnProfileEntry (XPathNavigator nav, Configuration configuration)
+		Configuration OnConfigurationEntry (XPathNavigator nav, SizeCheck parent)
+		{
+			var name = nav.GetAttribute ("name");
+			var configuration = Root.SizeCheck.Configurations.GetChild (c => c.Name == name, () => new Configuration (name));
+			nav.ProcessChildren ("profile", configuration, configuration.Profiles, OnProfileEntry);
+			return configuration;
+		}
+
+		Profile OnProfileEntry (XPathNavigator nav, Configuration configuration)
 		{
 			var name = nav.GetAttribute ("name");
 			var profile = configuration.Profiles.GetChild (p => p.Name == name, () => new Profile (name));
-			nav.ProcessChildren ("assembly", child => OnAssembly (child, profile));
+			nav.ProcessChildren ("assembly", profile.Assemblies, OnAssembly);
+			return profile;
 		}
 
-		void OnAssembly (XPathNavigator nav, Profile profile)
+		void OnSizeReportEntry (XPathNavigator nav, SizeReport parent)
+		{
+			nav.ProcessChildren ("assembly", parent.Assemblies, OnAssembly);
+		}
+
+		Assembly OnAssembly (XPathNavigator nav)
 		{
 			var name = OptionsReader.GetAttribute (nav, "name") ?? throw OptionsReader.ThrowError ("<assembly> requires `name` attribute.");
 			var sizeAttr = OptionsReader.GetAttribute (nav, "size");
@@ -146,7 +158,10 @@ namespace Mono.Linker.Optimizer.Configuration
 			var tolerance = OptionsReader.GetAttribute (nav, "tolerance");
 
 			var assembly = new Assembly (name, size, tolerance);
-			profile.Assemblies.Add (assembly);
+
+			nav.ProcessChildren ("namespace", assembly.Namespaces, OnNamespaceEntry);
+
+			return assembly;
 		}
 
 		static bool GetName (XPathNavigator nav, out string name, out MatchKind match)

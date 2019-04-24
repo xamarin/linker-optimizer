@@ -48,5 +48,10 @@ namespace Mono.Linker.Optimizer.Configuration
 		{
 			Assemblies.VisitChildren (visitor);
 		}
+
+		public override string ToString ()
+		{
+			return $"[{GetType ().Name} {Name}]";
+		}
 	}
 }

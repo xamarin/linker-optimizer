@@ -36,7 +36,8 @@ namespace Mono.Linker.Optimizer
 		Size		= 4,
 		DeadCode	= 8,
 		Detailed	= 16,
+		DetailedMethods	= 32,
 
-		All		= 31
+		All		= 63
 	}
 }

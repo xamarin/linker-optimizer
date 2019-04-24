@@ -16,7 +16,7 @@ LINKER_ARGS_AOT = -out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH) -c link -l
 
 TEST_LINKER_ARGS := $(TEST_LINKER_ARGS) $(LOCAL_LINKER_ARGS)
 
-NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,NotWorking,CAS,LinkerNotWorking$(EXTRA_NUNIT_EXCLUDES)
+NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,NotWorking,CAS,LinkerNotWorking,MobileNotWorking$(EXTRA_NUNIT_EXCLUDES)
 
 .NOTPARALLEL:
 
@@ -79,6 +79,9 @@ iltest-%: iltest-%.exe standalone-build
 
 lldb-test:
 	(cd $(LINKER_OUTPUT); MONO_PATH=. lldb $(RUNTIME_BINARY) -- $(RUNTIME_FLAGS) --debug -O=-aot $(notdir $(wildcard $(LINKER_OUTPUT)/*.exe)))
+
+lldb-corlib-test:
+	(cd $(LINKER_OUTPUT); MONO_PATH=. lldb $(RUNTIME_BINARY) -- $(RUNTIME_FLAGS) --debug -O=-aot $(PROFILE_PATH)/nunit-lite-console.exe $(PROFILE)_corlib_test.dll $(NUNIT_ARGS) $(TESTNAME_ARG))
 
 standalone-build::
 	$(MAKE) -C $(ROOTDIR) standalone-build

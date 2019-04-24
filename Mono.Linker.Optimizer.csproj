@@ -94,6 +94,8 @@
     <Compile Include="Mono.Linker.Optimizer.Configuration\Profile.cs" />
     <Compile Include="Mono.Linker.Optimizer\SizeReportStep.cs" />
     <Compile Include="Mono.Linker.Optimizer\FinalCheckStep.cs" />
+    <Compile Include="Mono.Linker.Optimizer\CompareWithReportStep.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\SizeComparision.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="external\linker\src\linker\Mono.Linker.csproj">

@@ -37,6 +37,10 @@ namespace Mono.Linker.Optimizer.Configuration
 			get; set;
 		}
 
+		public int? CodeSize {
+			get; set;
+		}
+
 		public string Tolerance {
 			get; set;
 		}
