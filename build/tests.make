@@ -16,7 +16,7 @@ LINKER_ARGS_AOT = -out $(LINKER_OUTPUT) -b true -d $(AOTPROFILE_PATH) -c link -l
 
 TEST_LINKER_ARGS := $(TEST_LINKER_ARGS) $(LOCAL_LINKER_ARGS)
 
-NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,NotWorking,CAS,LinkerNotWorking,MobileNotWorking$(EXTRA_NUNIT_EXCLUDES)
+NUNIT_ARGS := -exclude=NotOnMac,MacNotWorking,NotWorking,CAS,LinkerNotWorking,MobileNotWorking,Remoting,Security,Globalization$(EXTRA_NUNIT_EXCLUDES)
 
 .NOTPARALLEL:
 
