@@ -10,6 +10,8 @@
 	<type fullname="System.Runtime.Remoting.Proxies.TransparentProxy" action="preserve" />
 	<type fullname="System.IO.File" action="preserve" />
 	<type fullname="System.IO.TextWriter" action="preserve" />
+	<type fullname="System.Runtime.Remoting.Messaging.CallContext" action="preserve" />
+	<type fullname="System.Runtime.Remoting.Messaging.ILogicalThreadAffinative" action="preserve" />
 
 	<conditional feature="sre" enabled="true">
 		<type fullname="System.Reflection.Emit.TypeBuilder" action="preserve" />
