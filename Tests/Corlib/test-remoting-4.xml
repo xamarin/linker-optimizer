@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker-optimizer>
 
-	<options report-configuration="remoting" report-profile="net_4_x" detailed-size-report="true" check-size="true" compare-with="test-remoting-4-size.xml" />
-
-	<options-x all-modules="true" analyze-all="true" />
+	<options all-modules="true" analyze-all="true" disable-all="true" report-configuration="wasm" report-profile="wasm" report-mode="detailed-methods" check-size="true" />
 
 	<include filename="corlib-api.xml" />
 	<include filename="corlib-asserts.xml" />
@@ -14,7 +12,7 @@
 				<assembly name="mscorlib" size="944640" />
 			</profile>
 			<profile name="wasm">
-				<assembly name="mscorlib" size="573952" />
+				<assembly name="mscorlib" size="483328" />
 			</profile>
 		</configuration>
 	</size-check>
