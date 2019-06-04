@@ -43,6 +43,10 @@ namespace Mono.Linker.Optimizer
 			get; set;
 		}
 
+		public bool DeadCodeElimination {
+			get; set;
+		}
+
 		public PreprocessorMode Preprocessor {
 			get; set;
 		}
@@ -108,6 +112,7 @@ namespace Mono.Linker.Optimizer
 		public OptimizerOptions ()
 		{
 			NoConditionalRedefinition = true;
+			DeadCodeElimination = true;
 			_enabled_features = new Dictionary<MonoLinkerFeature, bool> {
 				[MonoLinkerFeature.Unknown] = false,
 				[MonoLinkerFeature.Martin] = false
@@ -172,6 +177,9 @@ namespace Mono.Linker.Optimizer
 					break;
 				case "analyze-all":
 					AnalyzeAll = enabled ?? true;
+					break;
+				case "dead-code-elimination":
+					DeadCodeElimination = enabled ?? true;
 					break;
 				case "no-conditional-redefinition":
 					NoConditionalRedefinition = enabled ?? true;

@@ -100,6 +100,7 @@ namespace Mono.Linker.Optimizer
 			CheckAttribute (nav, "main-debug", value => Options.AutoDebugMain = value);
 			CheckAttribute (nav, "all-modules", value => Options.ScanAllModules = value);
 			CheckAttribute (nav, "analyze-all", value => Options.AnalyzeAll = value);
+			CheckAttribute (nav, "dead-code-elimination", value => Options.DeadCodeElimination = value);
 			CheckAttribute (nav, "preprocessor", value => Options.SetPreprocessorMode (value));
 			CheckAttribute (nav, "no-conditional-redefinition", value => Options.NoConditionalRedefinition = value);
 			CheckAttribute (nav, "ignore-resolution-errors", value => Options.IgnoreResolutionErrors = value);

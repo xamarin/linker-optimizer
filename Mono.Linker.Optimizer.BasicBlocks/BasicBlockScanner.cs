@@ -254,6 +254,9 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 		void EliminateDeadBlocks (bool full = true)
 		{
+			if (!Context.Options.DeadCodeElimination)
+				return;
+
 			LogDebug (1, $"ELIMINATING DEAD BLOCKS");
 
 			bool removed;
