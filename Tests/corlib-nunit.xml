@@ -6,6 +6,7 @@
 	<type fullname="System.AppDomain" action="preserve" />
 	<type fullname="System.Environment" action="preserve" />
 	<type fullname="System.EventArgs" action="preserve" />
+	<type fullname="System.Reflection.Assembly" action="preserve" />
 	<type fullname="System.Reflection.MethodBase" action="preserve" />
 	<type fullname="System.Runtime.Remoting.Proxies.TransparentProxy" action="preserve" />
 	<type fullname="System.IO.File" action="preserve" />

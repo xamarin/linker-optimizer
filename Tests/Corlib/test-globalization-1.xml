@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker-optimizer>
-	<options all-modules="true" analyze-all="true" preprocessor="full" report-size="true" />
+	<options dead-code-elimination="false" report-configuration="globalization" report-profile="wasm" report-mode="all" check-size="true" size-check-tolerance="1%" />
 
 	<include filename="corlib-api.xml" />
-	<include filename="corlib-asserts.xml" />
+	<!-- <include filename="corlib-asserts.xml" /> -->
+
+	<size-check>
+		<configuration name="globalization">
+			<profile name="wasm">
+				<assembly name="mscorlib" size="675328" />
+			</profile>
+		</configuration>
+	</size-check>
+
+	<conditional feature="globalization" enabled="false">
+		<namespace name="System.Globalization">
+			<type name="HebrewNumber" action="fail" />
+			<type name="JapaneseCalendar" action="fail" />
+			<type name="TaiwanCalendar" action="fail" />
+		</namespace>
+	</conditional>
 
 	<features>
 		<feature name="globalization" enabled="false" />

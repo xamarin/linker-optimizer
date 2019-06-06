@@ -79,12 +79,16 @@ namespace Mono.Linker.Optimizer
 					arguments.Add ("--exclude-feature");
 					arguments.Add ("security");
 				}
-#if MARTIN_FIXME
 				if (!options.IsFeatureEnabled (MonoLinkerFeature.Remoting)) {
 					arguments.Add ("--exclude-feature");
 					arguments.Add ("remoting");
 				}
-#endif
+				if (!options.IsFeatureEnabled (MonoLinkerFeature.Globalization)) {
+					arguments.Add ("--exclude-feature");
+					arguments.Add ("globalization");
+				}
+			} else {
+				Console.Error.WriteLine ($"Optimizer is disabled.");
 			}
 
 			var watch = new Stopwatch ();

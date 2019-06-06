@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker-optimizer>
-	<options all-modules="true" preprocessor="full" check-size="true" analyze-all="true" report-configuration="reflection-emit" />
+	<options all-modules="true" preprocessor="full" check-size="false" analyze-all="true" report-configuration="reflection-emit" />
 
 	<include filename="corlib-api.xml" />
 	<include filename="corlib-asserts.xml" />
 	<include filename="corlib-sizes.xml" />
+
+	<namespace name="System.Runtime.Remoting">
+		<type name="RemotingConfiguration" action="none" />
+	</namespace>
+	<namespace name="System.Runtime.Remoting.Activation">
+		<type name="ActivationServices">
+			<method name="CreateProxyForType" action="none" />
+		</type>
+	</namespace>
+
+	<type fullname="System.AppDomain">
+		<method name="GetMarshalledDomainObjRef" action="none" />
+	</type>
+
+	<type fullname="Mono.Xml.SmallXmlParser" action="none" />
 
 	<features>
 		<feature name="reflection-emit" enabled="false" />

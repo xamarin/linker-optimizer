@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <linker-optimizer>
 
-	<options all-modules="true" analyze-all="true" disable-all="true" report-configuration="wasm" report-profile="wasm" report-mode="detailed-methods" check-size="true" />
+	<options report-configuration="remoting" report-profile="wasm" report-mode="actions+size+detailed" check-size="true" size-check-tolerance="5%" />
 
 	<include filename="corlib-api.xml" />
 	<include filename="corlib-asserts.xml" />
@@ -12,10 +12,14 @@
 				<assembly name="mscorlib" size="944640" />
 			</profile>
 			<profile name="wasm">
-				<assembly name="mscorlib" size="483328" />
+				<assembly name="mscorlib" size="492032" />
 			</profile>
 		</configuration>
 	</size-check>
+
+	<type fullname="System.Runtime.Serialization.IObjectReference">
+		<method name="GetRealObject" action="fail" />
+	</type>
 
 	<features>
 		<feature name="remoting" enabled="false" />
