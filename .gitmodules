@@ -1,4 +1,4 @@
 [submodule "external/linker"]
 	path = external/linker
-	branch = work-linker-research
-	url = git@github.com:baulig/private-linker.git
+	branch = optimizer-stable
+	url = git@github.com:baulig/linker.git
