@@ -13,7 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Mono.Linker.Optimizer\*.cs" />
+    <Compile Include="Mono.Linker.Optimizer.BasicBlocks\*.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Conditionals\*.cs" />
+    <Compile Include="Mono.Linker.Optimizer.Configuration\*.cs" />
+    <Compile Include="System.Runtime.CompilerServices\*.cs" />
+
   <!--
     <Compile Include="**\*.cs" Exclude="bin\**;obj\**;linker\**.*" />
     -->
