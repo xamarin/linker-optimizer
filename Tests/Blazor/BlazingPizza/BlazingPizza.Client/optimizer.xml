@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<linker-optimizer>
+
+	<options report-configuration="blazor" disable-all="true" report-mode="actions+size+detailed" check-size="false" size-check-tolerance="10%" />
+
+	<namespace name="System.Linq.Expressions" action="none" />
+
+	<namespace name="Microsoft.Extensions.DependencyInjection" action="none" />
+
+	<type fullname="Microsoft.Extensions.DependencyInjection.ServiceProvider" action="none" />
+	<type fullname="Microsoft.Extensions.DependencyInjection.ServiceLookup.ExpressionsServiceProviderEngine" action="none" />
+	<type fullname="Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine" action="none" />
+
+</linker-optimizer>

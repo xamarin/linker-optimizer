@@ -3,9 +3,9 @@ thisdir = tools/linker/Martin/Tests
 makefile_dir := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 ROOTDIR := $(abspath $(makefile_dir)/..)
 
-include $(ROOTDIR)/build/rules.make
+include $(ROOTDIR)/mk/rules.make
 
-include $(ROOTDIR)/build/tests.make
+include $(ROOTDIR)/mk/tests.make
 
 ifdef TESTNAME
 TESTNAME_ARG = -test=$(TESTNAME)

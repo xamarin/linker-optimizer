@@ -1,0 +1,55 @@
+<linker>
+
+  <assembly fullname="Mono.WebAssembly.Interop">
+    <type fullname="Mono.WebAssembly.Interop.MonoWebAssemblyJSRuntime" />
+  </assembly>
+
+  <assembly fullname="Microsoft.AspNetCore.Blazor" >
+    <type fullname="Microsoft.AspNetCore.Blazor.Services.WebAssemblyComponentContext" />
+    <type fullname="Microsoft.AspNetCore.Components.Builder.ComponentsApplicationBuilderExtensions" />
+    <type fullname="Microsoft.AspNetCore.Blazor.Hosting.WebAssemblyHost" />
+    <type fullname="Microsoft.AspNetCore.Blazor.Services.WebAssemblyLoggerFactory" />
+    <namespace fullname="Microsoft.AspNetCore.Blazor.Rendering" />
+    <namespace fullname="Microsoft.AspNetCore.Blazor.Http" />
+  </assembly>
+
+  <assembly fullname="Microsoft.AspNetCore.Components">
+    <namespace fullname="Microsoft.AspNetCore.Components.Reflection" />
+    <namespace fullname="Microsoft.AspNetCore.Components.Routing" />
+
+    <namespace fullname="Microsoft.AspNetCore.Components">
+      <type fullname="LayoutAttribute" />
+      <type fullname="LayoutComponentBase" />
+      <type fullname="PageDisplay" />
+      <type fullname="RouteAttribute" />
+      <type fullname="UI*EventArgs" />
+    </namespace>
+
+    <namespace fullname="Microsoft.AspNetCore.Components.Rendering">
+      <type fullname="EventFieldInfo" />
+    </namespace>
+  </assembly>
+
+  <assembly fullname="Microsoft.AspNetCore.Components.Web">
+    <namespace fullname="Microsoft.AspNetCore.Components">
+      <type fullname="UI*EventArgs" />
+    </namespace>
+
+    <namespace fullname="Microsoft.AspNetCore.Components.Routing">
+      <type fullname="NavLink" />
+    </namespace>
+  </assembly>
+
+  <assembly fullname="Microsoft.AspNetCore.Authorization" preserve="all">
+    <namespace fullname="Microsoft.AspNetCore.Authorization">
+      <type fullname="DefaultAuthorizationHandlerProvider" />
+      <type fullname="DefaultAuthorizationPolicyProvider" />
+      <type fullname="DefaultAuthorizationService" />
+    </namespace>
+  </assembly>
+
+  <assembly fullname="Microsoft.Extensions.Options" preserve="all">
+    <type fullname="Microsoft.Extensions.Options.OptionsManager`1" />
+  </assembly>
+
+</linker>

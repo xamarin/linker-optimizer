@@ -3,7 +3,7 @@ thisdir = tools/linker/Martin/Tests/Regression
 makefile_dir := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 ROOTDIR := $(abspath $(makefile_dir)/../..)
 
-include $(ROOTDIR)/build/rules.make
+include $(ROOTDIR)/mk/rules.make
 
 TEST_LINKER_ARGS := --optimizer-options -all-modules,analyze-all
 
@@ -42,7 +42,7 @@ ILTEST_CASES := \
 	iltest-flow-analysis-1.il
 
 
-include $(ROOTDIR)/build/tests.make
+include $(ROOTDIR)/mk/tests.make
 
 $(eval $(call RunTests,weak-instances))
 $(eval $(call RunTests,features))

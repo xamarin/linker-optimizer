@@ -134,8 +134,10 @@ namespace Mono.Linker.Optimizer
 				}
 			}
 
-			if (CorlibAssembly == null)
-				throw new OptimizerException ($"Cannot find `mscorlib.dll` is assembly list.");
+			if (CorlibAssembly == null) {
+				Console.Error.WriteLine ($"Cannot find `mscorlib.dll` is assembly list.");
+				// throw new OptimizerException ($"Cannot find `mscorlib.dll` is assembly list.");
+			}
 			if (MainAssembly == null)
 				throw new OptimizerException ($"Cannot find main module `{mainModule}` is assembly list.");
 

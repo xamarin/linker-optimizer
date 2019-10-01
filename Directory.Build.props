@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <LocalDotNetRoot>$(RepoRoot).dotnet\</LocalDotNetRoot>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseLocalBuild)' != 'false'">
+    <LocalBuildRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</LocalBuildRoot>
+    <LocalRestoreSources>
+      $(LocalBuildRoot)/Blazor/artifacts/packages/Debug/Shipping/;
+      $(LocalBuildRoot)/Extensions/artifacts/packages/Debug/Shipping/;
+      $(LocalBuildRoot)/Extensions/artifacts/packages/Debug/NonShipping/;
+      $(LocalBuildRoot)/AspNetCore/artifacts/packages/Debug/Shipping/;
+      $(LocalBuildRoot)/AspNetCore/artifacts/packages/Debug/NonShipping/;
+      $(LocalBuildRoot)/AspNetCore-Tooling/artifacts/packages/Debug/Shipping/;
+      $(LocalBuildRoot)/AspNetCore-Tooling/artifacts/packages/Debug/NonShipping/;
+      $(LocalBuildRoot)/EntityFrameworkCore/artifacts/packages/Debug/Shipping/;
+    </LocalRestoreSources>
+
+    <RestoreSources>
+      $(RestoreSources);
+      $(LocalRestoreSources);
+    </RestoreSources>
+  </PropertyGroup>
+
+</Project>

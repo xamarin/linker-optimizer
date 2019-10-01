@@ -3,7 +3,7 @@ thisdir = tools/linker/Martin/Tests/Corlib
 makefile_dir := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 ROOTDIR := $(abspath $(makefile_dir)/../..)
 
-include $(ROOTDIR)/build/rules.make
+include $(ROOTDIR)/mk/rules.make
 
 TEST_LINKER_ARGS := --optimizer-report $(LINKER_OUTPUT)/martin-report.xml --optimizer-options report-profile=$(PROFILE)
 
@@ -35,7 +35,7 @@ TEST_CASES := \
 	test-size-check-remoting.cs \
 	test-size-check-all.cs \
 
-include $(ROOTDIR)/build/tests.make
+include $(ROOTDIR)/mk/tests.make
 
 $(eval $(call RunTests,globalization))
 $(eval $(call RunTests,crypto))
