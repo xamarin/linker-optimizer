@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="linker\linker.csproj" />
+    <ProjectReference Include="..\external\linker\external\cecil\Mono.Cecil.csproj" />
+    <ProjectReference Include="..\external\linker\external\cecil\symbols\mdb\Mono.Cecil.Mdb.csproj" />
+    <ProjectReference Include="..\external\linker\external\cecil\symbols\pdb\Mono.Cecil.Pdb.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+  <!--
+    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;linker\**.*" />
+    -->
+  </ItemGroup>
+
+</Project>

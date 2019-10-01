@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>IL Linker</Description>
+    <DefineConstants>$(DefineConstants);FEATURE_ILLINK;FEATURE_ILLINK_OPTIMIZER;</DefineConstants>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" $(Configuration.EndsWith('Debug')) ">
+    <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
+    <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" $(Configuration.EndsWith('Release')) ">
+    <Optimize Condition=" '$(Optimize)' == '' ">true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\external\linker\external\cecil\Mono.Cecil.csproj" />
+    <ProjectReference Include="..\..\external\linker\external\cecil\symbols\mdb\Mono.Cecil.Mdb.csproj" />
+    <ProjectReference Include="..\..\external\linker\external\cecil\symbols\pdb\Mono.Cecil.Pdb.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\external\linker\src\linker\Linker\*.cs" />
+    <Compile Include="..\..\external\linker\src\linker\Linker.Steps\*.cs" />
+  </ItemGroup>
+
+</Project>
