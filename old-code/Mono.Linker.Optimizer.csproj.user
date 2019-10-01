@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
-    <StartAction>Project</StartAction>
-    <StartArguments>--optimizer test-globalization-1 --optimizer-report martin-report.xml --optimizer-options report-profile=wasm,report-mode=all -out output -b true -d /Workspace/mono-patch/mcs/class/lib/wasm -d /Workspace/linker-research/Tests/TestHelpers -c link -l none</StartArguments>
-    <StartWorkingDirectory>Tests\Corlib</StartWorkingDirectory>
-    <ConsolePause>true</ConsolePause>
-  </PropertyGroup>
-</Project>
