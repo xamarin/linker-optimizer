@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseLocalBuild)' != 'false'">
+    <AspNetVersion>3.0.0-dev</AspNetVersion>
+    <AspNetBlazorHttpClientVersion>3.0.0-dev</AspNetBlazorHttpClientVersion>
+
     <LocalBuildRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</LocalBuildRoot>
     <LocalRestoreSources>
       $(LocalBuildRoot)/Blazor/artifacts/packages/Debug/Shipping/;
@@ -23,6 +26,11 @@
       $(RestoreSources);
       $(LocalRestoreSources);
     </RestoreSources>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseLocalBuild)' == 'false'">
+    <AspNetVersion>3.0.0-preview4-19216-03</AspNetVersion>
+    <AspNetBlazorHttpClientVersion>3.0.0-preview8.19405.7</AspNetBlazorHttpClientVersion>
   </PropertyGroup>
 
 </Project>
