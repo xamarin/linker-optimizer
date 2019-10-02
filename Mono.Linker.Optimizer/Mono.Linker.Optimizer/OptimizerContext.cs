@@ -48,12 +48,17 @@ namespace Mono.Linker.Optimizer
 			get;
 		}
 
+		public string MainModule {
+			get;
+		}
+
 		public AnnotationStore Annotations => Context.Annotations;
 
-		OptimizerContext (LinkContext context, OptimizerOptions options)
+		OptimizerContext (LinkContext context, OptimizerOptions options, string mainModule)
 		{
 			Context = context;
 			Options = options;
+			MainModule = mainModule;
 		}
 
 		public void LogMessage (MessageImportance importance, string message)
@@ -72,11 +77,15 @@ namespace Mono.Linker.Optimizer
 			Context.Logger.LogMessage (MessageImportance.Low, message);
 		}
 
+		static bool initialized;
+
 		public static void Initialize (LinkContext linkContext, string mainModule, OptimizerOptions options)
 		{
-			var context = new OptimizerContext (linkContext, options);
+			if (initialized)
+				return;
+			initialized = true;
 
-			context.Initialize (mainModule);
+			var context = new OptimizerContext (linkContext, options, mainModule);
 
 			if (options.CheckSize)
 				options.ReportMode |= ReportMode.Size;
@@ -87,6 +96,9 @@ namespace Mono.Linker.Optimizer
 					options.Preprocessor = OptimizerOptions.PreprocessorMode.Automatic;
 			}
 
+			linkContext.Pipeline.AddStepAfter (typeof (TypeMapStep), new InitializeOptimizerStep (context));
+			if (options.EnableBlazor)
+				linkContext.Pipeline.AddStepBefore(typeof(MarkStep), new BlazorPreserveStep(context));
 			linkContext.Pipeline.AddStepBefore (typeof (MarkStep), new PreprocessStep (context));
 			linkContext.Pipeline.ReplaceStep (typeof (MarkStep), new ConditionalMarkStep (context));
 			linkContext.Pipeline.AppendStep (new SizeReportStep (context));
@@ -94,6 +106,8 @@ namespace Mono.Linker.Optimizer
 				linkContext.Pipeline.AppendStep (new CompareWithReportStep (context));
 			linkContext.Pipeline.AppendStep (new GenerateReportStep (context));
 			linkContext.Pipeline.AppendStep (new FinalCheckStep (context));
+
+			context.ResolveAssemblies ();
 		}
 
 		const string LinkerSupportType = "System.Runtime.CompilerServices.MonoLinkerSupport";
@@ -112,11 +126,19 @@ namespace Mono.Linker.Optimizer
 		Lazy<MethodDefinition> _platform_not_supported_exception_ctor;
 		FieldInfo _tracer_stack_field;
 
-		void Initialize (string mainModule)
+		void ResolveAssemblies ()
+		{
+			foreach (var reference in Options.AssemblyReferences) {
+				var assembly = Context.Resolve (reference);
+				LogMessage (MessageImportance.Normal, $"Resolved assembly reference: {reference} {assembly}");
+			}
+		}
+
+		void Initialize ()
 		{
 			LogMessage (MessageImportance.High, $"Initializing {Program.ProgramName}.");
 
-			var mainName = Path.GetFileNameWithoutExtension (mainModule);
+			var mainName = Path.GetFileNameWithoutExtension (MainModule);
 
 			foreach (var asm in Context.GetAssemblies ()) {
 				switch (asm.Name.Name) {
@@ -139,7 +161,7 @@ namespace Mono.Linker.Optimizer
 				// throw new OptimizerException ($"Cannot find `mscorlib.dll` is assembly list.");
 			}
 			if (MainAssembly == null)
-				throw new OptimizerException ($"Cannot find main module `{mainModule}` is assembly list.");
+				throw new OptimizerException ($"Cannot find main module `{MainModule}` is assembly list.");
 
 			_is_weak_instance_of = ResolveSupportMethod ("IsWeakInstanceOf");
 			_as_weak_instance_of = ResolveSupportMethod ("AsWeakInstanceOf");
@@ -381,5 +403,19 @@ namespace Mono.Linker.Optimizer
 
 			public bool Matches (MethodDefinition method) => method != null && (method == Corlib || method == Helper);
 		}
+
+		class InitializeOptimizerStep : OptimizerBaseStep
+		{
+			public InitializeOptimizerStep (OptimizerContext context)
+				: base (context)
+			{
+			}
+
+			protected override void Process ()
+			{
+				Context.Initialize ();
+			}
+		}
+
 	}
 }

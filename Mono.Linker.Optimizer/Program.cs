@@ -59,17 +59,17 @@ namespace Mono.Linker.Optimizer
 
 			moduleEnabled &= !options.DisableModule;
 
-			if (mainModule == null) {
+			if (mainModule != null) {
+				// arguments.Insert(0, "-a");
+				// arguments.Insert(1, mainModule);
+			} else if (moduleEnabled) {
 				Console.Error.WriteLine ("Missing main module argument.");
 				return 1;
 			}
 
-			arguments.Insert (0, "-a");
-			arguments.Insert (1, mainModule);
-
 			if (moduleEnabled) {
-				arguments.Insert (2, "--custom-step");
-				arguments.Insert (3, $"TypeMapStep:{typeof (InitializeStep).AssemblyQualifiedName}");
+				arguments.Add ("--custom-step");
+				arguments.Add ($"{typeof (InitializeStep).AssemblyQualifiedName}:ResolveFromAssemblyStep");
 
 				if (!options.IsFeatureEnabled (MonoLinkerFeature.ReflectionEmit)) {
 					arguments.Add ("--exclude-feature");
@@ -86,6 +86,10 @@ namespace Mono.Linker.Optimizer
 				if (!options.IsFeatureEnabled (MonoLinkerFeature.Globalization)) {
 					arguments.Add ("--exclude-feature");
 					arguments.Add ("globalization");
+				}
+				if (mainModule != null) {
+					arguments.Add ("-a");
+					arguments.Add (mainModule);
 				}
 			} else {
 				Console.Error.WriteLine ($"Optimizer is disabled.");
@@ -146,6 +150,10 @@ namespace Mono.Linker.Optimizer
 		{
 			while (arguments.Count > 0) {
 				var token = arguments[0];
+				if (token == "--") {
+					arguments.RemoveAt (0);
+					break;
+				}
 				if (!token.StartsWith ("--optimizer", StringComparison.Ordinal))
 					break;
 
@@ -176,6 +184,11 @@ namespace Mono.Linker.Optimizer
 					filename = arguments [0];
 					arguments.RemoveAt (0);
 					options.ReportFileName = filename;
+					break;
+				case "--optimizer-ref":
+					filename = arguments [0];
+					arguments.RemoveAt (0);
+					options.AssemblyReferences.Add (filename);
 					break;
 				}
 			}

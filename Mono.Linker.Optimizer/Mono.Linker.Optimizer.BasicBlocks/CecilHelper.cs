@@ -417,6 +417,21 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			return builder.ToString ();
 		}
 
+		public static TypeDefinition Resolve (TypeReference reference)
+		{
+			if (reference is FunctionPointerType)
+				return null;
+
+			if (reference is GenericParameter)
+				return null;
+
+			TypeDefinition type = reference as TypeDefinition;
+			if (type == null)
+				type = reference.Resolve ();
+
+			return type;
+		}
+
 		// Unused template listing all possible opcode types.
 		static void AllOpCodeTypes (Code code)
 		{
