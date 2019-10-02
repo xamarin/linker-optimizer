@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
+    <BlazorLinkOnBuild>true</BlazorLinkOnBuild>
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <LangVersion>7.3</LangVersion>
@@ -8,10 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.0.0-preview9.19465.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="3.0.0-preview9.19465.2" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.0.0-preview9.19465.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.DevServer" Version="3.0.0-preview9.19465.2" PrivateAssets="all" />
+   <LinkerOptimizerXmlDescriptors Include="optimizer.xml" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <LinkerOptimizerOptions>report-profile=wasm,report-mode=actions+size+detailed</LinkerOptimizerOptions>
+    <LinkerOptimizerReport>martin-report.xml</LinkerOptimizerReport>
+    <LinkerOptimizerExtraLinkerArguments>--verbose --dump-dependencies</LinkerOptimizerExtraLinkerArguments>
+    <LinkerOptimizerEnabled>true</LinkerOptimizerEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="$(AspNetVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="$(AspNetVersion)" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="$(AspNetBlazorHttpClientVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.DevServer" Version="$(AspNetVersion)" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

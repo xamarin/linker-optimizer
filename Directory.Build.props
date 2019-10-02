@@ -32,8 +32,8 @@
 
   <PropertyGroup Condition="'$(UseLocalBuild)' == 'false'">
     <LocalDotNet>dotnet</LocalDotNet>
-    <AspNetVersion>3.0.0-preview4-19216-03</AspNetVersion>
-    <AspNetBlazorHttpClientVersion>3.0.0-preview8.19405.7</AspNetBlazorHttpClientVersion>
+    <AspNetVersion>3.0.0-preview9.19465.2</AspNetVersion>
+    <AspNetBlazorHttpClientVersion>3.0.0-preview9.19465.2</AspNetBlazorHttpClientVersion>
   </PropertyGroup>
 
 </Project>
