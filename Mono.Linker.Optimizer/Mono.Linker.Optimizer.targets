@@ -60,7 +60,7 @@
 
       <_LinkerOptimizerCommandLine>$(_LinkerOptimizerArguments) @(_LinkerOptimizerXmlArguments, ' ') $(_LinkerOptimizerOptions) $(_LinkerOptimizerReport) $(LinkerOptimizerExtraArguments) @(_LinkerOptimizerAssemblyReferences, ' ')</_LinkerOptimizerCommandLine>
       <_LinkerOptimizerFullCommandLine>$(_LinkerOptimizerCommandLine) -- $(LinkerOptimizerExtraLinkerArguments) $(AdditionalMonoLinkerOptions) -l $(MonoLinkerI18NAssemblies) @(_BlazorFolderLookupPaths, ' ') -o &quot;$(BlazorIntermediateLinkerOutputPath)&quot; @(_BlazorAssemblyDescriptorFiles, ' ')</_LinkerOptimizerFullCommandLine>
-      <MonoLinkerPath>$(MSBuildThisFileDirectory)\artifacts\bin\Mono.Linker.Optimizer\Debug\netcoreapp3.0\Mono.Linker.Optimizer.dll</MonoLinkerPath>
+      <MonoLinkerPath>$(MSBuildThisFileDirectory)\bin\optimizer\netcoreapp2.0\Mono.Linker.Optimizer.dll</MonoLinkerPath>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(LinkerOptimizerEnabled)' == 'false'">
@@ -122,7 +122,7 @@
     <Delete Files="$(BlazorIntermediateLinkerOutputPath)*.dll" />
 
     <!-- Run the linker and put the results in /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linker -->
-    <Exec Command="$(LocalDotNetRoot)\dotnet &quot;$(MonoLinkerPath)&quot; @$(_LinkerOptimizerResponseFile)" />
+    <Exec Command="$(LocalDotNet) &quot;$(MonoLinkerPath)&quot; @$(_LinkerOptimizerResponseFile)" />
 
     <!-- Collect the contents of /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linker/ -->
     <ItemGroup>

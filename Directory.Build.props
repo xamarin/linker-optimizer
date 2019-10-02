@@ -3,12 +3,14 @@
 
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <LocalDotNetRoot>$(RepoRoot).dotnet\</LocalDotNetRoot>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseLocalBuild)' != 'false'">
     <AspNetVersion>3.0.0-dev</AspNetVersion>
     <AspNetBlazorHttpClientVersion>3.0.0-dev</AspNetBlazorHttpClientVersion>
+
+    <LocalDotNetRoot>$(RepoRoot).dotnet\</LocalDotNetRoot>
+    <LocalDotNet>$(LocalDotNetRoot)dotnet</LocalDotNet>
 
     <LocalBuildRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</LocalBuildRoot>
     <LocalRestoreSources>
@@ -29,6 +31,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseLocalBuild)' == 'false'">
+    <LocalDotNet>dotnet</LocalDotNet>
     <AspNetVersion>3.0.0-preview4-19216-03</AspNetVersion>
     <AspNetBlazorHttpClientVersion>3.0.0-preview8.19405.7</AspNetBlazorHttpClientVersion>
   </PropertyGroup>
