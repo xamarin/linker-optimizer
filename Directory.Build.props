@@ -40,4 +40,10 @@
     <BlazorVersion>3.0.0-preview9.19465.2</BlazorVersion>
   </PropertyGroup>
 
+  <!-- Set this to replace the assemblies with a local Mono build.
+  <PropertyGroup>
+    <MonoOverrideBaseClassLibraryPath>/Workspace/mono-master/mcs/class/lib/wasm</MonoOverrideBaseClassLibraryPath>
+  </PropertyGroup>
+  -->
+
 </Project>
