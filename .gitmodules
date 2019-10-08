@@ -1,4 +1,4 @@
 [submodule "external/linker"]
 	path = external/linker
-	branch = optimizer-stable
-	url = git@github.com:baulig/linker.git
+	branch = master
+	url = git@github.com:mono/linker.git
