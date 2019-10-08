@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.0.0-dev" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="$(AspNetComponentsVersion)" />
   </ItemGroup>
 
 </Project>
