@@ -5,7 +5,7 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseLocalBuild)' != 'false'">
+  <PropertyGroup Condition="'$(UseLocalBuild)' == 'true'">
     <AspNetVersion>3.0.0-dev</AspNetVersion>
     <AspNetCoreVersion>3.0.0-dev</AspNetCoreVersion>
     <EntityFrameworkVersion>3.0.0-dev</EntityFrameworkVersion>
@@ -32,7 +32,7 @@
     </RestoreSources>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseLocalBuild)' == 'false'">
+  <PropertyGroup Condition="'$(UseLocalBuild)' != 'true'">
     <LocalDotNet>dotnet</LocalDotNet>
     <AspNetVersion>3.0.0-preview9.19465.2</AspNetVersion>
     <AspNetCoreVersion>3.0.0-rc1.19457.4</AspNetCoreVersion>

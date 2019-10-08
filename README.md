@@ -45,7 +45,7 @@ This will automatically generate XML output in `./Tests/Blazor/<sample>/optimize
 Open the top-level `Directory.Build.props` and you'll find this section at the bottom:
 
 ```
-  <PropertyGroup Condition="'$(UseLocalBuild)' == 'false'">
+  <PropertyGroup Condition="'$(UseLocalBuild)' != 'true'">
     <LocalDotNet>dotnet</LocalDotNet>
     <AspNetVersion>3.0.0-preview9.19465.2</AspNetVersion>
     <AspNetCoreVersion>3.0.0-rc1.19457.4</AspNetCoreVersion>
