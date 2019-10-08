@@ -11,10 +11,21 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.3</LangVersion>
     <RazorLangVersion>3.0</RazorLangVersion>
+    <BlazorLinkOnBuild>true</BlazorLinkOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LinkerOptimizerOptions>report-profile=wasm,report-mode=actions+size+detailed</LinkerOptimizerOptions>
+    <LinkerOptimizerReport>optimizer-report.xml</LinkerOptimizerReport>
+    <LinkerOptimizerExtraLinkerArguments>--verbose --dump-dependencies</LinkerOptimizerExtraLinkerArguments>
+    <LinkerOptimizerEnabled>true</LinkerOptimizerEnabled>
   </PropertyGroup>
 
   <ItemGroup>
     <BlazorLinkerDescriptor Include="$(MSBuildThisFileDirectory)\extra-linker-descriptor.xml" />
+    <BlazorLinkerDescriptor Include="extra-linker-descriptor.xml" Condition="Exists('extra-linker-descriptor.xml')" />
+    <LinkerOptimizerXmlDescriptors Include="$(MSBuildThisFileDirectory)\linker-optimizer.xml" Condition="Exists('$(MSBuildThisFileDirectory)\linker-optimizer.xml')" />
+    <LinkerOptimizerXmlDescriptors Include="linker-optimizer.xml" Condition="Exists('linker-optimizer.xml')" />
   </ItemGroup>
 
 </Project>
