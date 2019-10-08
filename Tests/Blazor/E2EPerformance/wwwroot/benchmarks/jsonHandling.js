@@ -52,6 +52,6 @@ async function benchmarkJson(app, buttonSelector, resultSelector, expectedResult
 
   const resultElem = appDocument.querySelector(resultSelector);
   if (resultElem.textContent != expectedResult.toString()) {
-    throw new Error(`Incorrect result: ${resultElem.textContent}, expected ${expectedResult.toString()}`);
+    throw new Error(`Incorrect result: ${resultElem.textContent}`);
   }
 }
