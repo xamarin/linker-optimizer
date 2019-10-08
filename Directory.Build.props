@@ -7,7 +7,9 @@
 
   <PropertyGroup Condition="'$(UseLocalBuild)' != 'false'">
     <AspNetVersion>3.0.0-dev</AspNetVersion>
-    <AspNetBlazorHttpClientVersion>3.0.0-dev</AspNetBlazorHttpClientVersion>
+    <AspNetCoreVersion>3.0.0-dev</AspNetCoreVersion>
+    <EntityFrameworkVersion>3.0.0-dev</EntityFrameworkVersion>
+    <BlazorVersion>3.0.0-dev</BlazorVersion>
 
     <LocalDotNetRoot>$(RepoRoot).dotnet\</LocalDotNetRoot>
     <LocalDotNet>$(LocalDotNetRoot)dotnet</LocalDotNet>
@@ -33,8 +35,9 @@
   <PropertyGroup Condition="'$(UseLocalBuild)' == 'false'">
     <LocalDotNet>dotnet</LocalDotNet>
     <AspNetVersion>3.0.0-preview9.19465.2</AspNetVersion>
-    <AspNetComponentsVersion>3.0.0-rc1.19457.4</AspNetComponentsVersion>
-    <AspNetBlazorHttpClientVersion>3.0.0-preview9.19465.2</AspNetBlazorHttpClientVersion>
+    <AspNetCoreVersion>3.0.0-rc1.19457.4</AspNetCoreVersion>
+    <EntityFrameworkVersion>3.0.0-rc1.19456.14</EntityFrameworkVersion>
+    <BlazorVersion>3.0.0-preview9.19465.2</BlazorVersion>
   </PropertyGroup>
 
 </Project>
