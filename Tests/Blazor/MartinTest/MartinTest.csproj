@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="3.0.0-dev" />
-  </ItemGroup>
-
-</Project>
