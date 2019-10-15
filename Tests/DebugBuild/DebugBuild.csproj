@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Mono.Linker.WasmPackager\WasmPackager.csproj" />
+    <PackageReference Include="Microsoft.Build" Version="$(MSBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MSBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MSBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="5.4.0-preview.2.6265" />
+    <PackageReference Include="Microsoft.NET.HostModel" Version="3.0.0" />
+  </ItemGroup>
+
+</Project>

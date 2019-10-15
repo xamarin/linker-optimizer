@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\external\linker\external\cecil\Mono.Cecil.csproj" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MSBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildFrameworkVersion)" />
+    <PackageReference Include="System.Json" Version="4.6.0" />
+  </ItemGroup>
+</Project>

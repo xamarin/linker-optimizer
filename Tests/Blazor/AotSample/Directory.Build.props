@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <LinkerOptimizerOptions>report-profile=wasm,report-mode=actions+size+detailed</LinkerOptimizerOptions>
+    <LinkerOptimizerReport>optimizer-report.xml</LinkerOptimizerReport>
+    <LinkerOptimizerExtraLinkerArguments>--verbose --dump-dependencies</LinkerOptimizerExtraLinkerArguments>
+    <LinkerOptimizerEnabled>true</LinkerOptimizerEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <BlazorLinkerDescriptor Remove="@(BlazorLinkerDescriptor)" />
+    <BlazorLinkerDescriptor Include="extra-linker-descriptor.xml" />
+  </ItemGroup>
+
+</Project>

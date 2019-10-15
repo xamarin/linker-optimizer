@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "Tests/DebugBuild"
+		},
+		{
+			"path": "Mono.Linker.WasmPackager"
+		},
+		{
+			"path": "Tests/Blazor/AotSample"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,330 @@
+<Project DefaultTargets="Build">
+  <UsingTask TaskName="Mono.Linker.WasmPackager.MartinTest" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.PackagerTask" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.GenerateICallTable" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.GeneratePInvokeTable" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.SourceEnvironment" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.WasmResolverTask" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.Emcc" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
+
+  <Target Name="MartinTest">
+    <MartinTest />
+  </Target>
+
+  <!-- Packager defaults -->
+  <PropertyGroup>
+    <RuntimeTemplate Condition="'$(RuntimeTemplate)' == ''">runtime-tests.js</RuntimeTemplate>
+    <WasmEnableDebug Condition="'$(WasmEnableDebug)' == ''">false</WasmEnableDebug>
+    <EmscriptenSdkDir Condition="'$(EmscriptenSdkDir)' == ''">$(MonoWasmRoot)/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
+  </PropertyGroup>
+
+  <!-- FIXME -->
+  <ItemGroup>
+      <WasmPackager_RootAssemblies Include="$(TargetPath)" />
+      <!-- <WasmPackager_Profilers Include="TestProfiler" /> -->
+      <WasmPackager_PInvokeLibraries Include="libfoo" />
+  </ItemGroup>
+
+  <!-- Packager settings -->
+  <PropertyGroup>
+    <WasmPackager_BuildDir>$(IntermediateOutputPath)aot</WasmPackager_BuildDir>
+    <WasmPackager_VfsPrefix>managed</WasmPackager_VfsPrefix>
+    <WasmPackager_DeployPrefix>managed</WasmPackager_DeployPrefix>
+
+    <WasmPackager_LinkIcalls>false</WasmPackager_LinkIcalls>
+    <WasmPackager_EnableLinker>true</WasmPackager_EnableLinker>
+  </PropertyGroup>
+
+  <!-- Derived and private settings -->
+  <PropertyGroup>
+    <_WasmPackager_RuntimeJsIntermediate>$(WasmPackager_BuildDir)/runtime.js</_WasmPackager_RuntimeJsIntermediate>
+    <_WasmPackager_ExecMode>AotInterp</_WasmPackager_ExecMode>
+
+    <_WasmPackager_RuntimeTemplateSource>$(MonoWasmRoot)/sdks/wasm/$(RuntimeTemplate)</_WasmPackager_RuntimeTemplateSource>
+    <_WasmPackager_Driver_Source>$(MonoWasmRoot)/sdks/wasm/src/driver.c</_WasmPackager_Driver_Source>
+    <_WasmPackager_PInvokeTablesDefault_Source>$(MonoWasmRoot)/sdks/wasm/src/pinvoke-tables-default.h</_WasmPackager_PInvokeTablesDefault_Source>
+
+    <_WasmPackager_MonoConfig>$(WasmPackager_BuildDir)/mono-config.js</_WasmPackager_MonoConfig>
+    <_WasmPackager_Driver>$(WasmPackager_BuildDir)/driver.c</_WasmPackager_Driver>
+    <_WasmPackager_DriverGen>$(WasmPackager_BuildDir)/driver-gen.c</_WasmPackager_DriverGen>
+    <_WasmPackager_Driver_Output>$(WasmPackager_BuildDir)/driver.o</_WasmPackager_Driver_Output>
+    <_WasmPackager_PInvokeTablesDefault>$(WasmPackager_BuildDir)/pinvoke-tables-default.h</_WasmPackager_PInvokeTablesDefault>
+    <_WasmPackager_EmsdkEnv>$(WasmPackager_BuildDir)/emsdk_env.sh</_WasmPackager_EmsdkEnv>
+    <_WasmPackager_MonoIncludeDir>$(MonoWasmRoot)/sdks/out/wasm-runtime-release/include/mono-2.0</_WasmPackager_MonoIncludeDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_WasmPackager_SdkSource_Files Include="$(RuntimeTemplate);src/driver.c;src/pinvoke-tables-default.h" />
+    <_WasmPackager_SdkSources Include="@(_WasmPackager_SdkSource_Files->'$(MonoWasmRoot)/sdks/wasm/%(Identity)')" />
+    <_WasmPackager_SdkSources_Intermediate Include="@(_WasmPackager_SdkSource_Files->'$(WasmPackager_BuildDir)/%(Filename)%(Extension)')" />
+  </ItemGroup>
+
+  <!-- Target Dependencies -->
+  <PropertyGroup>
+    <WasmPackagerDependsUpon>
+      $(_WasmPackagerGeneratorDependsUpon);
+      _WasmPackager_GenerateMonoConfig;
+      _WasmPackager_GenerateDriver;
+      _WasmPackager_GeneratePInvokeTable;
+      _WasmPackager_Emcc_Driver;
+    </WasmPackagerDependsUpon>
+    <!-- All generator targets have these dependencies -->
+    <_WasmPackagerGeneratorDependsUpon>
+      $(_WasmPackagerGeneratorDependsUpon);
+      _WasmPackager_ResolveProperties;
+      _WasmPackager_Resolve;
+      _WasmPackager_ConstructEnv;
+      _WasmPackager_CopySources;
+    </_WasmPackagerGeneratorDependsUpon>
+  </PropertyGroup>
+
+  <!-- Resolve some conditional properties -->
+  <Target Name="_WasmPackager_ResolveProperties">
+    <CreateProperty Value="$(WasmPackager_BuildDir)/pinvoke-table.h" Condition="'@(WasmPackager_PInvokeLibraries)' != ''">
+      <Output TaskParameter="Value" PropertyName="_WasmPackager_PInvokeTable2" />
+    </CreateProperty>
+
+    <CreateProperty Value="$(WasmPackager_BuildDir)/icall-table.h" Condition="'$(WasmPackager_LinkIcalls)' == 'true'">
+      <Output TaskParameter="Value" PropertyName="_WasmPackager_IcallTable2" />
+    </CreateProperty>
+
+    <!-- FIXME: I believe I had a reason for using <CreateProperty> -->
+    <PropertyGroup>
+      <_WasmPackager_PInvokeTable Condition="'@(WasmPackager_PInvokeLibraries)' != ''">$(WasmPackager_BuildDir)/pinvoke-table.h</_WasmPackager_PInvokeTable>
+      <_WasmPackager_IcallTable Condition="'$(WasmPackager_LinkIcalls)' == 'true'">$(WasmPackager_BuildDir)/icall-table.h</_WasmPackager_IcallTable>
+      <_WasmPackager_LinkerInput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-in</_WasmPackager_LinkerInput_Dir>
+      <_WasmPackager_LinkerOutput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-out</_WasmPackager_LinkerOutput_Dir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_WasmPackager_Driver_Deps Include="$(_WasmPackager_IcallTable)" Condition="'$(_WasmPackager_IcallTable)' != ''" />
+      <_WasmPackager_Driver_Deps Include="$(_WasmPackager_PInvokeTable)" Condition="'$(_WasmPackager_PInvokeTable)' != ''" />
+    </ItemGroup>
+
+  </Target>
+
+  <!-- 
+    Calls WasmResolverTask to resolve the assemblies.
+
+    Inputs:
+      @(WasmPackager_RootAssemblies)
+    
+    Outputs:
+      @(_WasmPackager_Assemblies)
+      @(_WasmPackager_FileList)
+
+    Make sure to only edit those two in pairs:
+      @(_WasmPackager_Copy_Inputs)
+      @(_WasmPackager_Copy_Outputs)
+
+    AOT Outputs:
+      @(_WasmPackager_AotAssemblies)
+    Linker Outputs:
+      @(_WasmPackager_PInvokeAssemblies)
+      @(_WasmPackager_Assemblies_LinkerInputs)
+      @(_WasmPackager_Assemblies_LinkerOutputs)
+
+  -->
+  <Target Name="_WasmPackager_Resolve" DependsOnTargets="_WasmPackager_ResolveProperties">
+    <Message Importance="High" Text="WasmPackager - resolving assemblies with root $(MonoWasmRoot)" />
+    <Message Importance="Normal" Text="  RootAssemblies: %(WasmPackager_RootAssemblies.Identity)" />
+
+    <WasmResolverTask
+          MonoWasmRoot="$(MonoWasmRoot)"
+          RootAssemblies="@(WasmPackager_RootAssemblies)"
+          EnableAot="true"
+          EnableDebug="$(WasmEnableDebug)">
+      <Output TaskParameter="Assemblies" ItemName="_WasmPackager_Assemblies" />
+      <Output TaskParameter="FileList" ItemName="_WasmPackager_FileList" />
+    </WasmResolverTask>
+
+    <ItemGroup>
+      <_WasmPackager_AotAssemblies Include="@(_WasmPackager_Assemblies)" Condition="'%(AOT)' == 'true'" />
+    </ItemGroup>
+
+    <!-- Make sure to always modify these in pairs -->
+    <ItemGroup>
+      <_WasmPackager_Copy_Inputs Include="@(_WasmPackager_SdkSources)" />
+      <_WasmPackager_Copy_Outputs Include="@(_WasmPackager_SdkSources_Intermediate)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' == 'true'" >
+      <_WasmPackager_Assemblies_LinkerInputs Include="@(_WasmPackager_AotAssemblies->'$(_WasmPackager_LinkerInput_Dir)/%(Filename)%(Extension)')" />
+      <_WasmPackager_Assemblies_LinkerOutputs Include="@(_WasmPackager_AotAssemblies->'$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)')" />
+      <_WasmPackager_PInvokeAssemblies Include="@(_WasmPackager_Assemblies_LinkerInputs)" />
+      <_WasmPackager_Copy_Inputs Include="%(_WasmPackager_AotAssemblies.SrcPath)" />
+      <_WasmPackager_Copy_Outputs Include="@(_WasmPackager_Assemblies_LinkerInputs)" />
+    </ItemGroup>
+
+    <Message Importance="Normal" Text="  Assemblies: %(_WasmPackager_Assemblies.Identity) - %(_WasmPackager_Assemblies.SrcPath)" />
+    <Message Importance="Normal" Text="  FileList: %(_WasmPackager_FileList.Identity)" />
+    <Message Importance="Normal" Text="  AOT Assemblies: %(_WasmPackager_AotAssemblies.Identity) - %(_WasmPackager_AotAssemblies.SrcPath)" />
+    <Message Importance="Normal" Text="  PInvoke Assemblies: %(_WasmPackager_PInvokeAssemblies.Identity) - %(_WasmPackager_PInvokeAssemblies.SrcPath)" />
+    <Message Importance="Normal" Text="  Linker Inputs: %(_WasmPackager_Assemblies_LinkerInputs.Identity) - %(_WasmPackager_Assemblies_LinkerInputs.SrcPath)" />
+    <Message Importance="Normal" Text="  Linker Outputs: %(_WasmPackager_Assemblies_LinkerOutputs.Identity) - %(_WasmPackager_Assemblies_LinkerOutputs.SrcPath)" />
+
+    <Message Importance="High" Text="WasmPackager - done resolving assemblies" />
+  </Target>
+
+  <!-- 
+    Generates the mono-config.js
+  -->
+  <Target
+      Name="_WasmPackager_GenerateMonoConfig"
+      DependsOnTargets="$(_WasmPackagerGeneratorDependsUpon)"
+      Outputs="$(_WasmPackager_MonoConfig)">
+
+    <ItemGroup>
+      <__WasmPackager_MonoConfig_FileList Include="&quot;%(_WasmPackager_FileList.FileName)%(_WasmPackager_FileList.Extension)&quot;" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <__WasmPackager_MonoConfig_EnableDebug Condition="'$(WasmEnableDebug)' == 'true'">1</__WasmPackager_MonoConfig_EnableDebug>
+      <__WasmPackager_MonoConfig_EnableDebug Condition="'$(WasmEnableDebug)' != 'true'">0</__WasmPackager_MonoConfig_EnableDebug>
+      <__WasmPackager_MonoConfig_Contents>
+config = {
+ 	vfs_prefix: "$(WasmPackager_VfsPrefix)",
+ 	deploy_prefix: "$(WasmPackager_DeployPrefix)",
+ 	enable_debugging: $(__WasmPackager_MonoConfig_EnableDebug),
+ 	file_list: [ @(__WasmPackager_MonoConfig_FileList, ',') ]
+}      
+      </__WasmPackager_MonoConfig_Contents>
+    </PropertyGroup>
+
+    <Message Importance="High" Text="MONO CONFIG: $(__WasmPackager_MonoConfig_Contents)" />
+
+    <WriteLinesToFile
+        File="$(_WasmPackager_MonoConfig)"
+        Lines="$(__WasmPackager_MonoConfig_Contents)"
+        Overwrite="true" WriteOnlyWhenDifferent="true" />
+
+    <Message Importance="High" Text="WasmPackager - wrote $(_WasmPackager_MonoConfig)" />
+  </Target>
+
+  <!-- 
+    Generates the driver-gen.c
+  -->
+  <Target
+      Name="_WasmPackager_GenerateDriver"
+      DependsOnTargets="$(_WasmPackagerGeneratorDependsUpon)"
+      Outputs="$(_WasmPackager_DriverGen)">
+
+    <ItemGroup>
+      <__WasmPackager_AotAssemblies_SymbolList Include="@(_WasmPackager_AotAssemblies->Replace ('.', '_')->Replace ('-', '_'))" />
+      <__WasmPackager_AotAssemblies_Symbols Include="$([System.String]::Format('mono_aot_module_{0}_info', %(__WasmPackager_AotAssemblies_SymbolList.Identity)))" />
+
+      <__WasmPackager_DriverGen_Lines Include="@(__WasmPackager_AotAssemblies_Symbols->'extern void %2A%(Identity);')" />
+      <__WasmPackager_DriverGen_Lines Include="static void register_aot_modules ()" />
+      <__WasmPackager_DriverGen_Lines Include="{" />
+      <__WasmPackager_DriverGen_Lines Include="@(__WasmPackager_AotAssemblies_Symbols->'    mono_aot_register_module (%(Identity));')" />
+      <__WasmPackager_DriverGen_Lines Include="}" />
+
+      <__WasmPackager_DriverGen_Lines Include="@(WasmPackager_Profilers->'void mono_profiler_init_%(Identity) (const char %2Adesc);')" />
+      <__WasmPackager_DriverGen_Lines Include="@(WasmPackager_Profilers->'EMSCRIPTEN_KEEPALIVE void mono_wasm_load_profiler_%(Identity) (const char *desc) { mono_profiler_init_%(Identity) (desc); }')" />
+      <__WasmPackager_DriverGen_Lines Include="#define EE_MODE_LLVMONLY_INTERP 1" Condition="'$(_WasmPackager_ExecMode)' == 'AotInterp'" />
+      <__WasmPackager_DriverGen_Lines Include="#define EE_MODE_LLVMONLY 1" Condition="'$(_WasmPackager_ExecMode)' == 'Aot'" />
+      <__WasmPackager_DriverGen_Lines Include="#define LINK_ICALLS 1" Condition="'$(WasmPackager_LinkIcalls)' == 'true'" />
+    </ItemGroup>
+
+    <Message Importance="High" Text="WasmPackager - AotAssemblies: %(_WasmPackager_AotAssemblies.Identity) - %(_WasmPackager_AotAssemblies.SrcPath)" />
+
+    <WriteLinesToFile
+        File="$(_WasmPackager_DriverGen)"
+        Lines="@(__WasmPackager_DriverGen_Lines)"
+        Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+    <!-- 
+    Generates the pinvoke-table.h
+  -->
+  <Target
+      Name="_WasmPackager_GeneratePInvokeTable"
+      DependsOnTargets="$(_WasmPackagerGeneratorDependsUpon)"
+      Inputs="@(_WasmPackager_PInvokeAssemblies)"
+      Outputs="$(_WasmPackager_PInvokeTable)"
+      Condition="'$(_WasmPackager_PInvokeTable)' != ''">
+      <GeneratePInvokeTable
+          NativeLibraries="System.Native;@(WasmPackager_PInvokeLibraries)"
+          Assemblies="@(_WasmPackager_PInvokeAssemblies)"
+          OutputFile="$(_WasmPackager_PInvokeTable)" />
+  </Target>
+
+  <Target
+      Name="_WasmPackager_ConstructEnv"
+      DependsOnTargets="_WasmPackager_Resolve"
+      Outputs="$(_WasmPackager_EmsdkEnv)">
+    <Message Importance="High" Text="WasmPackager - generating emsdk env: $(_WasmPackager_EmsdkEnv)" />
+    <MakeDir Directories="$(WasmPackager_BuildDir)" />
+    <Exec Command="$(EmscriptenSdkDir)/emsdk construct_env $(_WasmPackager_EmsdkEnv)" />
+  </Target>
+
+  <Target
+      Name="_WasmPackager_CopySources"
+      DependsOnTargets="_WasmPackager_Resolve"
+      Inputs="@(_WasmPackager_Copy_Inputs)"
+      Outputs="@(_WasmPackager_Copy_Outputs)">
+      <Message Importance="High" Text="WasmPackager - copy sources" />
+      <Message Importance="Normal" Text="  copy inputs: %(_WasmPackager_Copy_Inputs.Identity)" />
+      <Message Importance="Normal" Text="  copy outputs: %(_WasmPackager_Copy_Outputs.Identity)" />
+
+      <Copy
+          SourceFiles="@(_WasmPackager_Copy_Inputs)"
+          DestinationFiles="@(_WasmPackager_Copy_Outputs)"
+          SkipUnchangedFiles="true" />
+
+      <Message Importance="High" Text="WasmPackager - copy sources done" />
+  </Target>
+
+  <Target
+      Name="_WasmPackager_Emcc_Driver"
+      DependsOnTargets="$(_WasmPackagerGeneratorDependsUpon)"
+      Inputs="@(_WasmPackager_Driver_Deps);$(_WasmPackager_Driver);$(_WasmPackager_EmsdkEnv)"
+      Outputs="$(_WasmPackager_Driver_Output)">
+
+    <ItemGroup>
+      <__WasmPackager_Driver_CFlags Include="-DGEN_PINVOKE" Condition="'$(_WasmPackager_PInvokeTable)' != ''" />
+    </ItemGroup>
+
+    <Message Importance="High" Text="WASM DRIVER - DEPS: %(_WasmPackager_Driver_Deps.Identity)" />
+    <Message Importance="High" Text="WASM DRIVER - CFLAGS: %(_WasmPackager_Driver_CFlags.Identity)" />
+    <Message Importance="High" Text="WASM DRIVER - INPUT: $(_WasmPackager_Driver)" />
+
+    <Emcc SdkDir="$(MonoWasmRoot)/sdks/builds/toolchains/emsdk"
+          EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
+          BuildDir="$(WasmPackager_BuildDir)"
+          Input="$(_WasmPackager_Driver)"
+          Output="$(_Wasmpackager_Driver_Output)"
+          Flags="@(__WasmPackager_Driver_CFlags, ' ') -DDRIVER_GEN=1 -I$(_WasmPackager_MonoIncludeDir)" />
+
+  </Target>
+
+  <Target Name="RunWasmPackager" DependsOnTargets="$(WasmPackagerDependsUpon)">
+    <Message Importance="High" Text="WasmPackager: $(WasmPackager_BuildDir)" />
+
+    <Error Text="ABORT HERE" />
+
+    <!-- 
+      ninja.WriteLine ("build $emsdk_env: create-emsdk-env");
+      ninja.WriteLine ($"build $builddir/driver.o: emcc $builddir/driver.c | $emsdk_env $builddir/driver-gen.c {driver_deps}");
+      ninja.WriteLine ($"  flags = {driver_cflags} -DDRIVER_GEN=1 -I$mono_sdkdir/wasm-runtime-release/include/mono-2.0");
+    -->
+
+    <PackagerTask
+      MonoWasmRoot="$(MonoWasmRoot)"
+      EmscriptenSdkDir="$(MonoWasmRoot)/sdks/builds/toolchains/emsdk"
+      RootAssemblies="@(_RootAssemblies)"
+      EnableAot="true"
+      BuildDir="$(_WasmPackagerBuildDir)"
+      RuntimeTemplate="runtime-tests.js">
+    </PackagerTask>
+  </Target>
+
+  <PropertyGroup Condition="'$(UseWasmPackager)' == 'true'">
+    <LinkBlazorApplicationDependsOn>
+      $(LinkBlazorApplicationDependsOn);
+      RunWasmPackager;
+      MartinTest;
+    </LinkBlazorApplicationDependsOn>
+  </PropertyGroup>
+
+</Project>
