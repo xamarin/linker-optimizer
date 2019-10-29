@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <UseWasmPackager>true</UseWasmPackager>
+    <!-- Hard-code this to net45; we override GetReferenceAssemblyPaths to actually point this to wasm -->
+    <TargetFramework>net45</TargetFramework>
+    <MonoWasmRoot>/Workspace/mono-linker</MonoWasmRoot>
+    <FrameworkPathOverride>$(MonoWasmRoot)/sdks/out/wasm-bcl/wasm</FrameworkPathOverride>
+  </PropertyGroup>
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+
+</Project>

@@ -4,7 +4,18 @@
     <OutputType>exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NuspecFile>Mono.Linker.Optimizer.nuspec</NuspecFile>
   </PropertyGroup>
+
+  <Target Name="CopyPackage" AfterTargets="Pack">
+    <PropertyGroup>
+      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
+    </PropertyGroup>
+    <Copy
+      SourceFiles="bin\$(Configuration)\$(PackageFileName)"
+      DestinationFolder="$(MSBuildThisFileDirectory)..\artifacts\" />
+    <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
+  </Target>
 
   <ItemGroup>
     <ProjectReference Include="linker\linker.csproj" />

@@ -1,12 +1,15 @@
 <Project DefaultTargets="Build">
-  <UsingTask TaskName="Mono.Linker.WasmPackager.MartinTest" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
-  <UsingTask TaskName="Mono.Linker.WasmPackager.PackagerTask" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
-  <UsingTask TaskName="Mono.Linker.WasmPackager.GenerateICallTable" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
-  <UsingTask TaskName="Mono.Linker.WasmPackager.GeneratePInvokeTable" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
-  <UsingTask TaskName="Mono.Linker.WasmPackager.GetFirstItem" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
-  <UsingTask TaskName="Mono.Linker.WasmPackager.SourceEnvironment" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
-  <UsingTask TaskName="Mono.Linker.WasmPackager.WasmResolverTask" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
-  <UsingTask TaskName="Mono.Linker.WasmPackager.Emcc" AssemblyFile=".\bin\Debug\netstandard2.0\WasmPackager.dll" />
+  <PropertyGroup>
+    <__WasmPackager_PackagerAssembly>$(MSBuildThisFileDirectory)\..\tools\Mono.Linker.WasmPackager.dll</__WasmPackager_PackagerAssembly>
+  </PropertyGroup>
+  <UsingTask TaskName="Mono.Linker.WasmPackager.MartinTest" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.PackagerTask" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.GenerateICallTable" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.GeneratePInvokeTable" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.GetFirstItem" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.SourceEnvironment" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.WasmResolverTask" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
+  <UsingTask TaskName="Mono.Linker.WasmPackager.Emcc" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
 
   <Target Name="MartinTest">
     <MartinTest />
@@ -21,7 +24,6 @@
 
   <!-- FIXME -->
   <ItemGroup>
-    <WasmPackager_RootAssemblies Include="@(IntermediateAssembly)" />
     <!-- <WasmPackager_Profilers Include="TestProfiler" /> -->
     <WasmPackager_PInvokeLibraries Include="libfoo" />
   </ItemGroup>
@@ -118,6 +120,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <_WasmPackager_RootAssemblies Include="@(IntermediateAssembly)" />
+
       <_WasmPackager_SdkSources Include="$(_WasmPackager_Driver)">
         <Source>$(_WasmPackager_Driver_Source)</Source>
         <Intermediate>$(_WasmPackager_Driver)</Intermediate>
@@ -126,6 +130,10 @@
         <Emcc_Deps>$(_WasmPackager_IcallTable);$(_WasmPackager_PInvokeTable)</Emcc_Deps>
       </_WasmPackager_SdkSources>
     </ItemGroup>
+
+    <Message Importance="High" Text="WasmPackager - Resolve Properties: $(MonoWasmRoot)" />
+    <Message Importance="High" Text="  RootAssemblies: %(_WasmPackager_RootAssemblies.Identity)" />
+    <Message Importance="High" Text="  ItermediateAssembly: %(IntermediateAssembly.Identity)" />
 
     <!--
       Include everything here that's supposed to be set by the user and separate item lists.
@@ -136,7 +144,7 @@
       <__WasmPackager_AllConfigItems Include="'$(RuntimeTemplate)';'$(WasmEnableDebug)';'$(EmscriptenSdkDir)'" />
       <__WasmPackager_AllConfigItems Include="'$(WasmPackager_BuildDir)';'$(WasmPackager_VfsPrefix)';'$(WasmPackager_DeployPrefix)'" />
       <__WasmPackager_AllConfigItems Include="'$(WasmPackager_LinkIcalls)';'$(WasmPackager_EnableLinker)';'$(WasmPackager_EnableAot)'" />
-      <__WasmPackager_AllConfigItems Include="R;@(WasmPackager_RootAssemblies);P;@(WasmPackager_Profilers);I;@(WasmPackager_PInvokeLibraries)" />
+      <__WasmPackager_AllConfigItems Include="R;@(_WasmPackager_RootAssemblies);P;@(WasmPackager_Profilers);I;@(WasmPackager_PInvokeLibraries)" />
     </ItemGroup>
 
     <Hash ItemsToHash="@(__WasmPackager_AllConfigItems)">
@@ -156,7 +164,7 @@
     Calls WasmResolverTask to resolve the assemblies.
 
     Inputs:
-      @(WasmPackager_RootAssemblies)
+      @(_WasmPackager_RootAssemblies)
     
     Outputs:
       @(_WasmPackager_Assemblies)
@@ -176,12 +184,17 @@
       Name="_WasmPackager_Resolve"
       Outputs="$(_WasmPackager_ResolveCache)"
       DependsOnTargets="_WasmPackager_ResolveProperties">
+
+    <ItemGroup>
+      <_WasmPackager_RootAssemblies Include="@(IntermediateAssembly)" />
+    </ItemGroup>
+
     <Message Importance="High" Text="WasmPackager - resolving assemblies with root $(MonoWasmRoot)" />
-    <Message Importance="Normal" Text="  RootAssemblies: %(WasmPackager_RootAssemblies.Identity)" />
+    <Message Importance="Normal" Text="  RootAssemblies: %(_WasmPackager_RootAssemblies.Identity)" />
 
     <WasmResolverTask
         MonoWasmRoot="$(MonoWasmRoot)"
-        RootAssemblies="@(WasmPackager_RootAssemblies)"
+        RootAssemblies="@(_WasmPackager_RootAssemblies)"
         EnableAot="$(WasmPackager_EnableAot)"
         EnableDebug="$(WasmEnableDebug)">
         <Output TaskParameter="Assemblies" ItemName="__WasmPackager_Assemblies" />
@@ -424,7 +437,9 @@ config = {
 
   </Target>
 
-  <Import Project="$(MSBuildThisFileDirectory)\..\Mono.Linker.Optimizer\Mono.Linker.Optimizer.targets" />
+  <ItemGroup>
+    <PackageReference Include="Mono.Linker.Optimizer" Version="1.0.0" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(UseWasmPackager)' == 'true'">
     <LinkBlazorApplicationDependsOn>

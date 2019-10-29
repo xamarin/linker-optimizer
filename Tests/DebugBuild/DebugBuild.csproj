@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Mono.Linker.WasmPackager\WasmPackager.csproj" />
+    <ProjectReference Include="..\..\Mono.Linker.WasmPackager\Mono.Linker.WasmPackager.csproj" />
     <PackageReference Include="Microsoft.Build" Version="$(MSBuildFrameworkVersion)" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MSBuildFrameworkVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildFrameworkVersion)" />

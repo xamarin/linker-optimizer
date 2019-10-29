@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <NuspecFile>Mono.Linker.WasmPackager.nuspec</NuspecFile>
+  </PropertyGroup>
+
+  <Target Name="CopyPackage" AfterTargets="Pack">
+    <PropertyGroup>
+      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
+    </PropertyGroup>
+    <Copy
+      SourceFiles="$(OutputPath)\$(PackageFileName)"
+      DestinationFolder="$(MSBuildThisFileDirectory)..\artifacts\" />
+    <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
+  </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\external\linker\external\cecil\Mono.Cecil.csproj" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MSBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildFrameworkVersion)" />
+    <PackageReference Include="System.Json" Version="4.6.0" />
+    <PackageReference Include="Mono.Linker.Optimizer" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "Tests/Blazor/AotSample"
+		},
+		{
+			"path": "Mono.Linker.Optimizer"
 		}
 	],
 	"settings": {}

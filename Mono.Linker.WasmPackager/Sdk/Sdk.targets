@@ -1,5 +1,12 @@
-<Project>
-  <Import Project="$(MSBuildThisFileDirectory)\..\..\Mono.Linker.WasmPackager\Mono.Linker.WasmPackager.targets" />
+<?xml version="1.0" encoding="utf-8"?>  
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.WasmPackager.targets" />
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+
+  <Target Name="TheMartinTest">
+    <Message Importance="High" Text="MARTIN TEST: $(NugetPackageRoot)" />
+  </Target>
 
   <PropertyGroup>
     <_WasmPackager_OldResolveAssemblyReferencesDependsOn>

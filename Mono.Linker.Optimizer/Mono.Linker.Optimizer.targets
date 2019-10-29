@@ -97,11 +97,11 @@
     </ItemGroup>
 
     <PropertyGroup Condition="'$(LinkerOptimizerEnabled)' != 'false'">
-      <_LinkerOptimizer_Path>$(MSBuildThisFileDirectory)\..\Mono.Linker.Optimizer\bin\optimizer\netcoreapp2.0\Mono.Linker.Optimizer.dll</_LinkerOptimizer_Path>
+      <_LinkerOptimizer_Path>$(MSBuildThisFileDirectory)\..\tools\Mono.Linker.Optimizer.dll</_LinkerOptimizer_Path>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(LinkerOptimizerEnabled)' == 'false'">
-      <_LinkerOptimizer_Path>$(MSBuildThisFileDirectory)\..\Mono.Linker.Optimizer\bin\optimizer\netcoreapp2.0\linker.dll</_LinkerOptimizer_Path>
+      <_LinkerOptimizer_Path>$(MSBuildThisFileDirectory)\..\tools\linker.dll</_LinkerOptimizer_Path>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(LinkerOptimizerEnabled)' != 'false'">
@@ -160,7 +160,7 @@
 
     <Delete Files="$(LinkerOptimizerOutputPath)*.dll" />
 
-    <Exec Command="$(LocalDotNet) &quot;$(_LinkerOptimizer_Path)&quot; @$(_LinkerOptimizer_ResponseFile)" />
+    <Exec Command="dotnet &quot;$(_LinkerOptimizer_Path)&quot; @$(_LinkerOptimizer_ResponseFile)" />
 
     <ItemGroup>
       <_LinkerOptimizer_Output Include="$(LinkerOptimizerOutputPath)*.dll" />

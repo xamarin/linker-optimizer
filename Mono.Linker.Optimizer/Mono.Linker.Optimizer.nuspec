@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Mono.Linker.Optimizer</id>
+    <version>1.0.0</version>
+    <authors>Mono.Linker.Optimizer</authors>
+    <owners>Mono.Linker.Optimizer</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Mono Linker Optimizer</description>
+    <dependencies>
+      <group targetFramework=".NETCoreApp2.0">
+        <dependency id="linker" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="Mono.Cecil" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="Mono.Cecil.Mdb" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="Mono.Cecil.Pdb" version="1.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin/Debug/netcoreapp2.0/*.dll" target="tools" />
+    <file src="bin/Debug/netcoreapp2.0/*.json" target="tools" />
+    <file src="Mono.Linker.Optimizer.targets" target="build" />
+  </files>
+</package>
