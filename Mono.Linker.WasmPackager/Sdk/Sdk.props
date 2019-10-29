@@ -6,6 +6,7 @@
     <!-- Hard-code this to net45; we override GetReferenceAssemblyPaths to actually point this to wasm -->
     <TargetFramework>net45</TargetFramework>
     <MonoWasmRoot>/Workspace/mono-linker</MonoWasmRoot>
+    <EmscriptenSdkDir>/Workspace/mono-linker/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
     <FrameworkPathOverride>$(MonoWasmRoot)/sdks/out/wasm-bcl/wasm</FrameworkPathOverride>
   </PropertyGroup>
 

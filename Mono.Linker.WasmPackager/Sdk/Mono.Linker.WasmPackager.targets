@@ -19,7 +19,6 @@
   <PropertyGroup>
     <RuntimeTemplate Condition="'$(RuntimeTemplate)' == ''">runtime-tests.js</RuntimeTemplate>
     <WasmEnableDebug Condition="'$(WasmEnableDebug)' == ''">false</WasmEnableDebug>
-    <EmscriptenSdkDir Condition="'$(EmscriptenSdkDir)' == ''">$(MonoWasmRoot)/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
   </PropertyGroup>
 
   <!-- FIXME -->
@@ -390,7 +389,7 @@ config = {
 
     <Message Importance="High" Text="WASM EMCC: %(_WasmPackager_Emcc_Sources.Identity) - %(_WasmPackager_Emcc_Sources.Emcc_Output) %(_WasmPackager_Emcc_Sources.Emcc_Flags) - %(_WasmPackager_Emcc_Sources.Emcc_Deps)" />
 
-    <Emcc SdkDir="$(MonoWasmRoot)/sdks/builds/toolchains/emsdk"
+    <Emcc SdkDir="$(EmscriptenSdkDir)"
           EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
           BuildDir="$(WasmPackager_BuildDir)"
           Input="%(_WasmPackager_Emcc_Sources.Intermediate)"
