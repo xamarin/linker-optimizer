@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LinkerOptimizerEnabled>true</LinkerOptimizerEnabled>
+  </PropertyGroup>
+
+</Project>

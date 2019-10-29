@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <UseWasmPackager>true</UseWasmPackager>
+    <!-- Hard-code this to net45; we override GetReferenceAssemblyPaths to actually point this to wasm -->
+    <TargetFramework>net45</TargetFramework>
+    <MonoWasmRoot>/Workspace/mono-linker</MonoWasmRoot>
+    <FrameworkPathOverride>$(MonoWasmRoot)/sdks/out/wasm-bcl/wasm</FrameworkPathOverride>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LinkerOptimizerOptions>report-profile=wasm,report-mode=actions+size+detailed</LinkerOptimizerOptions>
+    <LinkerOptimizerReport>optimizer-report.xml</LinkerOptimizerReport>
+    <LinkerOptimizerExtraLinkerArguments>--verbose --dump-dependencies</LinkerOptimizerExtraLinkerArguments>
+    <LinkerOptimizerEnabled>true</LinkerOptimizerEnabled>
+  </PropertyGroup>
+
+</Project>

@@ -1,156 +1,184 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <LinkBlazorApplicationDependsOn>
-      $(LinkBlazorApplicationDependsOn);
-      _PrepareLinkerOptimizerConfiguration;
-      _ComputeLinkerOptimizerDependencies;
-    </LinkBlazorApplicationDependsOn>
+    <LinkerOptimizerConfigurationDependsOn>
+      $(LinkerOptimizerConfigurationDependsOn);
+    </LinkerOptimizerConfigurationDependsOn>
+    <LinkerOptimizerDependsOn>
+      $(LinkerOptimizerDependsOn);
+      _LinkerOptimizer_ComputeDependencies;
+    </LinkerOptimizerDependsOn>
   </PropertyGroup>
 
-  <Target
-      Name="_PrepareLinkerOptimizerConfiguration"
-      AfterTargets="_PrepareBlazorOutputConfiguration">
+  <!--
+    Required input parameters:
+      $(LinkerOptimizerInputPath)
+      $(LinkerOptimizerOutputPath)
+      @(LinkerOptimizerInputAssembly)
+      @(LinkerOptimizerDependencyInput)
+      $(LinkerOptimizerEnabled)
 
+    Optional input parameters:
+      $(LinkerOptimizerOptions)
+      $(LinkerOptimizerReport)
+      @(LinkerOptimizerXmlDescriptors)
+      @(LinkerOptimizerLinkerDescriptors)
+
+      $(LinkerOptimizerExtraLinkerArguments)
+      @(LinkerOptimizerBaseClassLibraryPath)
+      $(LinkerOptimizerResultFilePath)
+  -->
+
+  <Target
+      Name="_LinkerOptimizer_PrepareConfiguration"
+      DependsOnTargets="$(LinkerOptimizerConfigurationDependsOn)">
+
+    <!--
+      These two properties are used as inputs in _LinkerOptimizer_ComputeDependencies.
+      We compute them inside a target because the $(LinkerOptimizerInputPath) and
+      $(LinkerOptimizerInputPath) could possibly be set by another target
+      (like for instance _LinkerOptimizerBlazor_PrepareConfiguration).
+      -->
     <PropertyGroup>
-      <_LinkerOptimizerDependencyCache>$(BlazorIntermediateOutputPath)linker-optimizer.cache</_LinkerOptimizerDependencyCache>
-      <_LinkerOptimizerResponseFile>$(BlazorIntermediateOutputPath)linker-optimizer.response</_LinkerOptimizerResponseFile>
+      <_LinkerOptimizer_DependencyCache>$(LinkerOptimizerInputPath)/linker-optimizer.cache</_LinkerOptimizer_DependencyCache>
+      <_LinkerOptimizer_ResponseFile>$(LinkerOptimizerInputPath)/linker-optimizer.response</_LinkerOptimizer_ResponseFile>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(LinkerOptimizerResultFilePath)' != ''">
+      <_LinkerOptimizer_ResultsFile>$(LinkerOptimizerResultFilePath)</_LinkerOptimizer_ResultsFile>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(LinkerOptimizerResultFilePath)' == ''">
+      <_LinkerOptimizer_ResultsFile>$(LinkerOptimizerInputPath)/linker-optimizer.results</_LinkerOptimizer_ResultsFile>
+    </PropertyGroup>
+
+    <Message Text="Dependency Cache: $(_LinkerOptimizer_DependencyCache)" />
+    <Message Text="Response File: $(_LinkerOptimizer_ResponseFile)" />
+
+    <Error Text="'LinkerOptimizerInputAssembly' contains more than one item: @(LinkerOptimizerInputAssembly)" Condition="'@(LinkerOptimizerInputAssembly->Count())' &gt; 1" />
   </Target>
 
   <Target
-      Name="_ComputeLinkerOptimizerDependencies"
-      DependsOnTargets="_PrepareLinkerOptimizerConfiguration"
+      Name="_LinkerOptimizer_ComputeDependencies"
+      DependsOnTargets="_LinkerOptimizer_PrepareConfiguration"
       Inputs="@(LinkerOptimizerXmlDescriptors);
-              $(BlazorBuildLinkerInputsCache);
-              @(BlazorBuildLinkerExtraInputs);
-              @(IntermediateAssembly);
-              @(_BlazorDependencyInput);
-              @(BlazorLinkerDescriptor)"
-      Outputs="$(_LinkerOptimizerDependencyCache);$(_LinkerOptimizerResponseFile)">
+              @(LinkerOptimizerLinkerDescriptors);
+              @(LinkerOptimizerInputAssembly);
+              @(LinkerOptimizerDependencyInput);"
+      Outputs="$(_LinkerOptimizer_DependencyCache);$(_LinkerOptimizer_ResponseFile)">
 
     <Message Text="Linker Optimizer is disabled." Condition="'$(LinkerOptimizerEnabled)' == 'false'"/>
 
-    <Message Text="Using Linker Optimizer XML: %(LinkerOptimizerXmlDescriptors.Identity)!" Condition="'$(LinkerOptimizerEnabled)' != 'false'"/>
+    <Message Text="Using Linker Optimizer XML: %(LinkerOptimizerXmlDescriptors.Identity)" Condition="'$(LinkerOptimizerEnabled)' != 'false'"/>
     <Message Text="Using Linker Optimizer Arguments: $(LinkerOptimizerOptions)"  Condition="'$(LinkerOptimizerOptions)' != '' and '$(LinkerOptimizerEnabled)' != 'false'" />
     <Message Text="Using Linker Optimizer Report: $(LinkerOptimizerReport)"  Condition="'$(LinkerOptimizerReport)' != '' and '$(LinkerOptimizerEnabled)' != 'false'" />
 
+    <ItemGroup>
+      <__LinkerOptimizer_Inputs Include="@(LinkerOptimizerInputAssembly)" />
+      <__LinkerOptimizer_Inputs Include="@(LinkerOptimizerDependencyInput)" />
+      <__LinkerOptimizer_Distinct_Inputs Include="@(__LinkerOptimizer_Inputs->Distinct ())" />
+    </ItemGroup>
+
     <ItemGroup Condition="'$(LinkerOptimizerEnabled)' != 'false'">
-      <_LinkerOptimizerXmlArguments Include="@(LinkerOptimizerXmlDescriptors->'--optimizer-xml &quot;%(FullPath)&quot;')" Condition="'@(LinkerOptimizerXmlDescriptors)' != ''" />
-      <_LinkerOptimizerAssemblyReferences Include="@(_BlazorDependencyInput->'--optimizer-ref &quot;%(Identity)&quot;')" />
-      <_LinkerOptimizerAssemblyReferences Include="@(IntermediateAssembly->'--optimizer-ref &quot;%(FullPath)&quot;')" />
+      <__LinkerOptimizer_Arguments Include="@(LinkerOptimizerXmlDescriptors->'--optimizer-xml &quot;%(FullPath)&quot;')" Condition="'@(LinkerOptimizerXmlDescriptors)' != ''" />
+      <__LinkerOptimizer_Arguments Include="@(__LinkerOptimizer_Distinct_Inputs->'--optimizer-ref &quot;%(FullPath)&quot;')" />
+      <__LinkerOptimizer_Arguments Condition="'$(LinkerOptimizerOptions)' != ''" Include="--optimizer-options $(LinkerOptimizerOptions)" />
+      <__LinkerOptimizer_Arguments Condition="'$(LinkerOptimizerReport)' != ''" Include="--optimizer-report $(LinkerOptimizerReport)" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(LinkerOptimizerEnabled)' == 'false'">
-      <_LinkerOptimizerAssemblyReferences Include="@(_BlazorDependencyInput->'-a &quot;%(Identity)&quot;')" />
-      <_LinkerOptimizerAssemblyReferences Include="@(IntermediateAssembly->'-a &quot;%(FullPath)&quot;')" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(MonoOverrideBaseClassLibraryPath)' != ''">
-      <_MonoBaseClassLibraryFolder Include="$(MonoOverrideBaseClassLibraryPath);$(MonoOverrideBaseClassLibraryPath)\Facades;" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(MonoOverrideBaseClassLibraryPath)' == ''">
-      <_MonoBaseClassLibraryFolder Include="$(MonoBaseClassLibraryPath);$(MonoBaseClassLibraryFacadesPath)" />
+      <__LinkerOptimizer_LinkerArguments Include="@(__LinkerOptimizer_Distinct_Inputs->'-a &quot;%(FullPath)&quot;')" />
     </ItemGroup>
 
     <ItemGroup>
-      <_BlazorFolderLookupPaths Include="@(_MonoBaseClassLibraryFolder->'-d &quot;%(Identity)&quot;')" />
-      <_BlazorAssemblyDescriptorFiles
-        Include="@(BlazorLinkerDescriptor->'-x &quot;%(FullPath)&quot;')" Condition="'@(BlazorLinkerDescriptor)' != ''" />
+      <__LinkerOptimizer_LinkerArguments Include="$(LinkerOptimizerExtraLinkerArguments)" />
+      <__LinkerOptimizer_LinkerArguments Include="@(LinkerOptimizerBaseClassLibraryPath->'-d &quot;%(Identity)&quot;')" />
+      <__LinkerOptimizer_LinkerArguments Include="@(LinkerOptimizerLinkerDescriptors->'-x &quot;%(FullPath)&quot;')" />
+      <__LinkerOptimizer_LinkerArguments Include="-o &quot;$(LinkerOptimizerOutputPath)&quot;" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(LinkerOptimizerEnabled)' != 'false'">
-      <_LinkerOptimizerArguments>--optimizer %(IntermediateAssembly.FullPath) --optimizer-options blazor</_LinkerOptimizerArguments>
-      <_LinkerOptimizerOptions Condition="'$(LinkerOptimizerOptions)' != ''">--optimizer-options $(LinkerOptimizerOptions)</_LinkerOptimizerOptions>
-      <_LinkerOptimizerReport Condition="'$(LinkerOptimizerReport)' != ''">--optimizer-report $(LinkerOptimizerReport)</_LinkerOptimizerReport>
-
-      <_LinkerOptimizerCommandLine>$(_LinkerOptimizerArguments) @(_LinkerOptimizerXmlArguments, ' ') $(_LinkerOptimizerOptions) $(_LinkerOptimizerReport) $(LinkerOptimizerExtraArguments) @(_LinkerOptimizerAssemblyReferences, ' ')</_LinkerOptimizerCommandLine>
-      <_LinkerOptimizerFullCommandLine>$(_LinkerOptimizerCommandLine) -- $(LinkerOptimizerExtraLinkerArguments) $(AdditionalMonoLinkerOptions) -l $(MonoLinkerI18NAssemblies) @(_BlazorFolderLookupPaths, ' ') -o &quot;$(BlazorIntermediateLinkerOutputPath)&quot; @(_BlazorAssemblyDescriptorFiles, ' ')</_LinkerOptimizerFullCommandLine>
-      <MonoLinkerPath>$(MSBuildThisFileDirectory)\bin\optimizer\netcoreapp2.0\Mono.Linker.Optimizer.dll</MonoLinkerPath>
+      <_LinkerOptimizer_Path>$(MSBuildThisFileDirectory)\..\Mono.Linker.Optimizer\bin\optimizer\netcoreapp2.0\Mono.Linker.Optimizer.dll</_LinkerOptimizer_Path>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(LinkerOptimizerEnabled)' == 'false'">
-      <_LinkerOptimizerFullCommandLine>$(LinkerOptimizerExtraLinkerArguments) $(AdditionalMonoLinkerOptions) -l $(MonoLinkerI18NAssemblies) @(_BlazorFolderLookupPaths, ' ') -o &quot;$(BlazorIntermediateLinkerOutputPath)&quot; @(_BlazorAssemblyDescriptorFiles, ' ') @(_LinkerOptimizerAssemblyReferences, ' ')</_LinkerOptimizerFullCommandLine>
-      <MonoLinkerPath>$(MSBuildThisFileDirectory)\artifacts\bin\Mono.Linker\Debug\netcoreapp3.0\illink.dll</MonoLinkerPath>
+      <_LinkerOptimizer_Path>$(MSBuildThisFileDirectory)\..\Mono.Linker.Optimizer\bin\optimizer\netcoreapp2.0\linker.dll</_LinkerOptimizer_Path>
     </PropertyGroup>
 
-    <Hash ItemsToHash="@(LinkerOptimizerXmlDescriptors);$(_LinkerOptimizerFullCommandLine)">
-      <Output TaskParameter="HashResult" PropertyName="_LinkerOptimizerDependencyHash" />
+    <ItemGroup Condition="'$(LinkerOptimizerEnabled)' != 'false'">
+      <_LinkerOptimizer_CommandLine Include="--optimizer;%(LinkerOptimizerInputAssembly.FullPath);@(__LinkerOptimizer_Arguments);--;@(__LinkerOptimizer_LinkerArguments)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(LinkerOptimizerEnabled)' == 'false'">
+      <_LinkerOptimizer_CommandLine Include="$(LinkerOptimizerExtraLinkerArguments);-o &quot;$(BlazorIntermediateLinkerOutputPath)&quot;;@(_BlazorAssemblyDescriptorFiles);@(_LinkerOptimizerAssemblyReferences)" />
+    </ItemGroup>
+
+    <Message Text="Linker Optimizer command line: %(_LinkerOptimizer_CommandLine.Identity) " />
+
+    <ItemGroup>
+      <__LinkerOptimizer_Config Include="'$(LinkerOptimizerOutputPath)';'$(LinkerOptimizerEnabled)'" />
+      <__LinkerOptimizer_Config Include="'$(LinkerOptimizerOptions)';'$(LinkerOptimizerReport)';B;@(LinkerOptimizerBaseClassLibraryPath)" />
+      <__LinkerOptimizer_Config Include="X;@(LinkerOptimizerXmlDescriptors);D;@(LinkerOptimizerLinkerDescriptors)" />
+      <__LinkerOptimizer_Config Include="A;@(__LinkerOptimizer_LinkerArguments);L;@(__LinkerOptimizer_LinkerArguments) "/>
+      <__LinkerOptimizer_Config Include="I;@(LinkerOptimizerInputAssembly);E;@(LinkerOptimizerDependencyInput) "/>
+    </ItemGroup>
+
+    <Hash ItemsToHash="@(__LinkerOptimizer_Config)">
+      <Output TaskParameter="HashResult" PropertyName="_LinkerOptimizer_ConfigHash" />
     </Hash>
 
     <WriteLinesToFile
-      Lines="$(_LinkerOptimizerDependencyHash)"
-      File="$(_LinkerOptimizerDependencyCache)"
+      Lines="$(_LinkerOptimizer_ConfigHash)"
+      File="$(_LinkerOptimizer_DependencyCache)"
       Overwrite="True"
       WriteOnlyWhenDifferent="True" />
 
     <WriteLinesToFile
-      Lines="$(_LinkerOptimizerFullCommandLine)"
-      FIle="$(_LinkerOptimizerResponseFile)"
+      Lines="@(_LinkerOptimizer_CommandLine)"
+      File="$(_LinkerOptimizer_ResponseFile)"
       Overwrite="True"
       WriteOnlyWhenDifferent="True" />
 
-    <Message Text="Generated response file: $(_LinkerOptimizerResponseFile)" />
-
-    <ItemGroup>
-      <BlazorBuildLinkerExtraInputs Include="$(_LinkerOptimizerResponseFile)" />
-      <BlazorBuildLinkerExtraInputs Include="$(_LinkerOptimizerDependencyCache)" />
-      <BlazorBuildLinkerExtraInputs Include="@(LinkerOptimizerXmlDescriptors)" />
-    </ItemGroup>
-
+    <Message Text="Linker Optimizer config cache: $(_LinkerOptimizer_ConfigHash) $(_LinkerOptimizer_DependencyCache)" />
+    <Message Text="Linker Optimizer response file: $(_LinkerOptimizer_ResponseFile)" />
   </Target>
 
   <Target
-      Name="_LinkBlazorApplication"
-      DependsOnTargets="$(LinkBlazorApplicationDependsOn)"
-      Inputs="$(BlazorBuildLinkerInputsCache);
-              $(_LinkerOptimizerResponseFile);
-              @(BlazorBuildLinkerExtraInputs);
-              @(IntermediateAssembly);
-              @(_BlazorDependencyInput);
-              @(BlazorLinkerDescriptor)"
-      Outputs="$(BlazorIntermediateLinkerResultFilePath)"
-    >
-    <!--
-    At this point we have decided to run the mono linker on the Blazor assembly and its dependencies.
-    The steps to run the mono linker are the following:
-    1) Clear the linker output directory if not clean before hand, as we don't know what the outputs of
-    the linker will be.
-    2) Run the linker on the main assembly, its dependencies and pass in the BCL folders to do the lookup
-    for framework assemblies.
-    3) Once we've run the linker we need to capture the produced output and generate a marker file containing
-    the list of produced files. This file will act as a marker to skip running the linker if none of the inputs
-    has changed.
-    4) Add the file we just created to the list of file writes, to support incremental builds.
-    -->
+      Name="_LinkerOptimizer_LinkApplication"
+      DependsOnTargets="$(LinkerOptimizerDependsOn)"
+      Inputs="@(LinkerOptimizerXmlDescriptors);
+              @(LinkerOptimizerLinkerDescriptors);
+              @(LinkerOptimizerInputAssembly);
+              @(LinkerOptimizerDependencyInput);
+              $(_LinkerOptimizer_DependencyCache);
+              $(_LinkerOptimizer_ResponseFile)"
+      Outputs="$(_LinkerOptimizer_ResultsFile)">
 
-    <!-- Clear the contents of /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linker -->
-    <Delete Files="$(BlazorIntermediateLinkerOutputPath)*.dll" />
+    <Message Importance="High" Text="Linker Optimizer - linking application" />
+    <Message Importance="Normal" Text="  input directory: $(LinkerOptimizerInputPath)" />
+    <Message Importance="Normal" Text="  output directory: $(LinkerOptimizerOutputPath)" />
+    <Message Importance="Normal" Text="  response file: $(_LinkerOptimizer_ResponseFile)" />
 
-    <!-- Run the linker and put the results in /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linker -->
-    <Exec Command="$(LocalDotNet) &quot;$(MonoLinkerPath)&quot; @$(_LinkerOptimizerResponseFile)" />
+    <Delete Files="$(LinkerOptimizerOutputPath)*.dll" />
 
-    <!-- Collect the contents of /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linker/ -->
+    <Exec Command="$(LocalDotNet) &quot;$(_LinkerOptimizer_Path)&quot; @$(_LinkerOptimizer_ResponseFile)" />
+
     <ItemGroup>
-      <_BlazorLinkerOutput Include="$(BlazorIntermediateLinkerOutputPath)*.dll" />
-      <_BlazorLinkerOutput Include="$(BlazorIntermediateLinkerOutputPath)*.pdb" />
+      <_LinkerOptimizer_Output Include="$(LinkerOptimizerOutputPath)*.dll" />
+      <_LinkerOptimizer_Output Include="$(LinkerOptimizerOutputPath)*.pdb" />
     </ItemGroup>
 
-    <!--
-    Write the list of files in /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linker/ into
-    /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linked.assemblies.txt
-    -->
     <WriteLinesToFile
-      File="$(BlazorIntermediateLinkerResultFilePath)"
-      Lines="@(_BlazorLinkerOutput)"
+      File="$(_LinkerOptimizer_ResultsFile)"
+      Lines="@(_LinkerOptimizer_Output)"
       Overwrite="true" />
 
-    <!-- Add /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linked.assemblies.txt to the list of written files. -->
-    <!-- Add /obj/<<configuration>>/<<targetframework>>/blazor/blazor/linker/*.dll to the list of written files. -->
     <ItemGroup>
-      <FileWrites Include="$(BlazorIntermediateLinkerResultFilePath)" />
-      <FileWrites Include="@(_BlazorLinkerOutput)" />
+      <FileWrites Include="$(_LinkerOptimizer_ResultsFile)" />
+      <FileWrites Include="@(_LinkerOptimizer_Output)" />
     </ItemGroup>
+
+    <Message Importance="High" Text="Linker Optimizer - done linking application" />
+    <Message Importance="Normal" Text="  results file: $(_LinkerOptimizer_ResultsFile)" />
   </Target>
 
 </Project>

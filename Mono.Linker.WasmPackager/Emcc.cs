@@ -54,7 +54,7 @@ namespace Mono.Linker.WasmPackager
 			arguments.Add (Flags);
 			arguments.Add ("-c");
 			arguments.Add ($"-o {Output}");
-			arguments.Add ("--verbose");
+//			arguments.Add ("--verbose");
 
 			psi.Arguments = string.Join (" ", arguments);
 

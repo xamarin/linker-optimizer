@@ -23,6 +23,14 @@ namespace Mono.Linker.WasmPackager
 			get; set;
 		}
 
+		public string Framework {
+			get; set;
+		}
+
+		public string NetCoreAppDir {
+			get; set;
+		}
+
 		public bool AddBinding {
 			get; set;
 		}
@@ -52,10 +60,12 @@ namespace Mono.Linker.WasmPackager
 		#endregion
 
 		string app_prefix, framework_prefix, bcl_prefix, bcl_tools_prefix, bcl_facades_prefix, out_prefix;
+		static List<string> bcl_prefixes;
 		HashSet<string> asm_map = new HashSet<string> ();
 		List<string> file_list = new List<string> ();
 		HashSet<string> assemblies_with_dbg_info = new HashSet<string> ();
 		List<string> root_search_paths = new List<string> ();
+		bool is_netcore;
 
 		List<AssemblyData> assemblies = new List<AssemblyData> ();
 
@@ -71,32 +81,14 @@ namespace Mono.Linker.WasmPackager
 			// Assembly name
 			public string name;
 			// Base filename
-			public string filename;
-			// Path outside build tree
 			public string src_path;
-			// Path of .bc file
-			public string bc_path;
-			// Path of the wasm object file
-			public string o_path;
-			// Path in appdir
-			public string app_path;
-			// Path of the AOT depfile
-			public string aot_depfile_path;
-			// Linker input path
-			public string linkin_path;
-			// Linker output path
-			public string linkout_path;
-			// AOT input path
-			public string aotin_path;
-			// Final output path after IL strip
-			public string final_path;
 			// Whenever to AOT this assembly
 			public bool aot;
 
 			public TaskItem CreateTaskItem ()
 			{
-				return new TaskItem (name, new Dictionary<string, string> () {
-					{ "SrcPath", src_path },
+				return new TaskItem (src_path, new Dictionary<string, string> () {
+					{ "Name", name },
 					{ "AOT", aot ? "true" : "false" }
 				});
 			}
@@ -152,7 +144,12 @@ namespace Mono.Linker.WasmPackager
 
 		string ResolveBcl (string asm_name)
 		{
-			return ResolveWithExtension (bcl_prefix, asm_name);
+			foreach (var prefix in bcl_prefixes) {
+				string res = ResolveWithExtension (prefix, asm_name);
+				if (res != null)
+					return res;
+			}
+			return null;
 		}
 
 		string ResolveBclFacade (string asm_name)
@@ -232,6 +229,19 @@ namespace Mono.Linker.WasmPackager
 			out_prefix = Environment.CurrentDirectory;
 			app_prefix = Environment.CurrentDirectory;
 
+			if (!string.IsNullOrEmpty (Framework)) {
+				if (Framework.StartsWith ("netcoreapp")) {
+					is_netcore = true;
+					if (string.IsNullOrEmpty (NetCoreAppDir)) {
+						Log.LogError ("The 'NetCoreAppDir' argument is required.");
+						return false;
+					}
+				} else {
+					Log.LogError ("The only valid value for 'Framework' is 'netcoreapp...'");
+					return false;
+				}
+			}
+
 			var mono_sdk_root = Path.Combine (MonoWasmRoot, "sdks", "out");
 
 			var tool_prefix = Path.Combine (MonoWasmRoot, "sdk", "wasm");
@@ -239,6 +249,15 @@ namespace Mono.Linker.WasmPackager
 			bcl_prefix = Path.Combine (mono_sdk_root, "wasm-bcl/wasm");
 			bcl_tools_prefix = Path.Combine (mono_sdk_root, "wasm-bcl/wasm_tools");
 			bcl_facades_prefix = Path.Combine (bcl_prefix, "Facades");
+			bcl_prefixes = new List<string> ();
+			if (is_netcore) {
+				/* corelib */
+				bcl_prefixes.Add (Path.Combine (mono_sdk_root, "netcore"));
+				/* .net runtime */
+				bcl_prefixes.Add (NetCoreAppDir);
+			} else {
+				bcl_prefixes.Add (bcl_prefix);
+			}
 
 			foreach (var ra in RootAssemblies) {
 				AssemblyKind kind;
@@ -283,12 +302,12 @@ namespace Mono.Linker.WasmPackager
 			return true;
 		}
 
-		void RemoveDuplicates<T> (ref List<T> list, string name, Func<T,string> getKey)
+		void RemoveDuplicates<T> (ref List<T> list, string name, Func<T, string> getKey)
 		{
 			var dupsFound = false;
 			var dict = new Dictionary<string, T> ();
 			foreach (var item in list) {
-				var key = getKey(item);
+				var key = getKey (item);
 				if (dict.ContainsKey (key)) {
 					Log.LogError ($"Duplicate {name}: '{key}'.");
 					dupsFound = true;

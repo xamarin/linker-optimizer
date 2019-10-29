@@ -1,0 +1,66 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <LinkBlazorApplicationDependsOn>
+      $(LinkBlazorApplicationDependsOn);
+      _LinkerOptimizerBlazor_PrepareConfiguration;
+      _LinkerOptimizer_PrepareConfiguration;
+      _LinkerOptimizer_ComputeDependencies;
+      _LinkerOptimizer_LinkApplication;
+    </LinkBlazorApplicationDependsOn>
+    <LinkerOptimizerConfigurationDependsOn>
+      $(LinkerOptimizerConfigurationDependsOn);
+      _LinkerOptimizerBlazor_PrepareConfiguration;
+    </LinkerOptimizerConfigurationDependsOn>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)\..\Mono.Linker.Optimizer\Mono.Linker.Optimizer.targets" />
+
+  <Target
+      Name="_LinkerOptimizerBlazor_PrepareConfiguration"
+      DependsOnTargets="_PrepareBlazorOutputConfiguration">
+
+    <PropertyGroup>
+      <LinkerOptimizerInputPath>$(BlazorIntermediateOutputPath)</LinkerOptimizerInputPath>
+      <LinkerOptimizerOutputPath>$(BlazorIntermediateLinkerOutputPath)</LinkerOptimizerOutputPath>
+      <LinkerOptimizerResultFilePath>$(BlazorIntermediateLinkerResultFilePath)</LinkerOptimizerResultFilePath>
+      <LinkerOptimizerExtraLinkerArguments>$(LinkerOptimizerExtraLinkerArguments) $(AdditionalMonoLinkerOptions)</LinkerOptimizerExtraLinkerArguments>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(MonoLinkerI18NAssemblies)' != ''">
+      <LinkerOptimizerExtraLinkerArguments>$(LinkerOptimizerExtraLinkerArguments) -l $(MonoLinkerI18NAssemblies)</LinkerOptimizerExtraLinkerArguments>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <LinkerOptimizerInputAssembly Include="@(IntermediateAssembly)" />
+      <LinkerOptimizerDependencyInput Include="@(_BlazorDependencyInput)" />
+      <LinkerOptimizerLinkerDescriptors Include="@(BlazorLinkerDescriptor)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(MonoOverrideBaseClassLibraryPath)' != ''">
+      <LinkerOptimizerBaseClassLibraryPath Include="$(MonoOverrideBaseClassLibraryPath);$(MonoOverrideBaseClassLibraryPath)\Facades;" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(MonoOverrideBaseClassLibraryPath)' == ''">
+      <LinkerOptimizerBaseClassLibraryPath Include="$(MonoBaseClassLibraryPath);$(MonoBaseClassLibraryFacadesPath)" />
+    </ItemGroup>
+
+    <Message Text="Linker Optimizer Blazor - output path: $(BlazorIntermediateOutputPath)" />
+  </Target>
+
+  <!--
+    This target is referenced by the Blazor code.
+    We don't need to do anything here except listing our dependencies, inputs and outputs
+    because the '_LinkerOptimizer_LinkApplication' target already does everything for us.
+  -->
+  <Target
+      Name="_LinkBlazorApplication"
+      DependsOnTargets="$(LinkBlazorApplicationDependsOn)"
+      Inputs="$(BlazorBuildLinkerInputsCache);
+              $(_LinkerOptimizerResponseFile);
+              @(BlazorBuildLinkerExtraInputs);
+              @(IntermediateAssembly);
+              @(_BlazorDependencyInput);
+              @(BlazorLinkerDescriptor)"
+      Outputs="$(BlazorIntermediateLinkerResultFilePath)" />
+
+</Project>

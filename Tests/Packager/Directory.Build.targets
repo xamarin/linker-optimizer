@@ -1,0 +1,43 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\Mono.Linker.WasmPackager\Mono.Linker.WasmPackager.targets" />
+
+  <PropertyGroup>
+    <_WasmPackager_OldResolveAssemblyReferencesDependsOn>
+      $(ResolveAssemblyReferencesDependsOn);
+    </_WasmPackager_OldResolveAssemblyReferencesDependsOn>
+    <ResolveAssemblyReferencesDependsOn>
+      $(ResolveAssemblyReferencesDependsOn);
+      _WasmPackager_FilterAssemblyReferences;
+    </ResolveAssemblyReferencesDependsOn>
+  </PropertyGroup>
+
+  <Target
+      Name="GetReferenceAssemblyPaths"
+      DependsOnTargets="$(GetReferenceAssemblyPathsDependsOn);GetFrameworkPaths">
+
+    <PropertyGroup>
+      <TargetFrameworkDirectory>$(FrameworkPathOverride)</TargetFrameworkDirectory>
+      <TargetFrameworkDirectory>$(TargetFrameworkDirectory)</TargetFrameworkDirectory>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'">
+      <DesignTimeFacadeDirectoryRoots Include="$(TargetFrameworkDirectory)" />
+      <DesignTimeFacadeDirectories Include="%(DesignTimeFacadeDirectoryRoots.Identity)Facades\" Condition="Exists('%(DesignTimeFacadeDirectoryRoots.Identity)Facades\')" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(DesignTimeFacadeDirectories)' != ''">
+      <TargetFrameworkDirectory>$(TargetFrameworkDirectory);@(DesignTimeFacadeDirectories)</TargetFrameworkDirectory>
+    </PropertyGroup>
+  </Target>
+
+  <Target
+      Name="_WasmPackager_FilterAssemblyReferences"
+      DependsOnTargets="$(_WasmPackager_OldResolveAssemblyReferencesDependsOn)">
+    <Message Text="_WasmPackager_FilterAssemblyReferences: @(Reference)" />
+
+    <ItemGroup>
+      <Reference Remove="System.Drawing" />
+    </ItemGroup>
+  </Target>
+
+</Project>
