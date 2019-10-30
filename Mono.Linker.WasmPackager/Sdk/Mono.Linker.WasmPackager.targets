@@ -11,9 +11,10 @@
   <UsingTask TaskName="Mono.Linker.WasmPackager.WasmResolverTask" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.Linker.WasmPackager.Emcc" AssemblyFile="$(__WasmPackager_PackagerAssembly)" />
 
-  <Target Name="MartinTest">
-    <MartinTest />
-  </Target>
+  <ItemGroup>
+    <PackageReference Include="Mono.Linker.Optimizer" Version="1.0.0" />
+    <PackageReference Include="Mono.WebAssembly.Framework" Version="$(MonoWebAssemblyFrameworkVersion)" />
+  </ItemGroup>
 
   <!-- Packager defaults -->
   <PropertyGroup>
@@ -59,7 +60,6 @@
     <_WasmPackager_PInvokeTablesDefault>$(WasmPackager_BuildDir)/pinvoke-tables-default.h</_WasmPackager_PInvokeTablesDefault>
     <_WasmPackager_EmsdkEnv>$(WasmPackager_BuildDir)/emsdk_env.sh</_WasmPackager_EmsdkEnv>
     <_WasmPackager_MonoSdkRoot>$(MonoWasmRoot)/sdks/out</_WasmPackager_MonoSdkRoot>
-    <_WasmPackager_MonoBclPath>$(_WasmPackager_MonoSdkRoot)/wasm-bcl/wasm</_WasmPackager_MonoBclPath>
     <_WasmPackager_MonoIncludeDir>$(_WasmPackager_MonoSdkRoot)/wasm-runtime-release/include/mono-2.0</_WasmPackager_MonoIncludeDir>
 
     <_WasmPackager_EnableZLib Condition="('$(WasmPackager_EnableAot)' == 'true') OR ('$(WasmPackager_LinkIcalls)' == 'true')">true</_WasmPackager_EnableZLib>
@@ -416,7 +416,7 @@ config = {
       <LinkerOptimizerInputAssembly Include="%(__WasmPackager_FirstInput.LinkerInput)" />
       <LinkerOptimizerDependencyInput Include="%(_WasmPackager_Assemblies.LinkerInput)" />
       <LinkerOptimizerDependencyInput Remove="%(__WasmPackager_FirstInput.LinkerInput)" />
-      <LinkerOptimizerBaseClassLibraryPath Include="$(_WasmPackager_MonoBclPath);$(_WasmPackager_MonoBclPath)/Facades" />
+      <LinkerOptimizerBaseClassLibraryPath Include="$(WasmPackager_MonoBclPath);$(WasmPackager_MonoBclPath)/Facades" />
     </ItemGroup>
 
     <Message Importance="High" Text="WasmPackager - prepare optimizer config" />
@@ -435,10 +435,6 @@ config = {
     </ItemGroup>
 
   </Target>
-
-  <ItemGroup>
-    <PackageReference Include="Mono.Linker.Optimizer" Version="1.0.0" />
-  </ItemGroup>
 
   <PropertyGroup Condition="'$(UseWasmPackager)' == 'true'">
     <LinkBlazorApplicationDependsOn>

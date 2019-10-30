@@ -4,10 +4,6 @@
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
-  <Target Name="TheMartinTest">
-    <Message Importance="High" Text="MARTIN TEST: $(NugetPackageRoot)" />
-  </Target>
-
   <PropertyGroup>
     <_WasmPackager_OldResolveAssemblyReferencesDependsOn>
       $(ResolveAssemblyReferencesDependsOn);
@@ -22,9 +18,10 @@
       Name="GetReferenceAssemblyPaths"
       DependsOnTargets="$(GetReferenceAssemblyPathsDependsOn);GetFrameworkPaths">
 
+    <Message Importance="High" Text="GetReferenceAssemblyPaths: WPMBP=$(WasmPackager_MonoBclPath) FPO=$(FrameworkPathOverride) TFD=$(TargetFrameworkDirectory)" />
+
     <PropertyGroup>
-      <TargetFrameworkDirectory>$(FrameworkPathOverride)</TargetFrameworkDirectory>
-      <TargetFrameworkDirectory>$(TargetFrameworkDirectory)</TargetFrameworkDirectory>
+      <TargetFrameworkDirectory>$(WasmPackager_MonoBclPath)</TargetFrameworkDirectory>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'">

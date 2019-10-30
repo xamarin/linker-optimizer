@@ -3,11 +3,42 @@
 
   <PropertyGroup>
     <UseWasmPackager>true</UseWasmPackager>
+
+    <!-- Set to true to use a packaged version of Mono. -->
+    <WasmPackager_UsePackagedMono>true</WasmPackager_UsePackagedMono>
+
+    <!-- We cannot use $(NugetPackageRoot) prior to including Sdk.props -->
+    <WasmPackager_NugetPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\..\..'))</WasmPackager_NugetPackageRoot>
+
+    <MonoWasmRoot>/Workspace/mono-linker</MonoWasmRoot>
+    <CompiledMonoWasmRoot>/Workspace/mono-linker</CompiledMonoWasmRoot>
+    <EmscriptenSdkDir>/Workspace/mono-linker/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
+  </PropertyGroup>
+
+  <Choose>
+    <When Condition="'$(WasmPackager_UsePackagedMono)' == 'true'">
+      <PropertyGroup>
+        <MonoWebAssemblyFrameworkVersion>0.2.2</MonoWebAssemblyFrameworkVersion>
+        <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.framework\$(MonoWebAssemblyFrameworkVersion)</MonoWebAssemblyFrameworkRoot>
+        <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)/wasm-assemblies</WasmPackager_MonoBclPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <WasmPackager_MonoBclPath>$(MonoWasmRoot)/sdks/out/wasm-bcl/wasm</WasmPackager_MonoBclPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <PropertyGroup>
+    <!--
+      FrameworkPathOverride needs to be set prior to including Sdk.props.
+      We set TargetFrameworkPath in our Sdk.targets because anything we set
+      here will be overwritten.
+    -->
+    <FrameworkPathOverride>$(WasmPackager_MonoBclPath)</FrameworkPathOverride>
     <!-- Hard-code this to net45; we override GetReferenceAssemblyPaths to actually point this to wasm -->
     <TargetFramework>net45</TargetFramework>
-    <MonoWasmRoot>/Workspace/mono-linker</MonoWasmRoot>
-    <EmscriptenSdkDir>/Workspace/mono-linker/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
-    <FrameworkPathOverride>$(MonoWasmRoot)/sdks/out/wasm-bcl/wasm</FrameworkPathOverride>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
