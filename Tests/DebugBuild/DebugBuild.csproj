@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Mono.Linker.WasmPackager\Mono.Linker.WasmPackager.csproj" />
+    <ProjectReference Include="..\..\external\linker\external\cecil\Mono.Cecil.csproj" />
     <PackageReference Include="Microsoft.Build" Version="$(MSBuildFrameworkVersion)" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MSBuildFrameworkVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildFrameworkVersion)" />

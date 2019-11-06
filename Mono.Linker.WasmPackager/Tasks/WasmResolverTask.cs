@@ -14,7 +14,15 @@ namespace Mono.Linker.WasmPackager
 		#region Task Properties
 
 		[Required]
-		public string MonoWasmRoot {
+		public string MonoBclPath {
+			get; set;
+		}
+
+		public string MonoWasmFrameworkPath {
+			get; set;
+		}
+
+		public string MonoBclFacadesPath {
 			get; set;
 		}
 
@@ -59,7 +67,7 @@ namespace Mono.Linker.WasmPackager
 
 		#endregion
 
-		string app_prefix, framework_prefix, bcl_prefix, bcl_tools_prefix, bcl_facades_prefix, out_prefix;
+		string app_prefix, out_prefix;
 		static List<string> bcl_prefixes;
 		HashSet<string> asm_map = new HashSet<string> ();
 		List<string> file_list = new List<string> ();
@@ -139,7 +147,9 @@ namespace Mono.Linker.WasmPackager
 
 		string ResolveFramework (string asm_name)
 		{
-			return ResolveWithExtension (framework_prefix, asm_name);
+			if (string.IsNullOrEmpty (MonoWasmFrameworkPath))
+				return null;
+			return ResolveWithExtension (MonoWasmFrameworkPath, asm_name);
 		}
 
 		string ResolveBcl (string asm_name)
@@ -154,7 +164,7 @@ namespace Mono.Linker.WasmPackager
 
 		string ResolveBclFacade (string asm_name)
 		{
-			return ResolveWithExtension (bcl_facades_prefix, asm_name);
+			return ResolveWithExtension (MonoBclFacadesPath, asm_name);
 		}
 
 		string Resolve (string asm_name, out AssemblyKind kind)
@@ -195,9 +205,10 @@ namespace Mono.Linker.WasmPackager
 
 			var resolver = new DefaultAssemblyResolver ();
 			root_search_paths.ForEach (resolver.AddSearchDirectory);
-			resolver.AddSearchDirectory (bcl_facades_prefix);
-			resolver.AddSearchDirectory (bcl_prefix);
-			resolver.AddSearchDirectory (framework_prefix);
+			resolver.AddSearchDirectory (MonoBclFacadesPath);
+			resolver.AddSearchDirectory (MonoBclPath);
+			if (!string.IsNullOrEmpty (MonoWasmFrameworkPath))
+				resolver.AddSearchDirectory (MonoWasmFrameworkPath);
 			rp.AssemblyResolver = resolver;
 
 			rp.InMemory = true;
@@ -229,6 +240,8 @@ namespace Mono.Linker.WasmPackager
 			out_prefix = Environment.CurrentDirectory;
 			app_prefix = Environment.CurrentDirectory;
 
+			Log.LogMessage (MessageImportance.High, $"WasmResolverTask: {MonoBclPath}");
+
 			if (!string.IsNullOrEmpty (Framework)) {
 				if (Framework.StartsWith ("netcoreapp")) {
 					is_netcore = true;
@@ -242,21 +255,18 @@ namespace Mono.Linker.WasmPackager
 				}
 			}
 
-			var mono_sdk_root = Path.Combine (MonoWasmRoot, "sdks", "out");
+			if (string.IsNullOrEmpty (MonoBclFacadesPath))
+				MonoBclFacadesPath = Path.Combine (MonoBclPath, "Facades");
 
-			var tool_prefix = Path.Combine (MonoWasmRoot, "sdk", "wasm");
-			framework_prefix = Path.Combine (MonoWasmRoot, "sdk", "wasm", "framework");
-			bcl_prefix = Path.Combine (mono_sdk_root, "wasm-bcl/wasm");
-			bcl_tools_prefix = Path.Combine (mono_sdk_root, "wasm-bcl/wasm_tools");
-			bcl_facades_prefix = Path.Combine (bcl_prefix, "Facades");
 			bcl_prefixes = new List<string> ();
 			if (is_netcore) {
+				throw new NotImplementedException ();
 				/* corelib */
-				bcl_prefixes.Add (Path.Combine (mono_sdk_root, "netcore"));
+				bcl_prefixes.Add (Path.Combine (MonoBclPath, "netcore"));
 				/* .net runtime */
 				bcl_prefixes.Add (NetCoreAppDir);
 			} else {
-				bcl_prefixes.Add (bcl_prefix);
+				bcl_prefixes.Add (MonoBclPath);
 			}
 
 			foreach (var ra in RootAssemblies) {

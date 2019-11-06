@@ -1,0 +1,91 @@
+{
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "package-optimizer",
+                "command": "dotnet",
+                "type": "process",
+                "args": [
+                    "pack",
+                    "${workspaceFolder}/../../../Mono.Linker.Optimizer",
+                    "/property:GenerateFullPaths=true",
+                    "/consoleloggerparameters:Summary"
+                ],
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "label": "package-wasmpackager",
+                "command": "dotnet",
+                "type": "process",
+                "args": [
+                    "pack",
+                    "${workspaceFolder}/../../../Mono.Linker.WasmPackager",
+                    "/property:GenerateFullPaths=true",
+                    "/consoleloggerparameters:Summary"
+                ],
+                "problemMatcher": "$msCompile",
+                "dependsOn": "package-optimizer"
+            },
+            {
+                "label": "clean-optimizer",
+                "command": "dotnet",
+                "type": "process",
+                "args": [
+                    "clean",
+                    "${workspaceFolder}/../../../Mono.Linker.Optimizer",
+                    "/property:GenerateFullPaths=true",
+                    "/consoleloggerparameters:Summary"
+                ],
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "label": "clean-packager",
+                "command": "dotnet",
+                "type": "process",
+                "args": [
+                    "clean",
+                    "${workspaceFolder}/../../../Mono.Linker.WasmPackager",
+                    "/property:GenerateFullPaths=true",
+                    "/consoleloggerparameters:Summary"
+                ],
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "label": "build",
+                "command": "dotnet",
+                "type": "process",
+                "args": [
+                    "build",
+                    "${workspaceFolder}/TestSdk.csproj",
+                    "/property:GenerateFullPaths=true",
+                    "/consoleloggerparameters:Summary",
+                    "/verbosity:normal"
+                ],
+                "problemMatcher": "$msCompile",
+                "dependsOn": [
+                    "package-optimizer",
+                    "package-wasmpackager"
+                ],
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                }
+            },
+            {
+                "label": "clean",
+                "command": "dotnet",
+                "type": "process",
+                "args": [
+                    "clean",
+                    "${workspaceFolder}/TestSdk.csproj",
+                    "/property:GenerateFullPaths=true",
+                    "/consoleloggerparameters:Summary"
+                ],
+                "problemMatcher": "$msCompile",
+                "dependsOn": [
+                    "clean-optimizer",
+                    "clean-wasmpackager"
+                ]
+            }
+        ]
+    }

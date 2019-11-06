@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <NuspecFile>Mono.Linker.WasmPackager.nuspec</NuspecFile>
+    <NuspecFile>Mono.Linker.Emscripten.nuspec</NuspecFile>
   </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.Emscripten.targets" />
 
   <Target Name="CopyPackage" AfterTargets="Pack">
     <PropertyGroup>
@@ -13,12 +15,5 @@
       DestinationFolder="$(MSBuildThisFileDirectory)..\artifacts\" />
     <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
   </Target>
-
-  <ItemGroup>
-    <ProjectReference Include="..\external\linker\external\cecil\Mono.Cecil.csproj" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="$(MSBuildFrameworkVersion)" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildFrameworkVersion)" />
-    <PackageReference Include="System.Json" Version="4.6.0" />
-  </ItemGroup>
 
 </Project>

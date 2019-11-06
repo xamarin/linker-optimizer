@@ -11,7 +11,7 @@ namespace TestBuild
 {
 	class Program
 	{
-		const string WORKSPACE_ROOT = "/Workspace/linker-optimizer";
+		const string WORKSPACE_ROOT = "/Users/Workspace/linker-optimizer";
 
 		static Dictionary<string, string> GetGlobalProperties (string projectPath, string toolsPath)
 		{

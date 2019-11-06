@@ -1,17 +1,27 @@
 {
 	"folders": [
 		{
+			"path": "Tests/Packager/TestSdk"
+		},
+		{
 			"path": "Tests/DebugBuild"
 		},
 		{
 			"path": "Mono.Linker.WasmPackager"
 		},
 		{
-			"path": "Tests/Blazor/AotSample"
+			"path": "Mono.Linker.Optimizer"
 		},
 		{
-			"path": "Mono.Linker.Optimizer"
+			"path": "Mono.Linker.Emscripten"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"editor.wordWrapColumn": 120,
+		"editor.wordBasedSuggestions": false,
+		"[markdown]":{
+			"editor.wordWrap": "wordWrapColumn",
+			"editor.wordWrapColumn": 80,
+		},
+	},
 }

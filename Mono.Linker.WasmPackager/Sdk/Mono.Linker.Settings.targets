@@ -1,0 +1,30 @@
+<Project>
+
+  <!-- Default Settings and Configuration -->
+
+  <!-- Packager defaults -->
+  <PropertyGroup>
+    <RuntimeTemplate Condition="'$(RuntimeTemplate)' == ''">runtime-tests.js</RuntimeTemplate>
+    <WasmEnableDebug Condition="'$(WasmEnableDebug)' == ''">false</WasmEnableDebug>
+  </PropertyGroup>
+
+  <!-- FIXME -->
+  <ItemGroup>
+    <!-- <WasmPackager_Profilers Include="TestProfiler" /> -->
+    <WasmPackager_PInvokeLibraries Include="libfoo" />
+  </ItemGroup>
+
+  <!-- Packager settings -->
+  <PropertyGroup>
+    <WasmPackager_BuildDir>$(IntermediateOutputPath)aot</WasmPackager_BuildDir>
+    <WasmPackager_VfsPrefix>managed</WasmPackager_VfsPrefix>
+    <WasmPackager_DeployPrefix>managed</WasmPackager_DeployPrefix>
+
+    <WasmPackager_LinkIcalls>false</WasmPackager_LinkIcalls>
+    <WasmPackager_EnableLinker>true</WasmPackager_EnableLinker>
+    <WasmPackager_EnableAot>true</WasmPackager_EnableAot>
+
+    <!-- <WasmPackager_AotProfile>test</WasmPackager_AotProfile> -->
+  </PropertyGroup>
+
+</Project>
