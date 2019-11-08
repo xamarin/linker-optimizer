@@ -13,7 +13,7 @@
 			"path": "Mono.Linker.Optimizer"
 		},
 		{
-			"path": "Mono.Linker.Emscripten"
+			"path": "Mono.Linker.CilStrip"
 		}
 	],
 	"settings": {

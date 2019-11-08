@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <NuspecFile>Mono.Linker.Emscripten.nuspec</NuspecFile>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.Emscripten.targets" />
+
+  <Target Name="CopyPackage" AfterTargets="Pack">
+    <PropertyGroup>
+      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
+    </PropertyGroup>
+    <Copy
+      SourceFiles="$(OutputPath)\$(PackageFileName)"
+      DestinationFolder="$(MSBuildThisFileDirectory)..\artifacts\" />
+    <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
+  </Target>
+
+</Project>

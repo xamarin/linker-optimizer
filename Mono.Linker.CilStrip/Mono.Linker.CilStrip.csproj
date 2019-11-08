@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <DefineConstants>CF_2_0</DefineConstants>
+    <NoWarn>0436;0108;0618;0169;0649;</NoWarn>
+    <NuspecFile>Mono.Linker.CilStrip.nuspec</NuspecFile>
+  </PropertyGroup>
+
+  <Target Name="CopyPackage" AfterTargets="Pack">
+    <PropertyGroup>
+      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
+    </PropertyGroup>
+    <Copy
+      SourceFiles="bin\$(Configuration)\$(PackageFileName)"
+      DestinationFolder="$(MSBuildThisFileDirectory)..\artifacts\" />
+    <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
+  </Target>
+
+</Project>

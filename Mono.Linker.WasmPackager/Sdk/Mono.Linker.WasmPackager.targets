@@ -28,6 +28,7 @@
       _WasmPackager_GenerateDriver;
       _WasmPackager_GenerateMonoConfig;
       _WasmPackager_GeneratePInvokeTable;
+      _WasmPackager_CilStrip;
     </_WasmPackager_Require_Generator>
   </PropertyGroup>
 
@@ -231,23 +232,44 @@ config = {
   </Target>
 
   <Target Name="_WasmPackager_CompileAot"
+    Inputs="@(_WasmPackager_Assemblies->'%(LinkerOutput)')"
+    Outputs="@(_WasmPackager_Assemblies->'%(LlvmOutFile)')"
     DependsOnTargets="$(_WasmPackager_Require_Generator)">
 
-    <Message Importance="High" Text="_WasmPackager_CompileAot - compiling %(_WasmPackager_Assemblies.LinkerOutput)" Condition="'%(AOT)' == 'true'" />
+    <Message Importance="High" Text="_WasmPackager_CompileAot - compiling @(_WasmPackager_Assemblies->'%(LinkerOutput)')" />
 
-    <PropertyGroup>
-      <__WasmPackager_AotArgs>@(_WasmPackager_AotArgs, ','),depfile=%(_WasmPackager_Assemblies.DepFile),llvm-outfile=%(_WasmPackager_Assemblies.LlvmOutFile)</__WasmPackager_AotArgs>
-    </PropertyGroup>
+    <!--
+      Be careful here not to copy any of those %(_WasmPackager_Assemblies.DepFile)
+      or similar expressions into a <PropertyGroup>; that would cause that property
+      to be assigned once for each file - which is not what we want.
 
+      By having the %(...) expressions inside the <CompileAot>, we ensure that it gets
+      called once for each input and the condition also correctly applies.
+
+      Also note that first the <CompileAot> task will be invoked for each file - and
+      then execution will move on to the <Copy>.  Which means that we could in theory
+      use the @(_WasmPackager_Assemblies->'%(LinkerOutput)') expression in there -
+      but that wouldn't correctly filter out the non-AOT assemblies.
+
+      This may look a bit ugly, but it allows us to have everything in one single
+      @(_WasmPackager_Assemblies) item rather than having a dozen different ones.
+    -->
     <CompileAot
         MonoCrossBin="$(_WasmPackager_MonoCrossBin)"
         MonoPath="$(_WasmPackager_AotInput_Dir)"
         Input="%(_WasmPackager_Assemblies.LinkerOutput)"
-        AotArgs="$(__WasmPackager_AotArgs)"
+        AotArgs="@(_WasmPackager_AotArgs, ','),depfile=%(_WasmPackager_Assemblies.DepFile),llvm-outfile=%(_WasmPackager_Assemblies.LlvmOutFileTemp)"
+        Condition="'%(_WasmPackager_Assemblies.AOT)' == 'true'" 
+     />
+
+    <Copy
+        SourceFiles="%(_WasmPackager_Assemblies.LlvmOutFileTemp)"
+        DestinationFiles="%(_WasmPackager_Assemblies.LlvmOutFile)"
+        SkipUnchangedFiles="true"
+        Condition="'%(_WasmPackager_Assemblies.AOT)' == 'true'" 
     />
 
-    <Message Importance="High" Text="_WasmPackager_CompileAot - done compiling %(_WasmPackager_AotAssemblies.LinkerOutput)" />
-
+    <Message Importance="High" Text="_WasmPackager_CompileAot - done" />
 
   </Target>
 

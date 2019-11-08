@@ -14,6 +14,7 @@
         - Name - Assembly base name
         - SkipCopy - boolean
         - SkipLink - boolean
+        - CilStripOutput
         - LinkerInput
         - LinkerOutput
         - AotInput
@@ -33,6 +34,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.Linker.Optimizer" Version="1.0.0" />
+    <PackageReference Include="Mono.Linker.CilStrip" Version="1.0.0" />
     <PackageReference Include="Mono.WebAssembly.Framework" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime.Aot" Version="$(MonoWebAssemblySdkVersion)" />
@@ -97,6 +99,7 @@
       <_WasmPackager_LinkerOutput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-out</_WasmPackager_LinkerOutput_Dir>
       <_WasmPackager_AotInput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(_WasmPackager_LinkerOutput_Dir)</_WasmPackager_AotInput_Dir>
       <_WasmPackager_AotInput_Dir Condition="'$(WasmPackager_EnableLinker)' != 'true'">$(WasmPackager_BuildDir)</_WasmPackager_AotInput_Dir>
+      <_WasmPackager_CilStripOutput_Dir Condition="'$(WasmPackager_CilStrip)' == 'true'">$(WasmPackager_BuildDir)/ilstrip-out</_WasmPackager_CilStripOutput_Dir>
       <_WasmPackager_AotDummy Condition="'$(_WasmPackager_EnableDedup)' == 'true'">$(WasmPackager_BuildDir)/aot-dummy.dll</_WasmPackager_AotDummy>
 
       <_WasmPackager_Emcc_Flags Condition="'$(_WasmPackager_PInvokeTable)' != ''">$(_WasmPackager_Emcc_Flags) -DGEN_PINVOKE</_WasmPackager_Emcc_Flags>
@@ -168,31 +171,44 @@
         RootAssemblies="@(_WasmPackager_RootAssemblies)"
         EnableAot="$(WasmPackager_EnableAot)"
         EnableDebug="$(WasmEnableDebug)">
-        <Output TaskParameter="Assemblies" ItemName="__WasmPackager_Assemblies" />
+        <Output TaskParameter="Assemblies" ItemName="_WasmPackager_Assemblies" />
         <Output TaskParameter="FileList" ItemName="_WasmPackager_FileList" />
     </WasmResolverTask>
 
     <ItemGroup Condition="'$(_WasmPackager_EnableDedup)' == 'true'">
-      <__WasmPackager_Assemblies Include="$(_WasmPackager_AotDummy)">
+      <_WasmPackager_Assemblies Include="$(_WasmPackager_AotDummy)">
         <Name>aot-dummy</Name>
         <AOT>true</AOT>
         <SkipCopy>true</SkipCopy>
         <SkipLink>true</SkipLink>
-      </__WasmPackager_Assemblies>
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' == 'true'">
-      <_WasmPackager_Assemblies Include="@(__WasmPackager_Assemblies)">
-        <LinkerInput>$(_WasmPackager_LinkerInput_Dir)/%(Filename)%(Extension)</LinkerInput>
-        <LinkerOutput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</LinkerOutput>
-        <AotInput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</AotInput>
-        <DepFile Condition="'$(WasmPackager_EnableAot)' == 'true'">$(_WasmPackager_LinkerOutput_Dir)/%(Filename).depfile</DepFile>
-        <LlvmOutFile Condition="'$(WasmPackager_EnableAot)' == 'true'">$(_WasmPackager_LinkerOutput_Dir)/%(Filename).bc.tmp</LlvmOutFile>
       </_WasmPackager_Assemblies>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' != 'true'">
-      <_WasmPackager_Assemblies Include="@(__WasmPackager_Assemblies)" />
+    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' == 'true'">
+      <_WasmPackager_Assemblies>
+        <LinkerInput>$(_WasmPackager_LinkerInput_Dir)/%(Filename)%(Extension)</LinkerInput>
+        <LinkerOutput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</LinkerOutput>
+      </_WasmPackager_Assemblies>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(WasmPackager_EnableAot)' == 'true'">
+      <_WasmPackager_Assemblies>
+        <AotInput>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</AotInput>
+        <DepFile>$(_WasmPackager_AotInput_Dir)/%(Filename).depfile</DepFile>
+        <LlvmOutFileTemp>$(_WasmPackager_AotInput_Dir)/%(Filename).bc.tmp</LlvmOutFileTemp>
+        <LlvmOutFile>$(_WasmPackager_AotInput_Dir)/%(Filename).bc</LlvmOutFile>
+      </_WasmPackager_Assemblies>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_WasmPackager_Assemblies Condition="'$(WasmPackager_CilStrip)' == 'true'">
+        <CilStripInput>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</CilStripInput>
+        <CilStripOutput>$(_WasmPackager_CilStripOutput_Dir)/%(Filename)%(Extension)</CilStripOutput>
+        <FinalPath>$(_WasmPackager_CilStripOutput_Dir)/%(Filename)%(Extension)</FinalPath>
+      </_WasmPackager_Assemblies>
+      <_WasmPackager_Assemblies Condition="'$(WasmPackager_CilStrip)' != 'true'">
+        <FinalPath>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</FinalPath>
+      </_WasmPackager_Assemblies>
     </ItemGroup>
 
     <!-- Make sure to always modify these in pairs -->
