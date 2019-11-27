@@ -22,7 +22,7 @@ namespace Mono.Linker.WasmPackager
 		}
 
 		[Required]
-		public string Input {
+		public string[] Inputs {
 			get; set;
 		}
 
@@ -41,7 +41,7 @@ namespace Mono.Linker.WasmPackager
 			var arguments = new List<string> ();
 			arguments.Add ("--debug");
 			arguments.Add ($"--aot={AotArgs}");
-			arguments.Add (Input);
+			arguments.AddRange (Inputs);
 
 			psi.Arguments = string.Join (" ", arguments);
 

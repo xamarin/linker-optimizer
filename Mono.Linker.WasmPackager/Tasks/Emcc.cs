@@ -37,7 +37,7 @@ namespace Mono.Linker.WasmPackager
 
 		public override bool Execute ()
 		{
-			Log.LogMessage (MessageImportance.High, $"EMCC: |{Flags}|");
+			Log.LogMessage (MessageImportance.High, $"EMCC: {Input} - {Output} - {Flags}");
 
 			var environment = SourceEnvironment.ParseEnvironmentVariables (Log, EmsdkEnv, false);
 
@@ -52,7 +52,6 @@ namespace Mono.Linker.WasmPackager
 			var arguments = new List<string> ();
 			arguments.Add (Input);
 			arguments.Add (Flags);
-			arguments.Add ("-c");
 			arguments.Add ($"-o {Output}");
 //			arguments.Add ("--verbose");
 

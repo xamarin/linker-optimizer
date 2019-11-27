@@ -24,6 +24,7 @@
         <WasmPackager_MonoRuntimePath>$(MonoWebAssemblyRuntimeRoot)\mono-wasm-runtime</WasmPackager_MonoRuntimePath>
         <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)\wasm-assemblies</WasmPackager_MonoBclPath>
         <WasmPackager_MonoIncludeDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\include\mono-2.0</WasmPackager_MonoIncludeDir>
+        <WasmPackager_MonoLibDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\lib</WasmPackager_MonoLibDir>
         <WasmPackager_MonoRuntimeAotDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
       </PropertyGroup>
     </When>
@@ -32,6 +33,7 @@
         <WasmPackager_MonoRuntimePath>$(MonoWasmRoot)\sdks\wasm</WasmPackager_MonoRuntimePath>
         <WasmPackager_MonoBclPath>$(MonoWasmRoot)\sdks\out\wasm-bcl\wasm</WasmPackager_MonoBclPath>
         <WasmPackager_MonoIncludeDir>$(MonoWasmRoot)\sdks\out\wasm-runtime-release\include\mono-2.0</WasmPackager_MonoIncludeDir>
+        <WasmPackager_MonoLibDir>$(MonoWasmRoot)\sdks\out\wasm-runtime-release\lib</WasmPackager_MonoLibDir>
         <WasmPackager_MonoRuntimeAotDir>$(MonoWasmRoot)\sdks\out\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
       </PropertyGroup>
     </Otherwise>

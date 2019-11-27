@@ -3,7 +3,6 @@
   <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.Resolver.targets" />
 
   <UsingTask TaskName="Mono.Linker.WasmPackager.MartinTest" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
-  <UsingTask TaskName="Mono.Linker.WasmPackager.PackagerTask" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.Linker.WasmPackager.GenerateICallTable" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.Linker.WasmPackager.GeneratePInvokeTable" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.Linker.WasmPackager.GetFirstItem" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
@@ -23,13 +22,23 @@
     </_WasmPackager_Require_PreLink>
     <_WasmPackager_Require_PostLink>
       _WasmPackager_CreateDummyAssemblies;
+      _WasmPackager_ConstructEnv;
     </_WasmPackager_Require_PostLink>
     <_WasmPackager_Require_Generator>
       _WasmPackager_GenerateDriver;
       _WasmPackager_GenerateMonoConfig;
       _WasmPackager_GeneratePInvokeTable;
       _WasmPackager_CilStrip;
+      _WasmPackager_Emcc;
     </_WasmPackager_Require_Generator>
+    <_WasmPackager_Require_AppBundle_Inputs>
+      $(_WasmPackager_Require_PostLink);
+      $(_WasmPackager_Require_Generator);
+      _WasmPackager_LinkEmcc;
+    </_WasmPackager_Require_AppBundle_Inputs>
+    <_WasmPackager_Require_AppBundle>
+      _WasmPackager_GenerateAppBundle;
+    </_WasmPackager_Require_AppBundle>
   </PropertyGroup>
 
   <!-- 
@@ -153,17 +162,18 @@ config = {
   <Target
       Name="_WasmPackager_Emcc"
       DependsOnTargets="$(_WasmPackager_Require_PostLink)"
-      Inputs="%(_WasmPackager_Emcc_Sources.Identity);%(_WasmPackager_Emcc_Sources.Emcc_Deps);$(_WasmPackager_EmsdkEnv)"
-      Outputs="%(_WasmPackager_Emcc_Sources.Emcc_Output)">
+      Inputs="%(_WasmPackager_SdkSources.Identity);%(_WasmPackager_SdkSources.Emcc_Deps);$(_WasmPackager_EmsdkEnv)"
+      Outputs="%(_WasmPackager_SdkSources.Emcc_Output)">
 
-    <Message Importance="High" Text="WASM EMCC: %(_WasmPackager_Emcc_Sources.Identity) - %(_WasmPackager_Emcc_Sources.Emcc_Output) %(_WasmPackager_Emcc_Sources.Emcc_Flags) - %(_WasmPackager_Emcc_Sources.Emcc_Deps)" />
+    <Message Importance="High" Text="_WasmPackager_Emcc: %(_WasmPackager_SdkSources.Identity) - %(_WasmPackager_SdkSources.Emcc_Output) %(_WasmPackager_SdkSources.Emcc_Flags) - %(_WasmPackager_SdkSources.Emcc_Deps)" />
 
     <Emcc SdkDir="$(EmscriptenSdkDir)"
           EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
           BuildDir="$(WasmPackager_BuildDir)"
-          Input="%(_WasmPackager_Emcc_Sources.Intermediate)"
-          Output="%(_WasmPackager_Emcc_Sources.Emcc_Output)"
-          Flags="%(_WasmPackager_Emcc_Sources.Emcc_Flags) $(_WasmPackager_Emcc_Flags) -I$(WasmPackager_MonoIncludeDir)" />
+          Input="%(_WasmPackager_SdkSources.Intermediate)"
+          Output="%(_WasmPackager_SdkSources.Emcc_Output)"
+          Flags="%(_WasmPackager_SdkSources.Emcc_Flags) $(_WasmPackager_Emcc_Flags) -c -I$(WasmPackager_MonoIncludeDir)"
+          Condition="'%(_WasmPackager_SdkSources.Emcc_Output)' != ''" />
 
   </Target>
 
@@ -257,7 +267,7 @@ config = {
     <CompileAot
         MonoCrossBin="$(_WasmPackager_MonoCrossBin)"
         MonoPath="$(_WasmPackager_AotInput_Dir)"
-        Input="%(_WasmPackager_Assemblies.LinkerOutput)"
+        Inputs="%(_WasmPackager_Assemblies.LinkerOutput)"
         AotArgs="@(_WasmPackager_AotArgs, ','),depfile=%(_WasmPackager_Assemblies.DepFile),llvm-outfile=%(_WasmPackager_Assemblies.LlvmOutFileTemp)"
         Condition="'%(_WasmPackager_Assemblies.AOT)' == 'true'" 
      />
@@ -273,8 +283,63 @@ config = {
 
   </Target>
 
+  <Target Name="_WasmPackager_Dedup"
+    Inputs="$(_WasmPackager_AotDummy)"
+    Outputs="@(_WasmPackager_Assemblies->'%(LlvmOutFile)')"
+    DependsOnTargets="_WasmPackager_CompileAot">
+
+    <Message Importance="High" Text="_WasmPackager_Dedup $(_WasmPackager_AotDummy)" />
+
+    <ItemGroup>
+      <__WasmPackager_Dedup_Assembly Include="@(_WasmPackager_Assemblies)" Condition="'%(Identity)' == '$(_WasmPackager_AotDummy)'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <__WasmPackager_Dedup_Identity>%(__WasmPackager_Dedup_Assembly.Identity)</__WasmPackager_Dedup_Identity>
+      <__WasmPackager_Dedup_LlvmOutfile>%(__WasmPackager_Dedup_Assembly.LlvmOutFileTemp)</__WasmPackager_Dedup_LlvmOutfile>
+    </PropertyGroup>
+
+    <CompileAot
+        MonoCrossBin="$(_WasmPackager_MonoCrossBin)"
+        MonoPath="$(_WasmPackager_AotInput_Dir)"
+        Inputs="@(_WasmPackager_Assemblies->'%(LinkerOutput)')"
+        AotArgs="@(_WasmPackager_AotBaseArgs, ','),llvm-outfile=$(__WasmPackager_Dedup_LlvmOutfile),dedup-include=$(__WasmPackager_Dedup_Identity)"
+        Condition="'%(_WasmPackager_Assemblies.AOT)' == 'true'" 
+    />
+
+  </Target>
+
+  <Target Name="_WasmPackager_GenerateAppBundle"
+    DependsOnTargets="$(_WasmPackager_Require_AppBundle_Inputs)"
+    Inputs="@(_WasmPackager_AppBundle_Files->'%(Source)');@(_WasmPackager_Assemblies->'%(FinalPath)')"
+    Outputs="@(_WasmPackager_AppBundle_Files->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath)')">
+
+    <Message Importance="High" Text="_WasmPackager_GenerateAppBundle: $(WasmPackager_AppDir)" />
+
+    <MakeDir Directories="$(WasmPackager_AppDir)" />
+
+    <Copy
+        SourceFiles="@(_WasmPackager_AppBundle_Files->'%(Source)');@(_WasmPackager_Assemblies->'%(FinalPath)')"
+        DestinationFiles="@(_WasmPackager_AppBundle_Files->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath)')"
+        SkipUnchangedFiles="true" />
+
+  </Target>
+
+  <Target Name="_WasmPackager_LinkEmcc"
+    DependsOnTargets="$(_WasmPackager_Require_Generator);_WasmPackager_Emcc"
+    Inputs="@(_WasmPackager_SdkSources->'%(Emcc_Output)')"
+    Outputs="$(WasmPackager_BuildDir)/mono.js">
+
+    <Emcc SdkDir="$(EmscriptenSdkDir)"
+          EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
+          BuildDir="$(WasmPackager_BuildDir)"
+          Input="@(_WasmPackager_SdkSources->'%(Emcc_Output)', ' ') @(_WasmPackager_Runtime_Libs->'%(Path)', ' ') @(_WasmPackager_Js_Libs->'--js-library %(Path)', ' ')"
+          Output="$(WasmPackager_BuildDir)/mono.js"
+          Flags="$(_WasmPackager_Emcc_Flags) $(_WasmPackager_Emcc_Link_Flags)" />
+
+  </Target>
+
   <Target Name="_WasmPackager_NetFramework"
-    DependsOnTargets="$(_WasmPackager_NetFramework_DependsOn)">
+    DependsOnTargets="$(_WasmPackager_NetFramework_DependsOn); $(_WasmPackager_Require_AppBundle)">
     <Message Importance="High" Text="WasmPackager: $(WasmPackager_BuildDir)" />
 
     <ItemGroup>
@@ -302,6 +367,7 @@ config = {
     <_WasmPackager_NetFramework_DependsOn>
       $(_WasmPackager_NetFramework_DependsOn);
       _WasmPackager_CompileAot;
+      _WasmPackager_Dedup;
     </_WasmPackager_NetFramework_DependsOn>
 
     <TargetsTriggeredByCompilation>_WasmPackager_NetFramework;</TargetsTriggeredByCompilation>

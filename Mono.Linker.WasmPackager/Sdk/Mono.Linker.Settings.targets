@@ -4,7 +4,7 @@
 
   <!-- Packager defaults -->
   <PropertyGroup>
-    <RuntimeTemplate Condition="'$(RuntimeTemplate)' == ''">runtime-tests.js</RuntimeTemplate>
+    <WasmPackager_RuntimeTemplate Condition="'$(WasmPackager_RuntimeTemplate)' == ''">runtime-tests.js</WasmPackager_RuntimeTemplate>
     <WasmEnableDebug Condition="'$(WasmEnableDebug)' == ''">false</WasmEnableDebug>
   </PropertyGroup>
 
@@ -17,6 +17,7 @@
   <!-- Packager settings -->
   <PropertyGroup>
     <WasmPackager_BuildDir>$(IntermediateOutputPath)aot</WasmPackager_BuildDir>
+    <WasmPackager_AppDir>$(OutputPath)app</WasmPackager_AppDir>
     <WasmPackager_VfsPrefix>managed</WasmPackager_VfsPrefix>
     <WasmPackager_DeployPrefix>managed</WasmPackager_DeployPrefix>
 
