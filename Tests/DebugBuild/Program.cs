@@ -11,8 +11,6 @@ namespace TestBuild
 {
 	class Program
 	{
-		const string WORKSPACE_ROOT = "/Users/Workspace/linker-optimizer";
-
 		static Dictionary<string, string> GetGlobalProperties (string projectPath, string toolsPath)
 		{
 			string solutionDir = Path.GetDirectoryName (projectPath);
@@ -30,7 +28,12 @@ namespace TestBuild
 
 		static void Main (string[] args)
 		{
-			var path = Path.Combine (WORKSPACE_ROOT, "Tests", "Blazor", "AotSample", "AotSample.csproj");
+			if (args.Length != 1)
+				throw new InvalidOperationException ($"Must provide workspace root as argument.");
+
+
+			var workspaceFolder = args[0];
+			var path = Path.Combine (workspaceFolder, Path.GetFileName (workspaceFolder) + ".csproj");
 
 			var toolsPath = "/usr/local/share/dotnet/sdk/3.0.100";
 			var globalProperties = GetGlobalProperties (path, toolsPath);
@@ -42,7 +45,10 @@ namespace TestBuild
 			collection.AddToolset (new Toolset (ToolLocationHelper.CurrentToolsVersion, toolsPath, collection, string.Empty));
 
 			StringBuilder logBuilder = new StringBuilder ();
-			ConsoleLogger logger = new ConsoleLogger (LoggerVerbosity.Normal, x => logBuilder.Append (x), null, null);
+			ConsoleLogger logger = new ConsoleLogger (LoggerVerbosity.Normal, x => {
+				logBuilder.Append (x);
+				Console.Error.Write (x);
+			}, null, null);
 			collection.RegisterLogger (logger);
 
 			var project = collection.LoadProject (path);

@@ -31,6 +31,10 @@ namespace Mono.Linker.WasmPackager
 			get; set;
 		}
 
+		public string[] FrameworkDirectories {
+			get; set;
+		}
+
 		public string Framework {
 			get; set;
 		}
@@ -147,6 +151,13 @@ namespace Mono.Linker.WasmPackager
 
 		string ResolveFramework (string asm_name)
 		{
+			if (FrameworkDirectories != null) {
+				foreach (var dir in FrameworkDirectories) {
+					string res = ResolveWithExtension (dir, asm_name);
+					if (res != null)
+						return res;
+				}
+			}
 			if (string.IsNullOrEmpty (MonoWasmFrameworkPath))
 				return null;
 			return ResolveWithExtension (MonoWasmFrameworkPath, asm_name);
@@ -209,6 +220,10 @@ namespace Mono.Linker.WasmPackager
 			resolver.AddSearchDirectory (MonoBclPath);
 			if (!string.IsNullOrEmpty (MonoWasmFrameworkPath))
 				resolver.AddSearchDirectory (MonoWasmFrameworkPath);
+			if (FrameworkDirectories != null) {
+				foreach (var dir in FrameworkDirectories)
+					resolver.AddSearchDirectory (dir);
+			}
 			rp.AssemblyResolver = resolver;
 
 			rp.InMemory = true;

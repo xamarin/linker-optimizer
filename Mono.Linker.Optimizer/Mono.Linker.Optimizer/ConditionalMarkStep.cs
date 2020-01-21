@@ -127,7 +127,7 @@ namespace Mono.Linker.Optimizer
 			if (reference is GenericParameter)
 				return null;
 
-			var type = ResolveTypeDefinition (reference);
+			var type = reference.Resolve ();
 			if (type == null) {
 				HandleUnresolvedType (reference);
 				return null;

@@ -14,6 +14,12 @@
 		},
 		{
 			"path": "Mono.Linker.CilStrip"
+		},
+		{
+			"path": "Tests/NewBlazor/SimpleTest"
+		},
+		{
+			"path": "Mono.Linker.WasmPackager.Web"
 		}
 	],
 	"settings": {

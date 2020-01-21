@@ -1,0 +1,7 @@
+<Project Sdk="Mono.Linker.WasmPackager/1.0.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+</Project>

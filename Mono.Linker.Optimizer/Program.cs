@@ -95,6 +95,10 @@ namespace Mono.Linker.Optimizer
 				Console.Error.WriteLine ($"Optimizer is disabled.");
 			}
 
+			// Always disable the RemoveUnreachableBlocksStep; it is incomplete and does not work.
+			arguments.Add ("--disable-opt");
+			arguments.Add ("ipconstprop");
+
 			var watch = new Stopwatch ();
 			watch.Start ();
 

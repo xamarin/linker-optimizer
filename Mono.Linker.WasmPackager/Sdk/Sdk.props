@@ -2,8 +2,6 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <UseWasmPackager>true</UseWasmPackager>
-
     <!-- Set to true to use a packaged version of Mono. -->
     <WasmPackager_UsePackagedMono>true</WasmPackager_UsePackagedMono>
     <MonoWebAssemblySdkVersion>0.2.2</MonoWebAssemblySdkVersion>
@@ -12,9 +10,30 @@
     <WasmPackager_NugetPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\..\..'))</WasmPackager_NugetPackageRoot>
 
     <EmscriptenSdkDir>/Users/Workspace/mono-linker/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
+    <JsvuDir>$([System.IO.Path]::GetFullPath('$(HOME)/.jsvu'))</JsvuDir>
   </PropertyGroup>
 
+  <ItemGroup>
+    <__WasmPackager_Bindings_Packages Include="webassembly.bindings;webassembly.net.http;webassembly.net.websockets" />
+  </ItemGroup>
+
   <Choose>
+    <When Condition="'$(WasmPackager_UseBlazorMono)' == 'true'">
+      <PropertyGroup>
+        <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</MonoWebAssemblyFrameworkRoot>
+        <MonoWebAssemblyRuntimeRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.runtime\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyRuntimeRoot>
+        <MonoWebAssemblyRuntimeAotRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.runtime.aot\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyRuntimeAotRoot>
+
+        <WasmPackager_MonoRuntimePath>$(MonoWebAssemblyRuntimeRoot)\mono-wasm-runtime</WasmPackager_MonoRuntimePath>
+        <WasmPackager_MonoBclPath>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</WasmPackager_MonoBclPath>
+        <WasmPackager_MonoIncludeDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\include\mono-2.0</WasmPackager_MonoIncludeDir>
+        <WasmPackager_MonoLibDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\lib</WasmPackager_MonoLibDir>
+        <WasmPackager_MonoRuntimeAotDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
+      </PropertyGroup>
+      <ItemGroup>
+        <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Bindings_Packages->'$(WasmPackager_NugetPackageRoot)/%(Identity)/$(MonoWebAssemblySdkVersion)/lib/netstandard2.0')" />
+      </ItemGroup>
+    </When>
     <When Condition="'$(WasmPackager_UsePackagedMono)' == 'true'">
       <PropertyGroup>
         <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.framework\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyFrameworkRoot>
@@ -27,6 +46,9 @@
         <WasmPackager_MonoLibDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\lib</WasmPackager_MonoLibDir>
         <WasmPackager_MonoRuntimeAotDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
       </PropertyGroup>
+      <ItemGroup>
+        <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Bindings_Packages->'$(WasmPackager_NugetPackageRoot)/%(Identity)/$(MonoWebAssemblySdkVersion)/lib/netstandard2.0')" />
+      </ItemGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
@@ -46,10 +68,13 @@
       here will be overwritten.
     -->
     <FrameworkPathOverride>$(WasmPackager_MonoBclPath)</FrameworkPathOverride>
-    <!-- Hard-code this to net45; we override GetReferenceAssemblyPaths to actually point this to wasm -->
-    <TargetFramework>net45</TargetFramework>
+    <!-- Hard-code this to net47; we override GetReferenceAssemblyPaths to actually point this to wasm -->
+    <TargetFramework>net47</TargetFramework>
+    <RunCommand>$(JsvuDir)/sm</RunCommand>
+    <RunWorkingDirectory>app</RunWorkingDirectory>
+    <RunArguments>runtime.js --run $(MSBuildProjectName)</RunArguments>
   </PropertyGroup>
 
-  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'" />
 
 </Project>

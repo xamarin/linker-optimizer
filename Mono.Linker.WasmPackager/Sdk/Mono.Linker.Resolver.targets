@@ -38,20 +38,20 @@
     <PackageReference Include="Mono.WebAssembly.Framework" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime.Aot" Version="$(MonoWebAssemblySdkVersion)" />
+    <PackageReference Include="WebAssembly.Bindings" Version="$(MonoWebAssemblySdkVersion)" />
+    <PackageReference Include="WebAssembly.Net.Http" Version="$(MonoWebAssemblySdkVersion)" />
+    <PackageReference Include="WebAssembly.Net.WebSockets" Version="$(MonoWebAssemblySdkVersion)" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.Settings.targets" />
 
   <!-- Derived and private settings -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(WasmPackager_EnablePackager)' == 'true'">
     <_WasmPackager_NetCoreAppDir>/MARTIN/FIXME/netcore/shared/Microsoft.NETCore.App/3.0</_WasmPackager_NetCoreAppDir>
     <_WasmPackager_ExecMode>AotInterp</_WasmPackager_ExecMode>
 
     <_WasmPackager_EnableDedup Condition="'$(WasmPackager_EnableLinker)' == 'true' OR '$(WasmPackager_EnableAot)' == 'true'">true</_WasmPackager_EnableDedup>
     <_WasmPackager_EnableDedup Condition="'$(_WasmPackager_EnableDedup)' != 'true'">false</_WasmPackager_EnableDedup>
-
-    <_WasmPackager_ConfigCache>$(WasmPackager_BuildDir)/packager-config.cache</_WasmPackager_ConfigCache>
-    <_WasmPackager_ResolveCache>$(WasmPackager_BuildDir)/packager-resolve.cache</_WasmPackager_ResolveCache>
 
     <_WasmPackager_MonoConfig>$(WasmPackager_BuildDir)/mono-config.js</_WasmPackager_MonoConfig>
     <_WasmPackager_DriverGen>$(WasmPackager_BuildDir)/driver-gen.c</_WasmPackager_DriverGen>
@@ -65,6 +65,11 @@
     <_WasmPackager_Emcc_Link_Flags Condition="('$(WasmEnableDebug)' == 'true')">-Oo</_WasmPackager_Emcc_Link_Flags>
 
     <_WasmPackager_MonoCrossBin>$(WasmPackager_MonoRuntimeAotDir)/bin/wasm32-unknown-none-mono-sgen</_WasmPackager_MonoCrossBin>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_WasmPackager_ConfigCache>$(WasmPackager_BuildDir)/packager-config.cache</_WasmPackager_ConfigCache>
+    <_WasmPackager_ResolveCache>$(WasmPackager_BuildDir)/packager-resolve.cache</_WasmPackager_ResolveCache>
   </PropertyGroup>
 
   <!-- Resolve some conditional properties -->
@@ -184,6 +189,7 @@
     <WasmResolverTask
         MonoBclPath="$(WasmPackager_MonoBclPath)"
         RootAssemblies="@(_WasmPackager_RootAssemblies)"
+        FrameworkDirectories="@(WasmPackager_FrameworkDirectories)"
         EnableAot="$(WasmPackager_EnableAot)"
         EnableDebug="$(WasmEnableDebug)">
         <Output TaskParameter="Assemblies" ItemName="_WasmPackager_Assemblies" />
@@ -213,6 +219,7 @@
         <DepFile>$(_WasmPackager_AotInput_Dir)/%(Filename).depfile</DepFile>
         <LlvmOutFileTemp>$(_WasmPackager_AotInput_Dir)/%(Filename).bc.tmp</LlvmOutFileTemp>
         <LlvmOutFile>$(_WasmPackager_AotInput_Dir)/%(Filename).bc</LlvmOutFile>
+        <Emcc_Output>$(_WasmPackager_AotInput_Dir)/%(Filename).o</Emcc_Output>
       </_WasmPackager_Assemblies>
     </ItemGroup>
 

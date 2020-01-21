@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>  
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.WasmPackager.targets" />
 
-  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.Resolver.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.WasmPackager.targets"  Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'" />
 
   <PropertyGroup>
     <_WasmPackager_OldResolveAssemblyReferencesDependsOn>
@@ -41,6 +43,7 @@
 
     <ItemGroup>
       <Reference Remove="System.Drawing" />
+      <Reference Remove="System.Drawing.Primitives" />
     </ItemGroup>
   </Target>
 

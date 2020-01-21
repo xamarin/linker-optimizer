@@ -1,6 +1,4 @@
-<Project DefaultTargets="Build">
-
-  <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.Resolver.targets" />
+<Project>
 
   <UsingTask TaskName="Mono.Linker.WasmPackager.MartinTest" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.Linker.WasmPackager.GenerateICallTable" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
@@ -177,6 +175,24 @@ config = {
 
   </Target>
 
+  <Target
+      Name="_WasmPackager_Emcc_Assemblies"
+      DependsOnTargets="$(_WasmPackager_Require_PostLink);_WasmPackager_CompileAot"
+      Inputs="%(_WasmPackager_Assemblies.LlvmOutFile);$(_WasmPackager_EmsdkEnv)"
+      Outputs="%(_WasmPackager_Assemblies.Emcc_Output)">
+
+    <Message Importance="High" Text="_WasmPackager_Emcc: %(_WasmPackager_SdkSources.Identity) - %(_WasmPackager_SdkSources.Emcc_Output) %(_WasmPackager_SdkSources.Emcc_Flags) - %(_WasmPackager_SdkSources.Emcc_Deps)" />
+
+    <Emcc SdkDir="$(EmscriptenSdkDir)"
+          EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
+          BuildDir="$(WasmPackager_BuildDir)"
+          Input="%(_WasmPackager_Assemblies.LlvmOutFile)"
+          Output="%(_WasmPackager_Assemblies.Emcc_Output)"
+          Flags="$(_WasmPackager_Emcc_Flags) -c -I$(WasmPackager_MonoIncludeDir)"
+          Condition="'%(_WasmPackager_Assemblies.Emcc_Output)' != ''" />
+
+  </Target>
+
   <Target Name="_WasmPackager_PrepareOptimizerConfiguration" DependsOnTargets="$(_WasmPackager_Require_PreLink)">
     <Message Importance="High" Text="WasmPackager: $(WasmPackager_BuildDir)" />
 
@@ -196,6 +212,7 @@ config = {
       <LinkerOptimizerDependencyInput Include="%(_WasmPackager_Assemblies.LinkerInput)" Condition="'%(_WasmPackager_Assemblies.SkipLink)' != 'true'" />
       <LinkerOptimizerDependencyInput Remove="%(__WasmPackager_FirstInput.LinkerInput)" />
       <LinkerOptimizerBaseClassLibraryPath Include="$(WasmPackager_MonoBclPath);$(WasmPackager_MonoBclPath)/Facades" />
+      <LinkerOptimizerBaseClassLibraryPath Include="@(WasmPackager_FrameworkDirectories)" />
     </ItemGroup>
 
     <Message Importance="High" Text="WasmPackager - prepare optimizer config" />
@@ -234,9 +251,14 @@ config = {
       Lines=""
       Overwrite="true" WriteOnlyWhenDifferent="false" />
 
+    <ItemGroup Condition="'$(WasmPackager_EnableNetCore)' != 'true'">
+      <__WasmPackager_AotDummy_References Include="$(WasmPackager_MonoBclPath)/mscorlib.dll" />
+    </ItemGroup>
+
     <Csc Sources="%(__WasmPackager_PostLink_Dummies.Dummy)"
       Deterministic="true"
       TargetType="library"
+      References="@(__WasmPackager_AotDummy_References)"
       OutputAssembly="%(__WasmPackager_PostLink_Dummies.LinkerOutput)"
     />
   </Target>
@@ -325,14 +347,22 @@ config = {
   </Target>
 
   <Target Name="_WasmPackager_LinkEmcc"
-    DependsOnTargets="$(_WasmPackager_Require_Generator);_WasmPackager_Emcc"
+    DependsOnTargets="$(_WasmPackager_Require_Generator);_WasmPackager_Emcc;_WasmPackager_Emcc_Assemblies"
     Inputs="@(_WasmPackager_SdkSources->'%(Emcc_Output)')"
     Outputs="$(WasmPackager_BuildDir)/mono.js">
+
+    <ItemGroup>
+      <__WasmPackager_LinkEmcc_Inputs Include="%(_WasmPackager_SdkSources.Emcc_Output)" />
+      <__WasmPackager_LinkEmcc_Inputs Include="%(_WasmPackager_Runtime_Libs.Path)" />
+      <__WasmPackager_LinkEmcc_Inputs Include="%(_WasmPackager_Assemblies.Emcc_Output)" />
+    </ItemGroup>
+
+    <Message Importance="High" Text="LINK EMCC: @(__WasmPackager_LinkEmcc_Inputs)" />
 
     <Emcc SdkDir="$(EmscriptenSdkDir)"
           EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
           BuildDir="$(WasmPackager_BuildDir)"
-          Input="@(_WasmPackager_SdkSources->'%(Emcc_Output)', ' ') @(_WasmPackager_Runtime_Libs->'%(Path)', ' ') @(_WasmPackager_Js_Libs->'--js-library %(Path)', ' ')"
+          Input="@(__WasmPackager_LinkEmcc_Inputs, ' ') @(_WasmPackager_Js_Libs->'--js-library %(Path)', ' ')"
           Output="$(WasmPackager_BuildDir)/mono.js"
           Flags="$(_WasmPackager_Emcc_Flags) $(_WasmPackager_Emcc_Link_Flags)" />
 
@@ -351,7 +381,7 @@ config = {
 
   </Target>
 
-  <PropertyGroup Condition="'$(UseWasmPackager)' == 'true'">
+  <PropertyGroup>
     <LinkBlazorApplicationDependsOn>
       $(LinkBlazorApplicationDependsOn);
       WasmPackager;
