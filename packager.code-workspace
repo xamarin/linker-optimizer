@@ -7,7 +7,7 @@
 			"path": "Tests/DebugBuild"
 		},
 		{
-			"path": "Mono.Linker.WasmPackager"
+			"path": "Mono.WasmPackager"
 		},
 		{
 			"path": "Mono.Linker.Optimizer"
@@ -19,7 +19,10 @@
 			"path": "Tests/NewBlazor/SimpleTest"
 		},
 		{
-			"path": "Mono.Linker.WasmPackager.Web"
+			"path": "Mono.WasmPackager.Web"
+		},
+		{
+			"path": "Tests/Packager/TestOptimizer"
 		}
 	],
 	"settings": {

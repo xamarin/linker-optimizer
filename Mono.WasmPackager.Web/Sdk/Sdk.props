@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <WasmPackager_EnablePackager>false</WasmPackager_EnablePackager>
+    <WasmPackager_UseBlazorMono>false</WasmPackager_UseBlazorMono>
+    <WasmPackager_EnableAot>false</WasmPackager_EnableAot>
+    <_WasmPackager_SkipSdkImport>true</_WasmPackager_SkipSdkImport>
+    <WasmPackager_BlazorVersion>3.0.0-preview9.19465.2</WasmPackager_BlazorVersion>
+    <WasmPackager_BlazorMonoVersion>3.0.0-preview9.19462.2</WasmPackager_BlazorMonoVersion>
+    <WasmPackager_AspNetVersion>3.0.0</WasmPackager_AspNetVersion>
+
+    <_LinkerOptimizer_Blazor>true</_LinkerOptimizer_Blazor>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <__WasmPackager_Blazor_Packages Include="microsoft.aspnetcore.blazor;microsoft.aspnetcore.blazor.httpclient" />
+    <__WasmPackager_AspNet_Packages Include="microsoft.jsinterop;microsoft.extensions.logging.abstractions;mono.webassembly.interop;microsoft.aspnetcore.components;microsoft.extensions.dependencyinjection;microsoft.extensions.dependencyinjection.abstractions;microsoft.aspnetcore.components.web;microsoft.aspnetcore.components.forms;microsoft.extensions.options;microsoft.extensions.primitives" />
+    <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Blazor_Packages->'$(WasmPackager_NugetPackageRoot)/%(Identity)/$(WasmPackager_BlazorVersion)/lib/netstandard2.0')" />
+    <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_AspNet_Packages->'$(WasmPackager_NugetPackageRoot)/%(Identity)/$(WasmPackager_AspNetVersion)/lib/netstandard2.0')" />
+    <WasmPackager_FrameworkDirectories Include="$(WasmPackager_NugetPackageRoot)/system.text.json/4.6.0/lib/netstandard2.0" />
+    <WasmPackager_FrameworkDirectories Include="$(WasmPackager_NugetPackageRoot)/microsoft.bcl.asyncinterfaces/1.0.0/lib/netstandard2.0" />
+  </ItemGroup>
+
+  <Import Sdk="Microsoft.NET.Sdk.Web" Project="Sdk.props" />
+  <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.props" />
+
+</Project>

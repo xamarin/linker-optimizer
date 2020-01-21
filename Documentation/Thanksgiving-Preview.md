@@ -21,7 +21,7 @@ $ dotnet pack
 
 The resulting packages will be placed in `sdks/wasm/sdk/packages`.  You need to manually copy them all into the top-level `artifacts/` directory in this module.  There will be a NuGet feed shortly, but at the moment it needs to be done manually.
 
-Then you need to edit `Mono.Linker.WasmPackager/Sdk/Sdk.props` and change the `EmscriptenSdkDir` in it to point to your Mono SDK build.
+Then you need to edit `Mono.WasmPackager/Sdk/Sdk.props` and change the `EmscriptenSdkDir` in it to point to your Mono SDK build.
 
 ## Build
 
@@ -33,7 +33,7 @@ To do it manually, you need to do `dotnet pack` in the following directories (in
 
 * Mono.Linker.Optimizer
 * Mono.Linker.CilStrip
-* Mono.Linker.WasmPackager
+* Mono.WasmPackager
 
 Ignore the "Mono.Linker.Emscripten" directory for now, it doesn't work yet.
 

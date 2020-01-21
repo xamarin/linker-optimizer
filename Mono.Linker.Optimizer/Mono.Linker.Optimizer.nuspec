@@ -19,6 +19,6 @@
   <files>
     <file src="bin/Debug/netcoreapp2.0/*.dll" target="tools" />
     <file src="bin/Debug/netcoreapp2.0/*.json" target="tools" />
-    <file src="Mono.Linker.Optimizer.targets" target="build" />
+    <file src="Sdk/*" target="Sdk/" />
   </files>
 </package>

@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <LinkBlazorApplicationDependsOn>
+      $(LinkBlazorApplicationDependsOn);
+      MartinTest;
+    </LinkBlazorApplicationDependsOn>
+  </PropertyGroup>
+
+  <Target Name="MartinTest">
+    <Message Importance="High" Text="MARTIN TEST" />
+  </Target>
+
+</Project>

@@ -43,7 +43,7 @@
             "type": "process",
             "args": [
                 "pack",
-                "${workspaceFolder}/../../../Mono.Linker.WasmPackager",
+                "${workspaceFolder}/../../../Mono.WasmPackager",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -84,7 +84,7 @@
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/../../../Mono.Linker.WasmPackager",
+                "${workspaceFolder}/../../../Mono.WasmPackager",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
