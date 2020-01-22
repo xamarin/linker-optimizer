@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestSdk
+namespace StandaloneOptimizer
 {
 	public class Hello
 	{
