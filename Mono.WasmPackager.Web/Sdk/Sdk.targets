@@ -4,6 +4,13 @@
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Web.targets" />
 
   <Import Sdk="Microsoft.NET.Sdk.Web" Project="Sdk.targets" />
+
   <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.targets" />
+
+  <PropertyGroup>
+    <RunCommand>dotnet</RunCommand>
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
+    <RunArguments>$(WasmPackager_NugetPackageRoot)/microsoft.aspnetcore.blazor.devserver/$(BlazorVersion)/tools/blazor-devserver.dll serve  --applicationpath &quot;$(MSBuildProjectDirectory)/$(OutputPath)$(TargetFileName)&quot;</RunArguments>
+  </PropertyGroup>
 
 </Project>
