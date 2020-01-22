@@ -11,7 +11,8 @@
     <!-- We cannot use $(NugetPackageRoot) prior to including Sdk.props -->
     <WasmPackager_NugetPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\..\..'))</WasmPackager_NugetPackageRoot>
 
-    <EmscriptenSdkDir>/Users/Workspace/mono-linker/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
+    <!-- FIXME: must set this manually. -->
+    <EmscriptenSdkDir>/Volumes/Work/mono-work/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
     <JsvuDir>$([System.IO.Path]::GetFullPath('$(HOME)/.jsvu'))</JsvuDir>
   </PropertyGroup>
 
@@ -72,9 +73,6 @@
     <FrameworkPathOverride>$(WasmPackager_MonoBclPath)</FrameworkPathOverride>
     <!-- Hard-code this to net47; we override GetReferenceAssemblyPaths to actually point this to wasm -->
     <TargetFramework>net47</TargetFramework>
-    <RunCommand>$(JsvuDir)/sm</RunCommand>
-    <RunWorkingDirectory>app</RunWorkingDirectory>
-    <RunArguments>runtime.js --run $(MSBuildProjectName)</RunArguments>
   </PropertyGroup>
 
   <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.props" />

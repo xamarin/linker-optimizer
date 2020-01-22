@@ -50,4 +50,10 @@
     </ItemGroup>
   </Target>
 
+  <PropertyGroup>
+    <RunCommand>$(JsvuDir)/sm</RunCommand>
+    <RunWorkingDirectory>app</RunWorkingDirectory>
+    <RunArguments>runtime.js $(WasmPackager_RunArguments) --run $(MSBuildProjectName)</RunArguments>
+  </PropertyGroup>
+
 </Project>

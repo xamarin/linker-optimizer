@@ -1,8 +1,0 @@
-<Project Sdk="Mono.WasmPackager/1.0.0">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <Test_NuGet_ForceReinstall>true</Test_NuGet_ForceReinstall>
-  </PropertyGroup>
-
-</Project>

@@ -98,8 +98,8 @@ config = {
 
       <__WasmPackager_DriverGen_Lines Include="@(WasmPackager_Profilers->'void mono_profiler_init_%(Identity) (const char %2Adesc);')" />
       <__WasmPackager_DriverGen_Lines Include="@(WasmPackager_Profilers->'EMSCRIPTEN_KEEPALIVE void mono_wasm_load_profiler_%(Identity) (const char *desc) { mono_profiler_init_%(Identity) (desc); }')" />
-      <__WasmPackager_DriverGen_Lines Include="#define EE_MODE_LLVMONLY_INTERP 1" Condition="'$(_WasmPackager_ExecMode)' == 'AotInterp'" />
-      <__WasmPackager_DriverGen_Lines Include="#define EE_MODE_LLVMONLY 1" Condition="'$(_WasmPackager_ExecMode)' == 'Aot'" />
+      <__WasmPackager_DriverGen_Lines Include="#define EE_MODE_LLVMONLY_INTERP 1" Condition="'$(WasmPackager_ExecMode)' == 'AotInterp'" />
+      <__WasmPackager_DriverGen_Lines Include="#define EE_MODE_LLVMONLY 1" Condition="'$(WasmPackager_ExecMode)' == 'Aot'" />
       <__WasmPackager_DriverGen_Lines Include="#define LINK_ICALLS 1" Condition="'$(WasmPackager_LinkIcalls)' == 'true'" />
     </ItemGroup>
 
@@ -230,6 +230,7 @@ config = {
     <ItemGroup>
       <__WasmPackager_PostLink_Dummies Include="@(_WasmPackager_Assemblies)" Condition="!Exists('%(LinkerOutput)')">
         <Dummy>$(_WasmPackager_LinkerOutput_Dir)/%(Filename).cs</Dummy>
+        <LinkerOutput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</LinkerOutput>
       </__WasmPackager_PostLink_Dummies>
     </ItemGroup>
 
@@ -238,7 +239,7 @@ config = {
   </Target>
 
   <Target Name="_WasmPackager_CreateDummyAssemblies"
-    Inputs="%(__WasmPackager_PostLink_Dummies.LinkerInput)"
+    Inputs="%(__WasmPackager_PostLink_Dummies.Dummy)"
     Outputs="%(__WasmPackager_PostLink_Dummies.LinkerOutput)"
     DependsOnTargets="_LinkerOptimizer_LinkApplication;_WasmPackager_ResolveLinkerOutputs">
 
@@ -349,7 +350,7 @@ config = {
   <Target Name="_WasmPackager_LinkEmcc"
     DependsOnTargets="$(_WasmPackager_Require_Generator);_WasmPackager_Emcc;_WasmPackager_Emcc_Assemblies"
     Inputs="@(_WasmPackager_SdkSources->'%(Emcc_Output)')"
-    Outputs="$(WasmPackager_BuildDir)/mono.js">
+    Outputs="$(WasmPackager_BuildDir)/dotnet.js">
 
     <ItemGroup>
       <__WasmPackager_LinkEmcc_Inputs Include="%(_WasmPackager_SdkSources.Emcc_Output)" />
@@ -363,7 +364,7 @@ config = {
           EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
           BuildDir="$(WasmPackager_BuildDir)"
           Input="@(__WasmPackager_LinkEmcc_Inputs, ' ') @(_WasmPackager_Js_Libs->'--js-library %(Path)', ' ')"
-          Output="$(WasmPackager_BuildDir)/mono.js"
+          Output="$(WasmPackager_BuildDir)/dotnet.js"
           Flags="$(_WasmPackager_Emcc_Flags) $(_WasmPackager_Emcc_Link_Flags)" />
 
   </Target>

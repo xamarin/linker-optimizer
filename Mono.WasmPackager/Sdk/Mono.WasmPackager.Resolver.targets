@@ -47,19 +47,24 @@
   <!-- Derived and private settings -->
   <PropertyGroup Condition="'$(WasmPackager_EnablePackager)' == 'true'">
     <_WasmPackager_NetCoreAppDir>/MARTIN/FIXME/netcore/shared/Microsoft.NETCore.App/3.0</_WasmPackager_NetCoreAppDir>
-    <_WasmPackager_ExecMode>AotInterp</_WasmPackager_ExecMode>
 
-    <_WasmPackager_EnableDedup Condition="'$(WasmPackager_EnableLinker)' == 'true' OR '$(WasmPackager_EnableAot)' == 'true'">true</_WasmPackager_EnableDedup>
+    <_WasmPackager_EnableAot Condition="'$(_WasmPackager_EnableAot)' != 'false' AND ('$(WasmPackager_ExecMode)' == 'Aot' OR '$(WasmPackager_ExecMode)' == 'AotInterp')">true</_WasmPackager_EnableAot>
+
+    <_WasmPackager_EnableDedup Condition="'$(WasmPackager_EnableLinker)' == 'true' OR '$(_WasmPackager_EnableAot)' == 'true'">true</_WasmPackager_EnableDedup>
     <_WasmPackager_EnableDedup Condition="'$(_WasmPackager_EnableDedup)' != 'true'">false</_WasmPackager_EnableDedup>
+
+    <!-- Copy from the public property and turn it off when it's not supported. -->
+    <_WasmPackager_CilStrip>$(WasmPackager_CilStrip)</_WasmPackager_CilStrip>
+    <_WasmPackager_CilStrip Condition="'$(WasmPackager_ExecMode)' != 'Aot'">false</_WasmPackager_CilStrip>
 
     <_WasmPackager_MonoConfig>$(WasmPackager_BuildDir)/mono-config.js</_WasmPackager_MonoConfig>
     <_WasmPackager_DriverGen>$(WasmPackager_BuildDir)/driver-gen.c</_WasmPackager_DriverGen>
     <_WasmPackager_EmsdkEnv>$(WasmPackager_BuildDir)/emsdk_env.sh</_WasmPackager_EmsdkEnv>
 
-    <_WasmPackager_EnableZLib Condition="('$(WasmPackager_EnableAot)' == 'true') OR ('$(WasmPackager_LinkIcalls)' == 'true')">true</_WasmPackager_EnableZLib>
+    <_WasmPackager_EnableZLib Condition="('$(_WasmPackager_EnableAot)' == 'true') OR ('$(WasmPackager_LinkIcalls)' == 'true')">true</_WasmPackager_EnableZLib>
 
     <_WasmPackager_Emcc_Flags>-Oz -g -s DISABLE_EXCEPTION_CATCHING=0 -s ASSERTIONS=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s BINARYEN=1 -s TOTAL_MEMORY=134217728 -s ALIASING_FUNCTION_POINTERS=0 -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'setValue', 'getValue', 'UTF8ToString']" -s "EXPORTED_FUNCTIONS=['___cxa_is_pointer_type', '___cxa_can_catch']" -s "DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['setThrew', 'memset']"</_WasmPackager_Emcc_Flags>
-    <_WasmPackager_Emcc_Flags Condition="('$(WasmPackager_EnableAot)' != 'true') AND ('$(WasmPackager_LinkIcalls)' == 'true')">$(_WasmPackager_Emcc_Flags) --llvm-lto 1</_WasmPackager_Emcc_Flags>
+    <_WasmPackager_Emcc_Flags Condition="('$(_WasmPackager_EnableAot)' != 'true') AND ('$(WasmPackager_LinkIcalls)' == 'true')">$(_WasmPackager_Emcc_Flags) --llvm-lto 1</_WasmPackager_Emcc_Flags>
 
     <_WasmPackager_Emcc_Link_Flags Condition="('$(WasmEnableDebug)' == 'true')">-Oo</_WasmPackager_Emcc_Link_Flags>
 
@@ -80,10 +85,12 @@
       <_WasmPackager_LinkerOutput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-out</_WasmPackager_LinkerOutput_Dir>
       <_WasmPackager_AotInput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(_WasmPackager_LinkerOutput_Dir)</_WasmPackager_AotInput_Dir>
       <_WasmPackager_AotInput_Dir Condition="'$(WasmPackager_EnableLinker)' != 'true'">$(WasmPackager_BuildDir)</_WasmPackager_AotInput_Dir>
-      <_WasmPackager_CilStripOutput_Dir Condition="'$(WasmPackager_CilStrip)' == 'true'">$(WasmPackager_BuildDir)/ilstrip-out</_WasmPackager_CilStripOutput_Dir>
+      <_WasmPackager_CilStripOutput_Dir Condition="'$(_WasmPackager_CilStrip)' == 'true'">$(WasmPackager_BuildDir)/ilstrip-out</_WasmPackager_CilStripOutput_Dir>
       <_WasmPackager_AotDummy Condition="'$(_WasmPackager_EnableDedup)' == 'true'">$(WasmPackager_BuildDir)/aot-dummy.dll</_WasmPackager_AotDummy>
 
       <_WasmPackager_Emcc_Flags Condition="'$(_WasmPackager_PInvokeTable)' != ''">$(_WasmPackager_Emcc_Flags) -DGEN_PINVOKE</_WasmPackager_Emcc_Flags>
+
+      <__WasmPackager_Driver_Emcc_Flags Condition="'$(WasmPackager_ExecMode)' == 'Aot'">-DENABLE_AOT=1</__WasmPackager_Driver_Emcc_Flags>
     </PropertyGroup>
 
     <ItemGroup>
@@ -92,7 +99,7 @@
       <_WasmPackager_SdkSources Include="pinvoke-tables-default.h" />
 
       <_WasmPackager_SdkSources Include="driver.c">
-        <Emcc_Flags>-DDRIVER_GEN=1</Emcc_Flags>
+        <Emcc_Flags>-DDRIVER_GEN=1 $(__WasmPackager_Driver_Emcc_Flags)</Emcc_Flags>
         <Emcc_Deps>$(_WasmPackager_IcallTable);$(_WasmPackager_PInvokeTable)</Emcc_Deps>
       </_WasmPackager_SdkSources>
 
@@ -103,14 +110,14 @@
       <_WasmPackager_AppBundle_Files Include="runtime.js">
         <Source>$(WasmPackager_MonoRuntimePath)/src/$(WasmPackager_RuntimeTemplate)</Source>
       </_WasmPackager_AppBundle_Files>
-      <_WasmPackager_AppBundle_Files Include="mono.js;mono.wasm;mono-config.js" />
+      <_WasmPackager_AppBundle_Files Include="dotnet.js;dotnet.wasm;mono-config.js" />
 
       <_WasmPackager_AotBaseArgs Include="llvmonly;asmonly;no-opt;static;direct-icalls;deterministic" />
 
       <_WasmPackager_AotArgs Include="llvm-path=$(EmscriptenSdkDir)/upstream/bin" />
       <_WasmPackager_AotArgs Include="@(WasmPackager_Profilers->'--profile=%(Identity)')" />
       <_WasmPackager_AotArgs Include="profile=$(WasmPackager_AotProfile),profile-only" Condition="'$(WasmPackager_AotProfile)' != ''" />
-      <_WasmPackager_AotArgs Include="interp" Condition="'$(_WasmPackager_ExecMode)' == 'AotInterp'" />
+      <_WasmPackager_AotArgs Include="interp" Condition="'$(WasmPackager_ExecMode)' == 'AotInterp'" />
       <_WasmPackager_AotArgs Include="dedup-skip" Condition="'$(_WasmPackager_EnableDedup)' == 'true'" />
       <_WasmPackager_AotArgs Include="@(_WasmPackager_AotBaseArgs)" />
 
@@ -119,7 +126,7 @@
       <_WasmPackager_Js_Libs Include="library_mono.js;dotnet_support.js" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(WasmPackager_LinkIcalls)' == 'true' OR '$(_WasmPackager_ExecMode)' == 'Interp' OR '$(_WasmPackager_ExecMode)' == 'AotInterp'">
+    <ItemGroup Condition="'$(WasmPackager_LinkIcalls)' == 'true' OR '$(WasmPackager_ExecMode)' == 'Interp' OR '$(WasmPackager_ExecMode)' == 'AotInterp'">
       <_WasmPackager_Runtime_Libs Include="libmono-ee-interp.a;libmono-ilgen.a" />
       <_WasmPackager_Runtime_Libs Include="libmono-icall-table.a" Condition="'$(WasmPackager_LinkIcalls)' != 'true'" />
     </ItemGroup>
@@ -155,7 +162,7 @@
     <ItemGroup>
       <__WasmPackager_AllConfigItems Include="'$(WasmPackager_RuntimeTemplate)';'$(WasmEnableDebug)';'$(EmscriptenSdkDir)'" />
       <__WasmPackager_AllConfigItems Include="'$(WasmPackager_BuildDir)';'$(WasmPackager_VfsPrefix)';'$(WasmPackager_DeployPrefix)'" />
-      <__WasmPackager_AllConfigItems Include="'$(WasmPackager_LinkIcalls)';'$(WasmPackager_EnableLinker)';'$(WasmPackager_EnableAot)'" />
+      <__WasmPackager_AllConfigItems Include="'$(WasmPackager_LinkIcalls)';'$(WasmPackager_EnableLinker)';'$(_WasmPackager_EnableAot)'" />
       <__WasmPackager_AllConfigItems Include="R;@(_WasmPackager_RootAssemblies);P;@(WasmPackager_Profilers);I;@(WasmPackager_PInvokeLibraries)" />
     </ItemGroup>
 
@@ -189,7 +196,7 @@
         MonoBclPath="$(WasmPackager_MonoBclPath)"
         RootAssemblies="@(_WasmPackager_RootAssemblies)"
         FrameworkDirectories="@(WasmPackager_FrameworkDirectories)"
-        EnableAot="$(WasmPackager_EnableAot)"
+        EnableAot="$(_WasmPackager_EnableAot)"
         EnableDebug="$(WasmEnableDebug)">
         <Output TaskParameter="Assemblies" ItemName="_WasmPackager_Assemblies" />
         <Output TaskParameter="FileList" ItemName="_WasmPackager_FileList" />
@@ -212,7 +219,7 @@
       </_WasmPackager_Assemblies>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(WasmPackager_EnableAot)' == 'true'">
+    <ItemGroup Condition="'$(_WasmPackager_EnableAot)' == 'true'">
       <_WasmPackager_Assemblies>
         <AotInput>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</AotInput>
         <DepFile>$(_WasmPackager_AotInput_Dir)/%(Filename).depfile</DepFile>
@@ -223,12 +230,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <_WasmPackager_Assemblies Condition="'$(WasmPackager_CilStrip)' == 'true'">
+      <_WasmPackager_Assemblies Condition="'$(_WasmPackager_CilStrip)' == 'true'">
         <CilStripInput>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</CilStripInput>
         <CilStripOutput>$(_WasmPackager_CilStripOutput_Dir)/%(Filename)%(Extension)</CilStripOutput>
         <FinalPath>$(_WasmPackager_CilStripOutput_Dir)/%(Filename)%(Extension)</FinalPath>
       </_WasmPackager_Assemblies>
-      <_WasmPackager_Assemblies Condition="'$(WasmPackager_CilStrip)' != 'true'">
+      <_WasmPackager_Assemblies Condition="'$(_WasmPackager_CilStrip)' != 'true'">
         <FinalPath>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</FinalPath>
       </_WasmPackager_Assemblies>
       <_WasmPackager_Assemblies>

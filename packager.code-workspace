@@ -1,7 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "Tests/Packager/TestSdk"
+			"path": "Tests/Packager/SimpleHello"
+		},
+		{
+			"path": "Tests/Packager/SimpleBlazor"
 		},
 		{
 			"path": "Tests/DebugBuild"
@@ -16,13 +19,13 @@
 			"path": "Mono.Linker.CilStrip"
 		},
 		{
-			"path": "Tests/NewBlazor/SimpleTest"
-		},
-		{
 			"path": "Mono.WasmPackager.Web"
 		},
 		{
 			"path": "Tests/Packager/TestOptimizer"
+		},
+		{
+			"path": "Tests/Packager/SimpleInterpreter"
 		}
 	],
 	"settings": {
@@ -31,6 +34,12 @@
 		"[markdown]":{
 			"editor.wordWrap": "wordWrapColumn",
 			"editor.wordWrapColumn": 80,
+		},
+		"files.exclude": {
+			"**/aot": true,
+			"**/app": true,
+			"**/bin": true,
+			"**/obj": true
 		},
 	},
 }

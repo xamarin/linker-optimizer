@@ -1,0 +1,9 @@
+<Project Sdk="Mono.WasmPackager/1.0.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <WasmPackager_ExecMode>AotInterp</WasmPackager_ExecMode>
+    <Test_NuGet_ForceReinstall>true</Test_NuGet_ForceReinstall>
+  </PropertyGroup>
+
+</Project>

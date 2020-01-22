@@ -2,6 +2,13 @@
 <Project>
 
   <PropertyGroup>
+    <LinkerOptimizerOptions>report-profile=wasm,report-mode=actions+size+detailed</LinkerOptimizerOptions>
+    <LinkerOptimizerReport>optimizer-report.xml</LinkerOptimizerReport>
+    <LinkerOptimizerExtraLinkerArguments>--verbose --dump-dependencies</LinkerOptimizerExtraLinkerArguments>
+    <LinkerOptimizerEnabled>true</LinkerOptimizerEnabled>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <!-- Keep in sync with the nuget.config in this folder. -->
     <Test_NuGet_GlobalsFolder>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\.packages'))</Test_NuGet_GlobalsFolder>
     <!-- When set to true, we will always wipe the $(Test_NuGet_GlobalsFolder) prior to restoring. -->
