@@ -2,6 +2,8 @@
 <Project>
 
   <PropertyGroup>
+    <BlazorVersion>3.0.0-preview9.19465.2</BlazorVersion>
+
     <!-- Keep in sync with the nuget.config in this folder. -->
     <Test_NuGet_GlobalsFolder>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\.packages'))</Test_NuGet_GlobalsFolder>
     <!-- When set to true, we will always wipe the $(Test_NuGet_GlobalsFolder) prior to restoring. -->
