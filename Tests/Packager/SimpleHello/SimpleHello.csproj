@@ -4,7 +4,6 @@
     <OutputType>Exe</OutputType>
     <WasmPackager_CilStrip>false</WasmPackager_CilStrip>
     <WasmPackager_RunArguments>--setenv=MONO_LOG_MASK=all --setenv=MONO_LOG_LEVEL=debug</WasmPackager_RunArguments>
-    <Test_NuGet_ForceReinstall>true</Test_NuGet_ForceReinstall>
   </PropertyGroup>
 
 </Project>

@@ -69,6 +69,11 @@ namespace Mono.WasmPackager
 			get; set;
 		}
 
+		[Output]
+		public ITaskItem[] PdbFiles {
+			get; set;
+		}
+
 		#endregion
 
 		string app_prefix, out_prefix;
@@ -323,6 +328,7 @@ namespace Mono.WasmPackager
 
 			FileList = file_list.Select (f => new TaskItem (f)).ToArray ();
 			Assemblies = assemblies.Select (a => a.CreateTaskItem ()).ToArray ();
+			PdbFiles = assemblies_with_dbg_info.Select (f => new TaskItem (f)).ToArray ();
 
 			return true;
 		}

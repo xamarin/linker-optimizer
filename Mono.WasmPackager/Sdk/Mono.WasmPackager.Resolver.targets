@@ -61,12 +61,12 @@
     <_WasmPackager_DriverGen>$(WasmPackager_BuildDir)/driver-gen.c</_WasmPackager_DriverGen>
     <_WasmPackager_EmsdkEnv>$(WasmPackager_BuildDir)/emsdk_env.sh</_WasmPackager_EmsdkEnv>
 
-    <_WasmPackager_EnableZLib Condition="('$(_WasmPackager_EnableAot)' == 'true') OR ('$(WasmPackager_LinkIcalls)' == 'true')">true</_WasmPackager_EnableZLib>
+    <_WasmPackager_EnableZLib>true</_WasmPackager_EnableZLib>
 
     <_WasmPackager_Emcc_Flags>-Oz -g -s DISABLE_EXCEPTION_CATCHING=0 -s ASSERTIONS=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s BINARYEN=1 -s TOTAL_MEMORY=134217728 -s ALIASING_FUNCTION_POINTERS=0 -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'setValue', 'getValue', 'UTF8ToString']" -s "EXPORTED_FUNCTIONS=['___cxa_is_pointer_type', '___cxa_can_catch']" -s "DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['setThrew', 'memset']"</_WasmPackager_Emcc_Flags>
     <_WasmPackager_Emcc_Flags Condition="('$(_WasmPackager_EnableAot)' != 'true') AND ('$(WasmPackager_LinkIcalls)' == 'true')">$(_WasmPackager_Emcc_Flags) --llvm-lto 1</_WasmPackager_Emcc_Flags>
 
-    <_WasmPackager_Emcc_Link_Flags Condition="('$(WasmEnableDebug)' == 'true')">-Oo</_WasmPackager_Emcc_Link_Flags>
+    <_WasmPackager_Emcc_Link_Flags Condition="('$(WasmPackager_EnableDebug)' == 'true')">-O0</_WasmPackager_Emcc_Link_Flags>
 
     <_WasmPackager_MonoCrossBin>$(WasmPackager_MonoRuntimeAotDir)/bin/wasm32-unknown-none-mono-sgen</_WasmPackager_MonoCrossBin>
   </PropertyGroup>
@@ -86,7 +86,7 @@
       <_WasmPackager_AotInput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(_WasmPackager_LinkerOutput_Dir)</_WasmPackager_AotInput_Dir>
       <_WasmPackager_AotInput_Dir Condition="'$(WasmPackager_EnableLinker)' != 'true'">$(WasmPackager_BuildDir)</_WasmPackager_AotInput_Dir>
       <_WasmPackager_CilStripOutput_Dir Condition="'$(_WasmPackager_CilStrip)' == 'true'">$(WasmPackager_BuildDir)/ilstrip-out</_WasmPackager_CilStripOutput_Dir>
-      <_WasmPackager_AotDummy Condition="'$(_WasmPackager_EnableDedup)' == 'true'">$(WasmPackager_BuildDir)/aot-dummy.dll</_WasmPackager_AotDummy>
+      <_WasmPackager_AotDummy Condition="'$(_WasmPackager_EnableDedup)' == 'true'">$(_WasmPackager_AotInput_Dir)/aot-dummy.dll</_WasmPackager_AotDummy>
 
       <_WasmPackager_Emcc_Flags Condition="'$(_WasmPackager_PInvokeTable)' != ''">$(_WasmPackager_Emcc_Flags) -DGEN_PINVOKE</_WasmPackager_Emcc_Flags>
 
@@ -113,8 +113,8 @@
       <_WasmPackager_AppBundle_Files Include="dotnet.js;dotnet.wasm;mono-config.js" />
 
       <_WasmPackager_AotBaseArgs Include="llvmonly;asmonly;no-opt;static;direct-icalls;deterministic" />
+      <_WasmPackager_AotBaseArgs Include="llvm-path=$(EmscriptenSdkDir)/upstream/bin" />
 
-      <_WasmPackager_AotArgs Include="llvm-path=$(EmscriptenSdkDir)/upstream/bin" />
       <_WasmPackager_AotArgs Include="@(WasmPackager_Profilers->'--profile=%(Identity)')" />
       <_WasmPackager_AotArgs Include="profile=$(WasmPackager_AotProfile),profile-only" Condition="'$(WasmPackager_AotProfile)' != ''" />
       <_WasmPackager_AotArgs Include="interp" Condition="'$(WasmPackager_ExecMode)' == 'AotInterp'" />
@@ -160,7 +160,7 @@
       input dependency in some of the targets.
     -->
     <ItemGroup>
-      <__WasmPackager_AllConfigItems Include="'$(WasmPackager_RuntimeTemplate)';'$(WasmEnableDebug)';'$(EmscriptenSdkDir)'" />
+      <__WasmPackager_AllConfigItems Include="'$(WasmPackager_RuntimeTemplate)';'$(WasmPackager_EnableDebug)';'$(EmscriptenSdkDir)'" />
       <__WasmPackager_AllConfigItems Include="'$(WasmPackager_BuildDir)';'$(WasmPackager_VfsPrefix)';'$(WasmPackager_DeployPrefix)'" />
       <__WasmPackager_AllConfigItems Include="'$(WasmPackager_LinkIcalls)';'$(WasmPackager_EnableLinker)';'$(_WasmPackager_EnableAot)'" />
       <__WasmPackager_AllConfigItems Include="R;@(_WasmPackager_RootAssemblies);P;@(WasmPackager_Profilers);I;@(WasmPackager_PInvokeLibraries)" />
@@ -197,15 +197,16 @@
         RootAssemblies="@(_WasmPackager_RootAssemblies)"
         FrameworkDirectories="@(WasmPackager_FrameworkDirectories)"
         EnableAot="$(_WasmPackager_EnableAot)"
-        EnableDebug="$(WasmEnableDebug)">
+        EnableDebug="$(WasmPackager_EnableDebug)">
         <Output TaskParameter="Assemblies" ItemName="_WasmPackager_Assemblies" />
         <Output TaskParameter="FileList" ItemName="_WasmPackager_FileList" />
+        <Output TaskParameter="PdbFiles" ItemName="_wasmPackager_PdbFiles" />
     </WasmResolverTask>
 
     <ItemGroup Condition="'$(_WasmPackager_EnableDedup)' == 'true'">
       <_WasmPackager_Assemblies Include="$(_WasmPackager_AotDummy)">
         <Name>aot-dummy</Name>
-        <AOT>true</AOT>
+        <AOT>false</AOT>
         <SkipCopy>true</SkipCopy>
         <SkipLink>true</SkipLink>
       </_WasmPackager_Assemblies>
@@ -254,17 +255,25 @@
       <_WasmPackager_Copy_Outputs Include="%(_WasmPackager_Assemblies.LinkerInput)" Condition="'%(_WasmPackager_Assemblies.LinkerInput)' != '' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(WasmPackager_EnableDebug)' == 'true'">
+      <_WasmPackager_PdbFiles>
+        <AppPath>$(WasmPackager_AppDir)/$(WasmPackager_DeployPrefix)/%(Filename)%(Extension)</AppPath>
+      </_WasmPackager_PdbFiles>
+    </ItemGroup>
+
     <Message Importance="Normal" Text="  Assemblies: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.Identity)" />
     <Message Importance="Normal" Text="  FileList: %(_WasmPackager_FileList.Identity)" />
     <Message Importance="Normal" Text="  SDK Sources: %(_WasmPackager_SdkSources.Identity) - %(_WasmPackager_SdkSources.Source) - %(_WasmPackager_SdkSources.Intermediate)" />
     <Message Importance="Normal" Text="  Linker Inputs: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.LinkerInput)" />
     <Message Importance="Normal" Text="  Linker Outputs: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.LinkerOutput)" />
+    <Message Importance="Normal" Text="  PDB Files: %(_WasmPackager_PdbFiles.Identity)" Condition="'$(WasmPackager_EnableDebug)' == 'true'" />
 
     <!-- Include all the results here and separate item lists. -->
     <ItemGroup>
       <__WasmPackager_AllResolveResults Include="'$(_WasmPackager_ConfigHash)';@(_WasmPackager_FileList)" />
       <__WasmPackager_AllResolveResults Include="A;@(_WasmPackager_Assemblies->'%(Identity):%(SrcPath):%(AOT):%(LinkerInput)')" />
       <__WasmPackager_AllResolveResults Include="S;@(_WasmPackager_SdkSources->'%(Identity):%(Emcc_Output):%(Emcc_Flags):%(Emcc_Deps)') " />
+      <__WasmPackager_AllResolveResults Include="D;%(_WasmPackager_PdbFiles->'%(Identity)')" Condition="'$(WasmPackager_EnableDebug)' == 'true'" />
     </ItemGroup>
 
     <Hash ItemsToHash="@(__WasmPackager_AllResolveResults)">

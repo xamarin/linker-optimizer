@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <Test_NuGet_ForceReinstall>true</Test_NuGet_ForceReinstall>
   </PropertyGroup>
 
 </Project>

@@ -53,8 +53,8 @@
     </ItemGroup>
 
     <PropertyGroup>
-      <__WasmPackager_MonoConfig_EnableDebug Condition="'$(WasmEnableDebug)' == 'true'">1</__WasmPackager_MonoConfig_EnableDebug>
-      <__WasmPackager_MonoConfig_EnableDebug Condition="'$(WasmEnableDebug)' != 'true'">0</__WasmPackager_MonoConfig_EnableDebug>
+      <__WasmPackager_MonoConfig_EnableDebug Condition="'$(WasmPackager_EnableDebug)' == 'true'">1</__WasmPackager_MonoConfig_EnableDebug>
+      <__WasmPackager_MonoConfig_EnableDebug Condition="'$(WasmPackager_EnableDebug)' != 'true'">0</__WasmPackager_MonoConfig_EnableDebug>
       <__WasmPackager_MonoConfig_Contents>
 config = {
  	vfs_prefix: "$(WasmPackager_VfsPrefix)",
@@ -239,8 +239,8 @@ config = {
   </Target>
 
   <Target Name="_WasmPackager_CreateDummyAssemblies"
-    Inputs="%(__WasmPackager_PostLink_Dummies.Dummy)"
-    Outputs="%(__WasmPackager_PostLink_Dummies.LinkerOutput)"
+    Inputs="@(__WasmPackager_PostLink_Dummies->'%(Dummy)')"
+    Outputs="@(__WasmPackager_PostLink_Dummies->'%(LinkerOutput)')"
     DependsOnTargets="_LinkerOptimizer_LinkApplication;_WasmPackager_ResolveLinkerOutputs">
 
     <Message Importance="High" Text="_WasmPackager_CreateDummyAssemblies" />
@@ -269,7 +269,7 @@ config = {
     Outputs="@(_WasmPackager_Assemblies->'%(LlvmOutFile)')"
     DependsOnTargets="$(_WasmPackager_Require_Generator)">
 
-    <Message Importance="High" Text="_WasmPackager_CompileAot - compiling @(_WasmPackager_Assemblies->'%(LinkerOutput)')" />
+    <Message Importance="High" Text="_WasmPackager_CompileAot" />
 
     <!--
       Be careful here not to copy any of those %(_WasmPackager_Assemblies.DepFile)
@@ -313,20 +313,34 @@ config = {
 
     <Message Importance="High" Text="_WasmPackager_Dedup $(_WasmPackager_AotDummy)" />
 
-    <ItemGroup>
-      <__WasmPackager_Dedup_Assembly Include="@(_WasmPackager_Assemblies)" Condition="'%(Identity)' == '$(_WasmPackager_AotDummy)'" />
-    </ItemGroup>
+    <!--
+      This is different from the situation in _WasmPackager_CompileAot.
+      Here, we want to invoke the `CompileAot` target once with all the inputs, so we need
+      to avoid using any %(...) expressions inside the <CompileAot>.
+    -->
+
     <PropertyGroup>
-      <__WasmPackager_Dedup_Identity>%(__WasmPackager_Dedup_Assembly.Identity)</__WasmPackager_Dedup_Identity>
-      <__WasmPackager_Dedup_LlvmOutfile>%(__WasmPackager_Dedup_Assembly.LlvmOutFileTemp)</__WasmPackager_Dedup_LlvmOutfile>
+      <__WasmPackager_Dedup_FileName>$([System.IO.Path]::GetFileNameWithoutExtension('$(_WasmPackager_AotDummy)'))</__WasmPackager_Dedup_FileName>
+      <__WasmPackager_Dedup_LlvmOutFile>$(_WasmPackager_AotInput_Dir)/$(__WasmPackager_Dedup_FileName).bc</__WasmPackager_Dedup_LlvmOutFile>
+      <__WasmPackager_Dedup_LlvmOutFileTemp>$(_WasmPackager_AotInput_Dir)/$(__WasmPackager_Dedup_FileName).bc.tmp</__WasmPackager_Dedup_LlvmOutFileTemp>
     </PropertyGroup>
+
+    <ItemGroup>
+      <__WasmPackager_Dedup_Inputs Include="@(_WasmPackager_Assemblies->'%(LinkerOutput)')" Condition="'%(AOT)' == 'true'" />
+      <__WasmPackager_Dedup_Inputs Include="$(_WasmPackager_AotDummy)" />
+    </ItemGroup>
 
     <CompileAot
         MonoCrossBin="$(_WasmPackager_MonoCrossBin)"
         MonoPath="$(_WasmPackager_AotInput_Dir)"
-        Inputs="@(_WasmPackager_Assemblies->'%(LinkerOutput)')"
-        AotArgs="@(_WasmPackager_AotBaseArgs, ','),llvm-outfile=$(__WasmPackager_Dedup_LlvmOutfile),dedup-include=$(__WasmPackager_Dedup_Identity)"
-        Condition="'%(_WasmPackager_Assemblies.AOT)' == 'true'" 
+        Inputs="@(__WasmPackager_Dedup_Inputs)"
+        AotArgs="@(_WasmPackager_AotBaseArgs, ','),llvm-outfile=$(__WasmPackager_Dedup_LlvmOutFileTemp),dedup-include=$(__WasmPackager_Dedup_FileName).dll"
+    />
+
+    <Copy
+        SourceFiles="$(__WasmPackager_Dedup_LlvmOutFileTemp)"
+        DestinationFiles="$(__WasmPackager_Dedup_LlvmOutFile)"
+        SkipUnchangedFiles="true"
     />
 
   </Target>
@@ -341,8 +355,8 @@ config = {
     <MakeDir Directories="$(WasmPackager_AppDir)" />
 
     <Copy
-        SourceFiles="@(_WasmPackager_AppBundle_Files->'%(Source)');@(_WasmPackager_Assemblies->'%(FinalPath)')"
-        DestinationFiles="@(_WasmPackager_AppBundle_Files->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath)')"
+        SourceFiles="@(_WasmPackager_AppBundle_Files->'%(Source)');@(_WasmPackager_Assemblies->'%(FinalPath)');@(_WasmPackager_PdbFiles->'%(Identity)')"
+        DestinationFiles="@(_WasmPackager_AppBundle_Files->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath)');@(_WasmPackager_PdbFiles->'%(AppPath)')"
         SkipUnchangedFiles="true" />
 
   </Target>

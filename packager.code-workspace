@@ -4,6 +4,21 @@
 			"path": "Tests/Packager/SimpleHello"
 		},
 		{
+			"path": "Tests/Packager/SimpleInterpreter"
+		},
+		{
+			"path": "Tests/Packager/SimpleMixed"
+		},
+		{
+			"path": "Tests/Packager/SimpleDebug"
+		},
+		{
+			"path": "Tests/Packager/StandaloneOptimizer"
+		},
+		{
+			"path": "Tests/Packager/PristineBlazor"
+		},
+		{
 			"path": "Tests/Packager/SimpleBlazor"
 		},
 		{
@@ -21,12 +36,6 @@
 		{
 			"path": "Mono.WasmPackager.Web"
 		},
-		{
-			"path": "Tests/Packager/TestOptimizer"
-		},
-		{
-			"path": "Tests/Packager/SimpleInterpreter"
-		}
 	],
 	"settings": {
 		"editor.wordWrapColumn": 120,

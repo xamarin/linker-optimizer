@@ -5,7 +5,7 @@
   <!-- Packager defaults -->
   <PropertyGroup>
     <WasmPackager_RuntimeTemplate Condition="'$(WasmPackager_RuntimeTemplate)' == ''">runtime-tests.js</WasmPackager_RuntimeTemplate>
-    <WasmEnableDebug Condition="'$(WasmEnableDebug)' == ''">false</WasmEnableDebug>
+    <WasmPackager_EnableDebug Condition="'$(WasmPackager_EnableDebug)' == ''">false</WasmPackager_EnableDebug>
   </PropertyGroup>
 
   <!-- FIXME -->
