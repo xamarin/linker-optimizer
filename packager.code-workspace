@@ -16,6 +16,9 @@
 			"path": "Tests/Packager/StandaloneOptimizer"
 		},
 		{
+			"path": "Tests/Packager/SimpleWeb"
+		},
+		{
 			"path": "Tests/Packager/PristineBlazor"
 		},
 		{
@@ -35,6 +38,9 @@
 		},
 		{
 			"path": "Mono.WasmPackager.Web"
+		},
+		{
+			"path": "Mono.WasmPackager.Blazor"
 		},
 	],
 	"settings": {

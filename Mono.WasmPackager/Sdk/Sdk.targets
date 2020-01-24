@@ -56,11 +56,7 @@
     <RunArguments>runtime.js $(WasmPackager_RunArguments) --run $(MSBuildProjectName)</RunArguments>
   </PropertyGroup>
 
-  <Target Name="_CopyFilesMarkedCopyLocal">
-    <!-- Override to skip this target. -->
-  </Target>
-  <Target Name="IncrementalClean">
-    <!-- Override to skip this target. -->
-  </Target>
+  <!-- override to skip -->
+  <Target Name="_CopyFilesMarkedCopyLocal" />
 
 </Project>

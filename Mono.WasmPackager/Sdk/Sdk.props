@@ -12,12 +12,20 @@
     <WasmPackager_NugetPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\..\..'))</WasmPackager_NugetPackageRoot>
 
     <!-- FIXME: must set this manually. -->
-    <EmscriptenSdkDir>/Volumes/Work/mono-work/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
+    <EmscriptenSdkDir>/Users/Workspace/mono-work/sdks/builds/toolchains/emsdk</EmscriptenSdkDir>
     <JsvuDir>$([System.IO.Path]::GetFullPath('$(HOME)/.jsvu'))</JsvuDir>
   </PropertyGroup>
 
   <ItemGroup>
-    <__WasmPackager_Bindings_Packages Include="webassembly.bindings;webassembly.net.http;webassembly.net.websockets" />
+    <__WasmPackager_Bindings Include="WebAssembly.Bindings">
+      <Package>webassembly.bindings</Package>
+    </__WasmPackager_Bindings>
+    <__WasmPackager_Bindings Include="WebAssembly.Net.Http">
+      <Package>webassembly.net.http</Package>
+    </__WasmPackager_Bindings>
+    <__WasmPackager_Bindings Include="WebAssembly.Net.WebSockets">
+      <Package>webassembly.net.websockets</Package>
+    </__WasmPackager_Bindings>
   </ItemGroup>
 
   <Choose>
@@ -34,7 +42,7 @@
         <WasmPackager_MonoRuntimeAotDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
       </PropertyGroup>
       <ItemGroup>
-        <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Bindings_Packages->'$(WasmPackager_NugetPackageRoot)/%(Identity)/$(MonoWebAssemblySdkVersion)/lib/netstandard2.0')" />
+        <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Bindings->'$(WasmPackager_NugetPackageRoot)/%(Package)/$(MonoWebAssemblySdkVersion)/lib/netstandard2.0')" />
       </ItemGroup>
     </When>
     <When Condition="'$(WasmPackager_UsePackagedMono)' == 'true'">
@@ -50,7 +58,7 @@
         <WasmPackager_MonoRuntimeAotDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
       </PropertyGroup>
       <ItemGroup>
-        <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Bindings_Packages->'$(WasmPackager_NugetPackageRoot)/%(Identity)/$(MonoWebAssemblySdkVersion)/lib/netstandard2.0')" />
+        <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Bindings->'$(WasmPackager_NugetPackageRoot)/%(Package)/$(MonoWebAssemblySdkVersion)/lib/netstandard2.0')" />
       </ItemGroup>
     </When>
     <Otherwise>
@@ -76,6 +84,12 @@
   </PropertyGroup>
 
   <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.props" />
+
+  <PropertyGroup Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'">
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
+    <SkipCopyingSymbolsToOutputDirectory>true</SkipCopyingSymbolsToOutputDirectory>
+  </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'" />
 

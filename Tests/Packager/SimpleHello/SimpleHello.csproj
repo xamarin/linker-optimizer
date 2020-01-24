@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <WasmPackager_CilStrip>false</WasmPackager_CilStrip>
     <WasmPackager_RunArguments>--setenv=MONO_LOG_MASK=all --setenv=MONO_LOG_LEVEL=debug</WasmPackager_RunArguments>
+    <WasmPackager_EnableDebug>true</WasmPackager_EnableDebug>
   </PropertyGroup>
 
 </Project>

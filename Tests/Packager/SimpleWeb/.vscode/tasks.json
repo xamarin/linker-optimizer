@@ -60,7 +60,7 @@
             "type": "process",
             "args": [
                 "pack",
-                "${workspaceFolder}/../../../Mono.WasmPackager.Blazor",
+                "${workspaceFolder}/../../../Mono.WasmPackager.Web",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -68,8 +68,7 @@
             "dependsOrder": "sequence",
             "dependsOn": [
                 "package-optimizer",
-                "package-cilstrip",
-                "package-wasmpackager"
+                "package-cilstrip"
             ]
         },
         {
@@ -109,12 +108,12 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "clean-webpackager-web",
+            "label": "clean-wasmpackager-web",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/../../../Mono.WasmPackager.Blazor",
+                "${workspaceFolder}/../../../Mono.WasmPackager.Web",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -126,7 +125,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/SimpleBlazor.csproj",
+                "${workspaceFolder}/SimpleWeb.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
                 "/verbosity:normal"
@@ -150,7 +149,7 @@
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/SimpleBlazor.csproj",
+                "${workspaceFolder}/SimpleWeb.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],

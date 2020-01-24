@@ -90,7 +90,8 @@
 
       <_WasmPackager_Emcc_Flags Condition="'$(_WasmPackager_PInvokeTable)' != ''">$(_WasmPackager_Emcc_Flags) -DGEN_PINVOKE</_WasmPackager_Emcc_Flags>
 
-      <__WasmPackager_Driver_Emcc_Flags Condition="'$(WasmPackager_ExecMode)' == 'Aot'">-DENABLE_AOT=1</__WasmPackager_Driver_Emcc_Flags>
+      <__WasmPackager_Driver_Emcc_Flags Condition="'$(WasmPackager_ExecMode)' == 'Aot'">$(__WasmPackager_Driver_Emcc_Flags) -DENABLE_AOT=1</__WasmPackager_Driver_Emcc_Flags>
+      <__WasmPackager_Driver_Emcc_Flags Condition="'$(WasmPackager_AddBinding)' == 'true'">$(__WasmPackager_Driver_Emcc_Flags) -DCORE_BINDINGS=1</__WasmPackager_Driver_Emcc_Flags>
     </PropertyGroup>
 
     <ItemGroup>
@@ -106,6 +107,8 @@
       <_WasmPackager_SdkSources Include="zlib-helper.c" Condition="'$(_WasmPackager_EnableZLib)' == 'true'">
         <Emcc_Flags>-s USE_ZLIB=1</Emcc_Flags>
       </_WasmPackager_SdkSources>
+
+      <_WasmPackager_SdkSources Include="corebindings.c" Condition="'$(WasmPackager_AddBinding)' == 'true'" />
 
       <_WasmPackager_AppBundle_Files Include="runtime.js">
         <Source>$(WasmPackager_MonoRuntimePath)/src/$(WasmPackager_RuntimeTemplate)</Source>
@@ -124,6 +127,10 @@
       <_WasmPackager_Runtime_Libs Include="libmonosgen-2.0.a;libmono-native.a" />
       <_WasmPackager_Runtime_Libs Include="@(WasmPackager_Profilers->'libmono-profiler-%(Identity)-static.a')"/>
       <_WasmPackager_Js_Libs Include="library_mono.js;dotnet_support.js" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(WasmPackager_AddBinding)' == 'true'">
+      <_WasmPackager_Js_libs Include="binding_support.js" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(WasmPackager_LinkIcalls)' == 'true' OR '$(WasmPackager_ExecMode)' == 'Interp' OR '$(WasmPackager_ExecMode)' == 'AotInterp'">
@@ -197,6 +204,7 @@
         RootAssemblies="@(_WasmPackager_RootAssemblies)"
         FrameworkDirectories="@(WasmPackager_FrameworkDirectories)"
         EnableAot="$(_WasmPackager_EnableAot)"
+        AddBinding="$(WasmPackager_AddBinding)"
         EnableDebug="$(WasmPackager_EnableDebug)">
         <Output TaskParameter="Assemblies" ItemName="_WasmPackager_Assemblies" />
         <Output TaskParameter="FileList" ItemName="_WasmPackager_FileList" />
@@ -206,7 +214,8 @@
     <ItemGroup Condition="'$(_WasmPackager_EnableDedup)' == 'true'">
       <_WasmPackager_Assemblies Include="$(_WasmPackager_AotDummy)">
         <Name>aot-dummy</Name>
-        <AOT>false</AOT>
+        <AOT>true</AOT>
+        <Dummy>true</Dummy>
         <SkipCopy>true</SkipCopy>
         <SkipLink>true</SkipLink>
       </_WasmPackager_Assemblies>

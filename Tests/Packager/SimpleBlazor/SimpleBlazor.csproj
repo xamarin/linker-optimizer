@@ -1,4 +1,4 @@
-<Project Sdk="Mono.WasmPackager.Web/1.0.0">
+<Project Sdk="Mono.WasmPackager.Blazor/1.0.0">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,6 +6,8 @@
     <LangVersion>7.3</LangVersion>
     <RazorLangVersion>3.0</RazorLangVersion>
     <WasmPackager_EnablePackager>false</WasmPackager_EnablePackager>
+    <WasmPackager_EnableLinker>false</WasmPackager_EnableLinker>
+    <AdditionalMonoLinkerOptions>--disable-opt unreachablebodies --verbose --strip-security true --exclude-feature com --exclude-feature sre -v false -c copy -u copy -b true</AdditionalMonoLinkerOptions>
   </PropertyGroup>
 
   <ItemGroup>

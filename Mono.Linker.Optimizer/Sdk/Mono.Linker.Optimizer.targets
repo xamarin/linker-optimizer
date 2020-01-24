@@ -94,6 +94,7 @@
       <__LinkerOptimizer_LinkerArguments Include="@(LinkerOptimizerBaseClassLibraryPath->'-d &quot;%(Identity)&quot;')" />
       <__LinkerOptimizer_LinkerArguments Include="@(LinkerOptimizerLinkerDescriptors->'-x &quot;%(FullPath)&quot;')" />
       <__LinkerOptimizer_LinkerArguments Include="-o &quot;$(LinkerOptimizerOutputPath)&quot;" />
+      <__LinkerOptimizer_LinkerArguments Condition="'$(WasmPackager_EnableDebug)' == 'true'" Include="-b true" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(LinkerOptimizerEnabled)' != 'false'">

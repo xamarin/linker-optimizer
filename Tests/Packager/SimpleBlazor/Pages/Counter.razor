@@ -11,6 +11,7 @@
 
     void IncrementCount()
     {
-        currentCount++;
+        if (currentCount++ >= 3)
+            throw new InvalidTimeZoneException($"I LIVE ON THE MOON!");
     }
 }
