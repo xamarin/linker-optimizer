@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
-namespace Mono.WasmPackager
+namespace Mono.WasmPackager.Emscripten
 {
 	public class SourceEnvironment : Microsoft.Build.Utilities.Task
 	{

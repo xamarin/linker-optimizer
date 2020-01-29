@@ -4,8 +4,6 @@
   <UsingTask TaskName="Mono.WasmPackager.GenerateICallTable" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.WasmPackager.GeneratePInvokeTable" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.WasmPackager.GetFirstItem" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
-  <UsingTask TaskName="Mono.WasmPackager.SourceEnvironment" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
-  <UsingTask TaskName="Mono.WasmPackager.Emcc" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.WasmPackager.CompileAot" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
 
   <!-- Target Dependencies -->
@@ -20,19 +18,17 @@
     </_WasmPackager_Require_PreLink>
     <_WasmPackager_Require_PostLink>
       _WasmPackager_CreateDummyAssemblies;
-      _WasmPackager_ConstructEnv;
     </_WasmPackager_Require_PostLink>
     <_WasmPackager_Require_Generator>
       _WasmPackager_GenerateDriver;
       _WasmPackager_GenerateMonoConfig;
       _WasmPackager_GeneratePInvokeTable;
       _WasmPackager_CilStrip;
-      _WasmPackager_Emcc;
     </_WasmPackager_Require_Generator>
     <_WasmPackager_Require_AppBundle_Inputs>
       $(_WasmPackager_Require_PostLink);
       $(_WasmPackager_Require_Generator);
-      _WasmPackager_LinkEmcc;
+      WasmPackager_LinkEmcc;
     </_WasmPackager_Require_AppBundle_Inputs>
     <_WasmPackager_Require_AppBundle>
       _WasmPackager_GenerateAppBundle;
@@ -131,16 +127,6 @@ config = {
   </Target>
 
   <Target
-      Name="_WasmPackager_ConstructEnv"
-      DependsOnTargets="_WasmPackager_Resolve"
-      Inputs="$(_WasmPackager_ConfigCache)"
-      Outputs="$(_WasmPackager_EmsdkEnv)">
-    <Message Importance="High" Text="WasmPackager - generating emsdk env: $(_WasmPackager_EmsdkEnv)" />
-    <MakeDir Directories="$(WasmPackager_BuildDir)" />
-    <Exec Command="$(EmscriptenSdkDir)/emsdk construct_env $(_WasmPackager_EmsdkEnv)" />
-  </Target>
-
-  <Target
       Name="_WasmPackager_CopySources"
       DependsOnTargets="$(_WasmPackager_Require_Resolve)"
       Inputs="@(_WasmPackager_Copy_Inputs)"
@@ -155,40 +141,6 @@ config = {
           SkipUnchangedFiles="true" />
 
       <Message Importance="High" Text="WasmPackager - copy sources done" />
-  </Target>
-
-  <Target
-      Name="_WasmPackager_Emcc"
-      DependsOnTargets="$(_WasmPackager_Require_PostLink)"
-      Inputs="%(_WasmPackager_SdkSources.Identity);%(_WasmPackager_SdkSources.Emcc_Deps);$(_WasmPackager_EmsdkEnv)"
-      Outputs="%(_WasmPackager_SdkSources.Emcc_Output)">
-
-    <Message Importance="High" Text="_WasmPackager_Emcc: %(_WasmPackager_SdkSources.Identity) - %(_WasmPackager_SdkSources.Emcc_Output) %(_WasmPackager_SdkSources.Emcc_Flags) - %(_WasmPackager_SdkSources.Emcc_Deps)" />
-
-    <Emcc SdkDir="$(EmscriptenSdkDir)"
-          EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
-          BuildDir="$(WasmPackager_BuildDir)"
-          Input="%(_WasmPackager_SdkSources.Intermediate)"
-          Output="%(_WasmPackager_SdkSources.Emcc_Output)"
-          Flags="%(_WasmPackager_SdkSources.Emcc_Flags) $(_WasmPackager_Emcc_Flags) -c -I$(WasmPackager_MonoIncludeDir)"
-          Condition="'%(_WasmPackager_SdkSources.Emcc_Output)' != ''" />
-
-  </Target>
-
-  <Target
-      Name="_WasmPackager_Emcc_Assemblies"
-      DependsOnTargets="$(_WasmPackager_Require_PostLink);_WasmPackager_CompileAot"
-      Inputs="%(_WasmPackager_Assemblies.LlvmOutFile);$(_WasmPackager_EmsdkEnv)"
-      Outputs="%(_WasmPackager_Assemblies.Emcc_Output)">
-
-    <Emcc SdkDir="$(EmscriptenSdkDir)"
-          EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
-          BuildDir="$(WasmPackager_BuildDir)"
-          Input="%(_WasmPackager_Assemblies.LlvmOutFile)"
-          Output="%(_WasmPackager_Assemblies.Emcc_Output)"
-          Flags="$(_WasmPackager_Emcc_Flags) -c -I$(WasmPackager_MonoIncludeDir)"
-          Condition="'%(_WasmPackager_Assemblies.Emcc_Output)' != ''" />
-
   </Target>
 
   <Target Name="_WasmPackager_PrepareOptimizerConfiguration" DependsOnTargets="$(_WasmPackager_Require_PreLink)">
@@ -364,28 +316,6 @@ config = {
 
   </Target>
 
-  <Target Name="_WasmPackager_LinkEmcc"
-    DependsOnTargets="$(_WasmPackager_Require_Generator);_WasmPackager_Emcc;_WasmPackager_Emcc_Assemblies"
-    Inputs="@(_WasmPackager_SdkSources->'%(Emcc_Output)')"
-    Outputs="$(WasmPackager_BuildDir)/dotnet.js">
-
-    <ItemGroup>
-      <__WasmPackager_LinkEmcc_Inputs Include="%(_WasmPackager_SdkSources.Emcc_Output)" />
-      <__WasmPackager_LinkEmcc_Inputs Include="%(_WasmPackager_Runtime_Libs.Path)" />
-      <__WasmPackager_LinkEmcc_Inputs Include="%(_WasmPackager_Assemblies.Emcc_Output)" />
-    </ItemGroup>
-
-    <Message Importance="High" Text="LINK EMCC: @(__WasmPackager_LinkEmcc_Inputs)" />
-
-    <Emcc SdkDir="$(EmscriptenSdkDir)"
-          EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
-          BuildDir="$(WasmPackager_BuildDir)"
-          Input="@(__WasmPackager_LinkEmcc_Inputs, ' ') @(_WasmPackager_Js_Libs->'--js-library %(Path)', ' ')"
-          Output="$(WasmPackager_BuildDir)/dotnet.js"
-          Flags="$(_WasmPackager_Emcc_Flags) $(_WasmPackager_Emcc_Link_Flags)" />
-
-  </Target>
-
   <Target Name="_WasmPackager_NetFramework"
     DependsOnTargets="$(_WasmPackager_NetFramework_DependsOn); $(_WasmPackager_Require_AppBundle)">
     <Message Importance="High" Text="WasmPackager: $(WasmPackager_BuildDir)" />
@@ -418,6 +348,11 @@ config = {
       _WasmPackager_CompileAot;
       _WasmPackager_Dedup;
     </_WasmPackager_NetFramework_DependsOn>
+    <WasmPackager_Emcc_DependsOn>
+      $(WasmPackager_Emcc_DependsOn);
+      $(_WasmPackager_Require_PostLink);
+      _WasmPackager_CompileAot;
+    </WasmPackager_Emcc_DependsOn>
 
     <TargetsTriggeredByCompilation>_WasmPackager_NetFramework;</TargetsTriggeredByCompilation>
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>

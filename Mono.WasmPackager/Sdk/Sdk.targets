@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>  
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Settings.targets" />
+
+  <Import Sdk="Mono.WasmPackager.Emscripten" Version="1.0.0" Project="Sdk.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
+
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Resolver.targets" />
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Linker.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Packager.targets"  Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Packager.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
 
   <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.targets" />
 

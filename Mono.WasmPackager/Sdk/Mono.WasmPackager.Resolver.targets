@@ -42,8 +42,6 @@
     <PackageReference Include="WebAssembly.Net.WebSockets" Version="$(MonoWebAssemblySdkVersion)" />
   </ItemGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Settings.targets" />
-
   <!-- Derived and private settings -->
   <PropertyGroup Condition="'$(WasmPackager_EnablePackager)' == 'true'">
     <_WasmPackager_NetCoreAppDir>/MARTIN/FIXME/netcore/shared/Microsoft.NETCore.App/3.0</_WasmPackager_NetCoreAppDir>
@@ -59,14 +57,14 @@
 
     <_WasmPackager_MonoConfig>$(WasmPackager_BuildDir)/mono-config.js</_WasmPackager_MonoConfig>
     <_WasmPackager_DriverGen>$(WasmPackager_BuildDir)/driver-gen.c</_WasmPackager_DriverGen>
-    <_WasmPackager_EmsdkEnv>$(WasmPackager_BuildDir)/emsdk_env.sh</_WasmPackager_EmsdkEnv>
 
     <_WasmPackager_EnableZLib>true</_WasmPackager_EnableZLib>
 
-    <_WasmPackager_Emcc_Flags>-Oz -g -s DISABLE_EXCEPTION_CATCHING=0 -s ASSERTIONS=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s BINARYEN=1 -s TOTAL_MEMORY=134217728 -s ALIASING_FUNCTION_POINTERS=0 -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'setValue', 'getValue', 'UTF8ToString']" -s "EXPORTED_FUNCTIONS=['___cxa_is_pointer_type', '___cxa_can_catch']" -s "DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['setThrew', 'memset']"</_WasmPackager_Emcc_Flags>
-    <_WasmPackager_Emcc_Flags Condition="('$(_WasmPackager_EnableAot)' != 'true') AND ('$(WasmPackager_LinkIcalls)' == 'true')">$(_WasmPackager_Emcc_Flags) --llvm-lto 1</_WasmPackager_Emcc_Flags>
+    <WasmPackager_Emcc_Flags>-Oz -g -s DISABLE_EXCEPTION_CATCHING=0 -s ASSERTIONS=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s BINARYEN=1 -s TOTAL_MEMORY=134217728 -s ALIASING_FUNCTION_POINTERS=0 -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'setValue', 'getValue', 'UTF8ToString']" -s "EXPORTED_FUNCTIONS=['___cxa_is_pointer_type', '___cxa_can_catch']" -s "DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['setThrew', 'memset']"</WasmPackager_Emcc_Flags>
+    <WasmPackager_Emcc_Flags Condition="('$(_WasmPackager_EnableAot)' != 'true') AND ('$(WasmPackager_LinkIcalls)' == 'true')">$(WasmPackager_Emcc_Flags) --llvm-lto 1</WasmPackager_Emcc_Flags>
 
-    <_WasmPackager_Emcc_Link_Flags Condition="('$(WasmPackager_EnableDebug)' == 'true')">-O0</_WasmPackager_Emcc_Link_Flags>
+    <WasmPackager_Emcc_Link_Flags Condition="('$(WasmPackager_EnableDebug)' == 'true')">-O0</WasmPackager_Emcc_Link_Flags>
+    <WasmPackager_Emcc_Output>$(WasmPackager_BuildDir)/dotnet.js</WasmPackager_Emcc_Output>
 
     <_WasmPackager_MonoCrossBin>$(WasmPackager_MonoRuntimeAotDir)/bin/wasm32-unknown-none-mono-sgen</_WasmPackager_MonoCrossBin>
   </PropertyGroup>
@@ -88,7 +86,7 @@
       <_WasmPackager_CilStripOutput_Dir Condition="'$(_WasmPackager_CilStrip)' == 'true'">$(WasmPackager_BuildDir)/ilstrip-out</_WasmPackager_CilStripOutput_Dir>
       <_WasmPackager_AotDummy Condition="'$(_WasmPackager_EnableDedup)' == 'true'">$(_WasmPackager_AotInput_Dir)/aot-dummy.dll</_WasmPackager_AotDummy>
 
-      <_WasmPackager_Emcc_Flags Condition="'$(_WasmPackager_PInvokeTable)' != ''">$(_WasmPackager_Emcc_Flags) -DGEN_PINVOKE</_WasmPackager_Emcc_Flags>
+      <WasmPackager_Emcc_Flags Condition="'$(_WasmPackager_PInvokeTable)' != ''">$(WasmPackager_Emcc_Flags) -DGEN_PINVOKE</WasmPackager_Emcc_Flags>
 
       <__WasmPackager_Driver_Emcc_Flags Condition="'$(WasmPackager_ExecMode)' == 'Aot'">$(__WasmPackager_Driver_Emcc_Flags) -DENABLE_AOT=1</__WasmPackager_Driver_Emcc_Flags>
       <__WasmPackager_Driver_Emcc_Flags Condition="'$(WasmPackager_AddBinding)' == 'true'">$(__WasmPackager_Driver_Emcc_Flags) -DCORE_BINDINGS=1</__WasmPackager_Driver_Emcc_Flags>
@@ -116,7 +114,7 @@
       <_WasmPackager_AppBundle_Files Include="dotnet.js;dotnet.wasm;mono-config.js" />
 
       <_WasmPackager_AotBaseArgs Include="llvmonly;asmonly;no-opt;static;direct-icalls;deterministic" />
-      <_WasmPackager_AotBaseArgs Include="llvm-path=$(EmscriptenSdkDir)/upstream/bin" />
+      <_WasmPackager_AotBaseArgs Include="llvm-path=$(WasmPackager_Emscripten_SdkDir)/upstream/bin" />
 
       <_WasmPackager_AotArgs Include="@(WasmPackager_Profilers->'--profile=%(Identity)')" />
       <_WasmPackager_AotArgs Include="profile=$(WasmPackager_AotProfile),profile-only" Condition="'$(WasmPackager_AotProfile)' != ''" />
@@ -167,7 +165,7 @@
       input dependency in some of the targets.
     -->
     <ItemGroup>
-      <__WasmPackager_AllConfigItems Include="'$(WasmPackager_RuntimeTemplate)';'$(WasmPackager_EnableDebug)';'$(EmscriptenSdkDir)'" />
+      <__WasmPackager_AllConfigItems Include="'$(WasmPackager_RuntimeTemplate)';'$(WasmPackager_EnableDebug)';'$(WasmPackager_Emscripten_SdkDir)'" />
       <__WasmPackager_AllConfigItems Include="'$(WasmPackager_BuildDir)';'$(WasmPackager_VfsPrefix)';'$(WasmPackager_DeployPrefix)'" />
       <__WasmPackager_AllConfigItems Include="'$(WasmPackager_LinkIcalls)';'$(WasmPackager_EnableLinker)';'$(_WasmPackager_EnableAot)'" />
       <__WasmPackager_AllConfigItems Include="R;@(_WasmPackager_RootAssemblies);P;@(WasmPackager_Profilers);I;@(WasmPackager_PInvokeLibraries)" />
@@ -268,6 +266,19 @@
       <_WasmPackager_PdbFiles>
         <AppPath>$(WasmPackager_AppDir)/$(WasmPackager_DeployPrefix)/%(Filename)%(Extension)</AppPath>
       </_WasmPackager_PdbFiles>
+    </ItemGroup>
+
+    <ItemGroup>
+      <WasmPackager_Emcc_Sources Include="@(_WasmPackager_SdkSources)" Condition="'%(_WasmPackager_SdkSources.Emcc_Output)' != ''">
+        <Emcc_Input>%(Intermediate)</Emcc_Input>
+        <Emcc_Flags>%(_WasmPackager_SdkSources.Emcc_Flags) -I$(WasmPackager_MonoIncludeDir)</Emcc_Flags>
+      </WasmPackager_Emcc_Sources>
+      <WasmPackager_Emcc_Sources Include="@(_WasmPackager_Assemblies)" Condition="'%(_WasmPackager_Assemblies.Emcc_Output)' != ''">
+        <Emcc_Input>%(_WasmPackager_Assemblies.LlvmOutFile)</Emcc_Input>
+        <Emcc_Flags>%(_WasmPackager_Assemblies.Emcc_Flags)</Emcc_Flags>
+      </WasmPackager_Emcc_Sources>
+      <WasmPackager_Emcc_Libraries Include="%(_WasmPackager_Runtime_Libs.Path)" />
+      <WasmPackager_Emcc_JsLibraries Include="%(_WasmPackager_Js_Libs.Path)" />
     </ItemGroup>
 
     <Message Importance="Normal" Text="  Assemblies: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.Identity)" />

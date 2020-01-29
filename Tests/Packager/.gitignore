@@ -2,3 +2,4 @@ optimizer-report.xml
 .packages/
 aot/
 app/
+.emscripten-cache*

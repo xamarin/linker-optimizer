@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
-namespace Mono.WasmPackager
+namespace Mono.WasmPackager.Emscripten
 {
 	public class Emcc : Microsoft.Build.Utilities.Task
 	{
@@ -18,12 +18,11 @@ namespace Mono.WasmPackager
 		}
 
 		[Required]
-		public string BuildDir {
+		public string Input {
 			get; set;
 		}
 
-		[Required]
-		public string Input {
+		public string CacheDir {
 			get; set;
 		}
 
@@ -45,6 +44,9 @@ namespace Mono.WasmPackager
 			psi.UseShellExecute = false;
 			foreach (var var in environment)
 				psi.EnvironmentVariables[var.Key] = var.Value;
+
+			if (!string.IsNullOrEmpty (CacheDir))
+				psi.EnvironmentVariables["EM_CACHE"] = CacheDir;
 
 			if (string.IsNullOrEmpty (Output))
 				Output = Path.ChangeExtension (Input, ".o");
