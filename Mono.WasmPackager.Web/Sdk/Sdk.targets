@@ -6,9 +6,9 @@
   <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.targets" />
 
   <PropertyGroup>
-    <RunCommand>http-server</RunCommand>
+    <RunCommand>dotnet</RunCommand>
+    <RunArguments>$(MSBuildThisFileDirectory)../tools/Mono.WasmPackager.Web.dll $([System.IO.Path]::GetFullPath('$(WasmPackager_AppDir)'))</RunArguments>
     <RunWorkingDirectory>$(WasmPackager_AppDir)</RunWorkingDirectory>
-    <RunArguments />
   </PropertyGroup>
 
 </Project>
