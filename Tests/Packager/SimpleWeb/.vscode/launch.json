@@ -1,7 +1,8 @@
+//
+// AUTO-GENERATED FILE - DO NOT MODIFY!
+// This file has been auto-generated from launch-web.json.
+//
 {
-    // Use IntelliSense to find out which attributes exist for C# debugging
-    // Use hover for the description of the existing attributes
-    // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
     "version": "0.2.0",
     "configurations": [
         {
@@ -9,7 +10,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/../.packages/mono.wasmpackager.web/1.0.0/tools/Mono.WasmPackager.Web.dll",
+            "program": "${workspaceFolder}/../.packages/mono.wasmpackager.devserver/1.0.0/tools/Mono.WasmPackager.DevServer.dll",
             "args": [
                 "${workspaceFolder}/app"
             ],
@@ -17,5 +18,17 @@
             "stopAtEntry": false,
             "console": "internalConsole"
         },
+        {
+            "name": "SimpleWeb Optimizer",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/../../../Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",
+            "args": [
+                "@aot/linker-in/linker-optimizer.response"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": true
+        }
     ]
 }

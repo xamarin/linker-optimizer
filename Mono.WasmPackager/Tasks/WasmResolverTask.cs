@@ -80,7 +80,6 @@ namespace Mono.WasmPackager
 		static List<string> bcl_prefixes;
 		HashSet<string> asm_map = new HashSet<string> ();
 		List<string> file_list = new List<string> ();
-		HashSet<string> assemblies_with_dbg_info = new HashSet<string> ();
 		List<string> root_search_paths = new List<string> ();
 		bool is_netcore;
 
@@ -101,12 +100,15 @@ namespace Mono.WasmPackager
 			public string src_path;
 			// Whenever to AOT this assembly
 			public bool aot;
+			// Has PDB file
+			public bool pdb;
 
 			public TaskItem CreateTaskItem ()
 			{
 				return new TaskItem (src_path, new Dictionary<string, string> () {
 					{ "Name", name },
-					{ "AOT", aot ? "true" : "false" }
+					{ "AOT", aot ? "true" : "false" },
+					{ "PDB", pdb ? "true" : "false" }
 				});
 			}
 		}
@@ -241,7 +243,7 @@ namespace Mono.WasmPackager
 
 			if (add_pdb && (kind == AssemblyKind.User || kind == AssemblyKind.Framework)) {
 				file_list.Add (Path.ChangeExtension (ra, "pdb"));
-				assemblies_with_dbg_info.Add (Path.ChangeExtension (ra, "pdb"));
+				data.pdb = true;
 			}
 
 			foreach (var ar in image.AssemblyReferences) {
@@ -328,7 +330,6 @@ namespace Mono.WasmPackager
 
 			FileList = file_list.Select (f => new TaskItem (f)).ToArray ();
 			Assemblies = assemblies.Select (a => a.CreateTaskItem ()).ToArray ();
-			PdbFiles = assemblies_with_dbg_info.Select (f => new TaskItem (f)).ToArray ();
 
 			return true;
 		}

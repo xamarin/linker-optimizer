@@ -40,6 +40,9 @@
 			"path": "Mono.WasmPackager.Web"
 		},
 		{
+			"path": "Mono.WasmPackager.DevServer"
+		},
+		{
 			"path": "Mono.WasmPackager.Blazor"
 		},
 		{
@@ -53,6 +56,33 @@
 			"editor.wordWrap": "wordWrapColumn",
 			"editor.wordWrapColumn": 80,
 		},
+		"editor.renderWhitespace": "all",
+		"git.enableSmartCommit": true,
+		"taskExplorer.enableBash": false,
+		"taskExplorer.enableAnt": false,
+		"taskExplorer.enableBatch": false,
+		"taskExplorer.enableGrunt": false,
+		"taskExplorer.enableMake": false,
+		"taskExplorer.enableNpm": false,
+		"taskExplorer.enableNsis": false,
+		"taskExplorer.enablePerl": false,
+		"taskExplorer.enablePowershell": false,
+		"taskExplorer.enablePython": false,
+		"taskExplorer.enableRuby": false,
+		"taskExplorer.enableSideBar": true,
+		"taskExplorer.enableTsc": false,
+		"[csharp]": {
+			"editor.defaultFormatter": "ms-vscode.csharp"
+		},
+		"editor.codeLens": false,
+		"debug.onTaskErrors": "showErrors",
+		"task.slowProviderWarning": [
+			"ant"
+		],
+		"git.detectSubmodules": false,
+		"git.ignoredRepositories": [
+			"git@github.com:mono/linker.git"
+		],
 		"files.exclude": {
 			"**/aot": true,
 			"**/app": true,

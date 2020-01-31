@@ -1,3 +1,7 @@
+//
+// AUTO-GENERATED FILE - DO NOT MODIFY!
+// This file has been auto-generated from tasks-console.json.
+//
 {
     "version": "2.0.0",
     "tasks": [
@@ -7,6 +11,7 @@
             "type": "process",
             "args": [
                 "build",
+                "/nologo",
                 "${workspaceFolder}/../../DebugBuild",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -19,6 +24,7 @@
             "type": "process",
             "args": [
                 "pack",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.Linker.Optimizer",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -31,6 +37,7 @@
             "type": "process",
             "args": [
                 "pack",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.Linker.CilStrip",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -38,11 +45,12 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "package-wasmpackager",
+            "label": "package-packager",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "pack",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.WasmPackager",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -60,6 +68,7 @@
             "type": "process",
             "args": [
                 "clean",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.Linker.Optimizer",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -72,6 +81,7 @@
             "type": "process",
             "args": [
                 "clean",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.Linker.CilStrip",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -84,6 +94,7 @@
             "type": "process",
             "args": [
                 "clean",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.WasmPackager",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -96,6 +107,7 @@
             "type": "process",
             "args": [
                 "build",
+                "/nologo",
                 "${workspaceFolder}/SimpleDebug.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
@@ -104,9 +116,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "package-optimizer",
-                "package-cilstrip",
-                "package-wasmpackager"
+                "package-packager"
             ],
             "group": {
                 "kind": "build",
@@ -119,6 +129,7 @@
             "type": "process",
             "args": [
                 "clean",
+                "/nologo",
                 "${workspaceFolder}/SimpleDebug.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -128,8 +139,27 @@
             "dependsOn": [
                 "clean-optimizer",
                 "clean-cilstrip",
-                "clean-wasmpackager"
+                "clean-packager"
             ]
+        },
+        {
+            "label": "run",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--no-build",
+                "/nologo",
+                "${workspaceFolder}/SimpleDebug.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary",
+                "/verbosity:verbose"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

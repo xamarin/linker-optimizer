@@ -3,8 +3,7 @@
     <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
     <NuspecFile>Mono.WasmPackager.Web.nuspec</NuspecFile>
     <MonoWebAssemblySdkVersion>0.2.2</MonoWebAssemblySdkVersion>
-    <OutputType>exe</OutputType>
-    <IsPackable>true</IsPackable>
+    <NoWarn>NU5128</NoWarn>
   </PropertyGroup>
 
   <Target Name="CopyPackage" AfterTargets="Pack">
@@ -18,9 +17,8 @@
   </Target>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Mono.WasmPackager" Version="1.0.0" />
-    <PackageReference Include="Mono.WebAssembly.DebuggerProxy" Version="0.2.2" />
+    <PackageReference Include="Mono.WasmPackager.DevServer" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

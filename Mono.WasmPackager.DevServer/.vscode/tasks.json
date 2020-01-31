@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Mono.WasmPackager.DevServer.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+        },
+        {
+            "label": "clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "${workspaceFolder}/Mono.WasmPackager.DevServer.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

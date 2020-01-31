@@ -5,11 +5,11 @@
         "version": "0.2.0",
         "configurations": [
             {
-                "name": "WasmPackager.Web",
+                "name": "WasmPackager.DevServer",
                 "type": "coreclr",
                 "request": "launch",
                 "preLaunchTask": "build",
-                "program": "${workspaceFolder}/bin/Debug/netcoreapp3.0/Mono.WasmPackager.Web.dll",
+                "program": "${workspaceFolder}/bin/Debug/netcoreapp3.0/Mono.WasmPackager.DevServer.dll",
                 "args": [],
                 "cwd": "${workspaceFolder}",
                 "stopAtEntry": false,

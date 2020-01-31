@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <NuspecFile>Mono.WasmPackager.Blazor.nuspec</NuspecFile>
+    <NoWarn>NU5128</NoWarn>
   </PropertyGroup>
 
   <Target Name="CopyPackage" AfterTargets="Pack">
@@ -16,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.WasmPackager" Version="1.0.0" />
+    <PackageReference Include="Mono.WasmPackager.DevServer" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

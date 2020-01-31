@@ -1,6 +1,5 @@
 <Project>
 
-  <UsingTask TaskName="Mono.WasmPackager.MartinTest" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.WasmPackager.GenerateICallTable" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.WasmPackager.GeneratePInvokeTable" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.WasmPackager.GetFirstItem" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
@@ -214,6 +213,7 @@ config = {
     <Csc Sources="%(__WasmPackager_PostLink_Dummies.Dummy)"
       Deterministic="true"
       TargetType="library"
+      EmitDebugInformation="$(WasmPackager_EnableDebug)"
       References="@(__WasmPackager_AotDummy_References)"
       OutputAssembly="%(__WasmPackager_PostLink_Dummies.LinkerOutput)"
     />
@@ -247,14 +247,14 @@ config = {
         MonoPath="$(_WasmPackager_AotInput_Dir)"
         Inputs="%(_WasmPackager_Assemblies.LinkerOutput)"
         AotArgs="@(_WasmPackager_AotArgs, ','),depfile=%(_WasmPackager_Assemblies.DepFile),llvm-outfile=%(_WasmPackager_Assemblies.LlvmOutFileTemp)"
-        Condition="'%(_WasmPackager_Assemblies.AOT)' == 'true' AND '%(_WasmPackager_Assemblies.Dummy)' != 'true'" 
+        Condition="'%(AOT)' == 'true' AND '%(Dummy)' != 'true'"
      />
 
     <Copy
         SourceFiles="%(_WasmPackager_Assemblies.LlvmOutFileTemp)"
         DestinationFiles="%(_WasmPackager_Assemblies.LlvmOutFile)"
         SkipUnchangedFiles="true"
-        Condition="'%(_WasmPackager_Assemblies.AOT)' == 'true' AND '%(_WasmPackager_Assemblies.Dummy)' != 'true'" 
+        Condition="'%(AOT)' == 'true' AND '%(Dummy)' != 'true'"
     />
 
     <Message Importance="High" Text="_WasmPackager_CompileAot - done" />
@@ -302,16 +302,16 @@ config = {
 
   <Target Name="_WasmPackager_GenerateAppBundle"
     DependsOnTargets="$(_WasmPackager_Require_AppBundle_Inputs)"
-    Inputs="@(_WasmPackager_AppBundle_Files->'%(Source)');@(_WasmPackager_Assemblies->'%(FinalPath)')"
-    Outputs="@(_WasmPackager_AppBundle_Files->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath)')">
+    Inputs="@(_WasmPackager_AppBundle_Files->'%(Source)');@(_WasmPackager_Assemblies->'%(FinalPath)');@(_WasmPackager_Assemblies->'%(FinalPath_PDB)')"
+    Outputs="@(_WasmPackager_AppBundle_Files->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath_PDB)')">
 
     <Message Importance="High" Text="_WasmPackager_GenerateAppBundle: $(WasmPackager_AppDir)" />
 
     <MakeDir Directories="$(WasmPackager_AppDir)" />
 
     <Copy
-        SourceFiles="@(_WasmPackager_AppBundle_Files->'%(Source)');@(_WasmPackager_Assemblies->'%(FinalPath)');@(_WasmPackager_PdbFiles->'%(Identity)')"
-        DestinationFiles="@(_WasmPackager_AppBundle_Files->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath)');@(_WasmPackager_PdbFiles->'%(AppPath)')"
+        SourceFiles="@(_WasmPackager_AppBundle_Files->'%(Source)');@(_WasmPackager_Assemblies->'%(FinalPath)');@(_WasmPackager_Assemblies->'%(FinalPath_PDB)')"
+        DestinationFiles="@(_WasmPackager_AppBundle_Files->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath)');@(_WasmPackager_Assemblies->'%(AppPath_PDB)')"
         SkipUnchangedFiles="true" />
 
   </Target>

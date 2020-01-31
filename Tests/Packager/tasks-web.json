@@ -1,7 +1,3 @@
-//
-// AUTO-GENERATED FILE - DO NOT MODIFY!
-// This file has been auto-generated from tasks-web.json.
-//
 {
     "version": "2.0.0",
     "tasks": [
@@ -195,7 +191,7 @@
             "args": [
                 "build",
                 "/nologo",
-                "${workspaceFolder}/SimpleWeb.csproj",
+                "${workspaceFolder}/@PROJECT@.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
                 "/verbosity:normal"
@@ -217,7 +213,7 @@
             "args": [
                 "clean",
                 "/nologo",
-                "${workspaceFolder}/SimpleWeb.csproj",
+                "${workspaceFolder}/@PROJECT@.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -240,7 +236,7 @@
                 "run",
                 "--no-build",
                 "/nologo",
-                "${workspaceFolder}/SimpleWeb.csproj",
+                "${workspaceFolder}/@PROJECT@.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
                 "/verbosity:normal"

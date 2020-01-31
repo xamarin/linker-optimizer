@@ -4,7 +4,7 @@
     <OutputType>exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DefineConstants>CF_2_0</DefineConstants>
-    <NoWarn>0436;0108;0618;0169;0649;</NoWarn>
+    <NoWarn>0436;0108;0618;0169;0649;NU5128</NoWarn>
     <NuspecFile>Mono.Linker.CilStrip.nuspec</NuspecFile>
   </PropertyGroup>
 

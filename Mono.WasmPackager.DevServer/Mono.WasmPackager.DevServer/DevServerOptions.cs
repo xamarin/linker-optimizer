@@ -13,6 +13,10 @@ namespace Mono.WasmPackager.DevServer
 
 		public string WebRoot { get; set; }
 
+		public string FrameworkDirectory { get; set; }
+
+		public bool EnableDebugging { get; set; }
+
 		public FileServerOptions FileServerOptions { get; set; } = new FileServerOptions ();
 	}
 }

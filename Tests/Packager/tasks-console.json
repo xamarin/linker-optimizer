@@ -2,11 +2,25 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "debug-build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../DebugBuild",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "package-optimizer",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "pack",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.Linker.Optimizer",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -19,6 +33,7 @@
             "type": "process",
             "args": [
                 "pack",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.Linker.CilStrip",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -26,29 +41,13 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "package-wasmpackager",
+            "label": "package-packager",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "pack",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.WasmPackager",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary"
-            ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "package-optimizer",
-                "package-cilstrip"
-            ]
-        },
-        {
-            "label": "package-wasmpackager-web",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "pack",
-                "${workspaceFolder}/../../../Mono.WasmPackager.Web",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -65,6 +64,7 @@
             "type": "process",
             "args": [
                 "clean",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.Linker.Optimizer",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -77,6 +77,7 @@
             "type": "process",
             "args": [
                 "clean",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.Linker.CilStrip",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
@@ -84,24 +85,13 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "clean-wasmpackager",
+            "label": "clean-packager",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "clean",
+                "/nologo",
                 "${workspaceFolder}/../../../Mono.WasmPackager",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "clean-wasmpackager-web",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "clean",
-                "${workspaceFolder}/../../../Mono.WasmPackager.Web",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -113,7 +103,8 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Mono.WasmPackager.Web.csproj",
+                "/nologo",
+                "${workspaceFolder}/@PROJECT@.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
                 "/verbosity:normal"
@@ -121,10 +112,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "package-optimizer",
-                "package-cilstrip",
-                "package-wasmpackager",
-                "package-wasmpackager-web"
+                "package-packager"
             ],
             "group": {
                 "kind": "build",
@@ -137,7 +125,8 @@
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/Mono.WasmPackager.Web.csproj",
+                "/nologo",
+                "${workspaceFolder}/@PROJECT@.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -146,9 +135,27 @@
             "dependsOn": [
                 "clean-optimizer",
                 "clean-cilstrip",
-                "clean-wasmpackager",
-                "clean-wasmpackager-web"
+                "clean-packager"
             ]
+        },
+        {
+            "label": "run",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--no-build",
+                "/nologo",
+                "${workspaceFolder}/@PROJECT@.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary",
+                "/verbosity:verbose"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

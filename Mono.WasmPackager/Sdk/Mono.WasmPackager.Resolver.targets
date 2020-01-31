@@ -206,13 +206,13 @@
         EnableDebug="$(WasmPackager_EnableDebug)">
         <Output TaskParameter="Assemblies" ItemName="_WasmPackager_Assemblies" />
         <Output TaskParameter="FileList" ItemName="_WasmPackager_FileList" />
-        <Output TaskParameter="PdbFiles" ItemName="_wasmPackager_PdbFiles" />
     </WasmResolverTask>
 
     <ItemGroup Condition="'$(_WasmPackager_EnableDedup)' == 'true'">
       <_WasmPackager_Assemblies Include="$(_WasmPackager_AotDummy)">
         <Name>aot-dummy</Name>
         <AOT>true</AOT>
+        <PDB>false</PDB>
         <Dummy>true</Dummy>
         <SkipCopy>true</SkipCopy>
         <SkipLink>true</SkipLink>
@@ -249,6 +249,20 @@
       <_WasmPackager_Assemblies>
         <AppPath Condition="'%(_WasmPackager_Assemblies.AppPath)' == ''">$(WasmPackager_AppDir)/$(WasmPackager_DeployPrefix)/%(Filename)%(Extension)</AppPath>
       </_WasmPackager_Assemblies>
+      <_WasmPackager_Assemblies Condition="'$(WasmPackager_EnableDebug)' == 'true'">
+        <FinalPath_PDB Condition="'%(PDB)' == 'true'">$([System.IO.Path]::ChangeExtension('%(FinalPath)','.pdb'))</FinalPath_PDB>
+        <AppPath_PDB Condition="'%(PDB)' == 'true'">$([System.IO.Path]::ChangeExtension('%(AppPath)','.pdb'))</AppPath_PDB>
+      </_WasmPackager_Assemblies>
+    </ItemGroup>
+
+    <!-- Set default values for all metadata, so we can use the short %(Name) syntax. -->
+    <ItemGroup>
+      <_WasmPackager_Assemblies>
+        <PDB Condition="'%(_WasmPackager_Assemblies.PDB)' == ''">false</PDB>
+        <AOT Condition="'%(_WasmPackager_Assemblies.AOT)' == ''">false</AOT>
+        <Dummy Condition="'%(_WasmPackager_Assemblies.Dummy)' == ''">false</Dummy>
+        <SkipCopy Condition="'%(_WasmPackager_Assemblies.SkipCopy)' == ''">false</SkipCopy>
+      </_WasmPackager_Assemblies>
     </ItemGroup>
 
     <!-- Make sure to always modify these in pairs -->
@@ -262,10 +276,18 @@
       <_WasmPackager_Copy_Outputs Include="%(_WasmPackager_Assemblies.LinkerInput)" Condition="'%(_WasmPackager_Assemblies.LinkerInput)' != '' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
     </ItemGroup>
 
+    <!-- Copy PDB Files -->
+
     <ItemGroup Condition="'$(WasmPackager_EnableDebug)' == 'true'">
-      <_WasmPackager_PdbFiles>
-        <AppPath>$(WasmPackager_AppDir)/$(WasmPackager_DeployPrefix)/%(Filename)%(Extension)</AppPath>
-      </_WasmPackager_PdbFiles>
+      <_WasmPackager_Assemblies>
+        <PDB_File Condition="'%(PDB)' == 'true'">$([System.IO.Path]::ChangeExtension('%(Identity)', '.pdb'))</PDB_File>
+      </_WasmPackager_Assemblies>
+      <_WasmPackager_Assemblies Condition="'$(WasmPackager_EnableLinker)' == 'true'">
+        <LinkerInput_Pdb Condition="'%(PDB)' == 'true'">$(_WasmPackager_LinkerInput_Dir)/%(Filename).pdb</LinkerInput_Pdb>
+        <LinkerOutput_Pdb Condition="'%(PDB)' == 'true'">$(_WasmPackager_LinkerOutput_Dir)/%(Filename).pdb</LinkerOutput_Pdb>
+      </_WasmPackager_Assemblies>
+      <_WasmPackager_Copy_Inputs Include="%(_WasmPackager_Assemblies.PDB_File)" Condition="'%(_WasmPackager_Assemblies.PDB)' == 'true' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
+      <_WasmPackager_Copy_Outputs Include="%(_WasmPackager_Assemblies.LinkerInput_Pdb)" Condition="'%(_WasmPackager_Assemblies.PDB)' == 'true' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
     </ItemGroup>
 
     <ItemGroup>
@@ -286,14 +308,12 @@
     <Message Importance="Normal" Text="  SDK Sources: %(_WasmPackager_SdkSources.Identity) - %(_WasmPackager_SdkSources.Source) - %(_WasmPackager_SdkSources.Intermediate)" />
     <Message Importance="Normal" Text="  Linker Inputs: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.LinkerInput)" />
     <Message Importance="Normal" Text="  Linker Outputs: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.LinkerOutput)" />
-    <Message Importance="Normal" Text="  PDB Files: %(_WasmPackager_PdbFiles.Identity)" Condition="'$(WasmPackager_EnableDebug)' == 'true'" />
 
     <!-- Include all the results here and separate item lists. -->
     <ItemGroup>
       <__WasmPackager_AllResolveResults Include="'$(_WasmPackager_ConfigHash)';@(_WasmPackager_FileList)" />
       <__WasmPackager_AllResolveResults Include="A;@(_WasmPackager_Assemblies->'%(Identity):%(SrcPath):%(AOT):%(LinkerInput)')" />
       <__WasmPackager_AllResolveResults Include="S;@(_WasmPackager_SdkSources->'%(Identity):%(Emcc_Output):%(Emcc_Flags):%(Emcc_Deps)') " />
-      <__WasmPackager_AllResolveResults Include="D;%(_WasmPackager_PdbFiles->'%(Identity)')" Condition="'$(WasmPackager_EnableDebug)' == 'true'" />
     </ItemGroup>
 
     <Hash ItemsToHash="@(__WasmPackager_AllResolveResults)">

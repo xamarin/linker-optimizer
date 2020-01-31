@@ -8,9 +8,18 @@
   <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.targets" />
 
   <PropertyGroup>
-    <RunCommand>dotnet</RunCommand>
-    <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
-    <RunArguments>$(WasmPackager_NugetPackageRoot)/microsoft.aspnetcore.blazor.devserver/$(BlazorVersion)/tools/blazor-devserver.dll serve  --applicationpath &quot;$(MSBuildProjectDirectory)/$(OutputPath)$(TargetFileName)&quot;</RunArguments>
+    <_WasmPackager_Blazor_FrameworkDir>$([System.IO.Path]::GetFullPath('$(OutputPath)/dist/_framework'))</_WasmPackager_Blazor_FrameworkDir>
+    <_WasmPackager_Blazor_WebRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/wwwroot'))</_WasmPackager_Blazor_WebRoot>
+    <WasmPackager_DevServer_RootDir>$(MSBuildProjectDirectory)</WasmPackager_DevServer_RootDir>
+    <WasmPackager_DevServer_Arguments>--web-root &quot;$(_WasmPackager_Blazor_WebRoot)&quot; --framework &quot;$(_WasmPackager_Blazor_FrameworkDir)&quot;</WasmPackager_DevServer_Arguments>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="$(BlazorVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="$(BlazorVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="$(BlazorVersion)" />
+  </ItemGroup>
+
+  <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.targets" />
 
 </Project>

@@ -3,6 +3,7 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <NuspecFile>Mono.WasmPackager.Emscripten.nuspec</NuspecFile>
     <WasmPackager_Emscripten_Version>1.39.5</WasmPackager_Emscripten_Version>
+    <NoWarn>NU5128</NoWarn>
   </PropertyGroup>
 
   <Target Name="CopyPackage" AfterTargets="Pack">

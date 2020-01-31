@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>  
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Web.targets" />
-
   <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.targets" />
 
   <PropertyGroup>
-    <RunCommand>dotnet</RunCommand>
-    <RunArguments>$(MSBuildThisFileDirectory)../tools/Mono.WasmPackager.Web.dll $([System.IO.Path]::GetFullPath('$(WasmPackager_AppDir)'))</RunArguments>
-    <RunWorkingDirectory>$(WasmPackager_AppDir)</RunWorkingDirectory>
+    <WasmPackager_DevServer_RootDir>$(WasmPackager_AppDir)</WasmPackager_DevServer_RootDir>
+    <WasmPackager_DevServer_Arguments>--web-root $([System.IO.Path]::GetFullPath('$(WasmPackager_AppDir)'))</WasmPackager_DevServer_Arguments>
   </PropertyGroup>
+
+  <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.targets" />
 
 </Project>

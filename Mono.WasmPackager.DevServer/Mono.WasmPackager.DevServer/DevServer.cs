@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,27 @@ namespace Mono.WasmPackager.DevServer
 
 		static void Main (string[] args)
 		{
-			string root = args.Length > 0 ? args[0] : DEFAULT_ROOT;
+			string root = DEFAULT_ROOT;
+			string framework = null;
+			string blazor;
+
+			int pos = 0;
+			while (pos < args.Length) {
+				var key = args[pos++];
+				switch (key) {
+				case "--web-root":
+					root = args[pos++];
+					break;
+				case "--framework":
+					framework = args[pos++];
+					break;
+				case "--blazor":
+					blazor = args[pos++];
+					break;
+				default:
+					throw new NotSupportedException ($"Unknown command-line argument: '{key}'.");
+				}
+			}
 
 			var host = new WebHostBuilder ()
 				.UseKestrel ()
@@ -30,6 +51,7 @@ namespace Mono.WasmPackager.DevServer
 					services.AddRouting ();
 					services.Configure<DevServerOptions> (options => {
 						options.WebRoot = root;
+						options.FrameworkDirectory = framework;
 						options.FileServerOptions.EnableDirectoryBrowsing = true;
 						options.FileServerOptions.StaticFileOptions.ServeUnknownFileTypes = true;
 					});
