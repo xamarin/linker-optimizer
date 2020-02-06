@@ -21,7 +21,8 @@ namespace Mono.WasmPackager.DevServer
 		{
 			string root = DEFAULT_ROOT;
 			string framework = null;
-			string blazor;
+			bool debug = false;
+			bool blazor;
 
 			int pos = 0;
 			while (pos < args.Length) {
@@ -34,7 +35,10 @@ namespace Mono.WasmPackager.DevServer
 					framework = args[pos++];
 					break;
 				case "--blazor":
-					blazor = args[pos++];
+					blazor = true;
+					break;
+				case "--debug":
+					debug = true;
 					break;
 				default:
 					throw new NotSupportedException ($"Unknown command-line argument: '{key}'.");
@@ -47,10 +51,15 @@ namespace Mono.WasmPackager.DevServer
 				.UseWebRoot (root)
 				.UseIISIntegration ()
 				.UseStartup<DevServer> ()
+				.ConfigureLogging (logging => {
+					logging.AddConsole ();
+					// logging.AddDebug ();
+				})
 				.ConfigureServices (services => {
 					services.AddRouting ();
 					services.Configure<DevServerOptions> (options => {
 						options.WebRoot = root;
+						options.EnableDebugging = debug;
 						options.FrameworkDirectory = framework;
 						options.FileServerOptions.EnableDirectoryBrowsing = true;
 						options.FileServerOptions.StaticFileOptions.ServeUnknownFileTypes = true;

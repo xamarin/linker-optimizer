@@ -1,8 +1,9 @@
 #!/usr/bin/perl -wT
 use strict;
 
-my @CONSOLE_DIRS = qw[SimpleDebug SimpleHello SimpleInterpreter SimpleMixed];
-my @WEB_DIRS = qw[SimpleWeb SimpleBlazor];
+my @CONSOLE_DIRS = qw[SimpleDebug SimpleHello SimpleInterpreter SimpleMixed DontLink];
+my @WEB_DIRS = qw[SimpleWeb SimpleWeb2];
+my @BLAZOR_DIRS = qw[SimpleBlazor];
 
 sub update($$$)
 {
@@ -34,4 +35,10 @@ for my $dir (@WEB_DIRS)
 {
 	update($dir,"tasks-web.json", "tasks.json");
 	update($dir,"launch-web.json", "launch.json");
+}
+
+for my $dir (@BLAZOR_DIRS)
+{
+	update($dir,"tasks-web.json", "tasks.json");
+	update($dir,"launch-blazor.json", "launch.json");
 }

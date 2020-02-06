@@ -1,29 +1,25 @@
 //
 // AUTO-GENERATED FILE - DO NOT MODIFY!
-// This file has been auto-generated from launch-blazor.json.
+// This file has been auto-generated from launch-console.json.
 //
 {
-    "version": "0.2.0",
-    "configurations": [
+   "version": "0.2.0",
+   "configurations": [
         {
-            "name": "SimpleBlazor",
+            "name": "DontLink Debug Build",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/../.packages/mono.wasmpackager.devserver/1.0.0/tools/Mono.WasmPackager.DevServer.dll",
+            "preLaunchTask": "debug-build",
+            "program": "${workspaceFolder}/../../DebugBuild/bin/Debug/netcoreapp3.0/DebugBuild.dll",
             "args": [
-                "--debug",
-                "--web-root",
-                "${workspaceFolder}/wwwroot",
-                "--framework",
-                "${workspaceFolder}/bin/Debug/netstandard2.0/dist/_framework",
-                "--blazor"
+                "${workspaceFolder}"
             ],
             "cwd": "${workspaceFolder}",
-            "stopAtEntry": false,
-            "console": "internalConsole"
+            "console": "internalConsole",
+            "stopAtEntry": false
         },
         {
-            "name": "SimpleBlazor Optimizer",
+            "name": "DontLink Optimizer",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/../../../Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",

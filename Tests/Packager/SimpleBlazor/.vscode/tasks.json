@@ -238,12 +238,7 @@
             "type": "process",
             "args": [
                 "run",
-                "--no-build",
-                "/nologo",
-                "${workspaceFolder}/SimpleBlazor.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary",
-                "/verbosity:normal"
+                "--no-build"
             ],
             "problemMatcher": "$msCompile",
             "group": {

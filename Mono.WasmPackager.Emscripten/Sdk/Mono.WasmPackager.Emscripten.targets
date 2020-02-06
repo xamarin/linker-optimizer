@@ -26,6 +26,9 @@
     <Message Importance="High" Text="WasmPackager - generating emsdk env: $(_WasmPackager_EmsdkEnv)" />
     <MakeDir Directories="$(WasmPackager_BuildDir)" />
     <Exec Command="$(WasmPackager_Emscripten_SdkDir)/emsdk construct_env $(_WasmPackager_EmsdkEnv)" />
+
+    <Message Importance="High" Text="_WasmPackager_Emcc_ConstructEnv: $(_WasmPackager_EnableAot)" />
+    <Message Importance="Normal" Text="  WasmPackager_Emcc_Sources: %(WasmPackager_Emcc_Sources.Identity) - %(Emcc_Input) - %(Emcc_Output)" />
   </Target>
 
   <Target

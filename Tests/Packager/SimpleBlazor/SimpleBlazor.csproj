@@ -5,8 +5,10 @@
     <OutputType>Exe</OutputType>
     <LangVersion>7.3</LangVersion>
     <RazorLangVersion>3.0</RazorLangVersion>
+    <WasmPackager_ExecMode>Interp</WasmPackager_ExecMode>
     <WasmPackager_EnablePackager>false</WasmPackager_EnablePackager>
     <WasmPackager_EnableLinker>false</WasmPackager_EnableLinker>
+    <WasmPackager_EnableDebug>true</WasmPackager_EnableDebug>
     <AdditionalMonoLinkerOptions>--disable-opt unreachablebodies --verbose --strip-security true --exclude-feature com --exclude-feature sre -v false -c copy -u copy -b true</AdditionalMonoLinkerOptions>
   </PropertyGroup>
 

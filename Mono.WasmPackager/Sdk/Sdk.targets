@@ -6,10 +6,10 @@
   <Import Sdk="Mono.WasmPackager.Emscripten" Version="1.0.0" Project="Sdk.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
 
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Resolver.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Linker.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Linker.targets"  Condition="'$(WasmPackager_EnableLinker)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Packager.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
 
-  <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.targets" />
+  <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.targets" Condition="'$(WasmPackager_EnableLinker)' == 'true'" />
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'" />
 

@@ -13,10 +13,16 @@
 			"path": "Tests/Packager/SimpleDebug"
 		},
 		{
+			"path": "Tests/Packager/DontLink"
+		},
+		{
 			"path": "Tests/Packager/StandaloneOptimizer"
 		},
 		{
 			"path": "Tests/Packager/SimpleWeb"
+		},
+		{
+			"path": "Tests/Packager/SimpleWeb2"
 		},
 		{
 			"path": "Tests/Packager/PristineBlazor"

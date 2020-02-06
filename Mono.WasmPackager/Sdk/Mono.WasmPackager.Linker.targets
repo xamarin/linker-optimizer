@@ -3,11 +3,73 @@
     <LinkBlazorApplicationDependsOn>
       $(LinkBlazorApplicationDependsOn);
       MartinTest;
+      WasmPackager;
+      MartinTest;
+      NotExistent;
     </LinkBlazorApplicationDependsOn>
+    <LinkerOptimizerConfigurationDependsOn>
+      $(LinkerOptimizerConfigurationDependsOn);
+      _WasmPackager_PrepareOptimizerConfiguration;
+    </LinkerOptimizerConfigurationDependsOn>
+    <_WasmPackager_Require_Link>
+      $(_WasmPackager_Require_Link);
+      _LinkerOptimizer_LinkApplication;
+      _WasmPackager_ResolveLinkerOutputs;
+    </_WasmPackager_Require_Link>
   </PropertyGroup>
 
   <Target Name="MartinTest">
     <Message Importance="High" Text="MARTIN TEST" />
+  </Target>
+
+  <Target Name="_WasmPackager_PrepareOptimizerConfiguration" DependsOnTargets="$(_WasmPackager_Require_PreLink)">
+    <Message Importance="High" Text="WasmPackager: $(WasmPackager_BuildDir)" />
+
+    <PropertyGroup>
+      <LinkerOptimizerInputPath>$(_WasmPackager_LinkerInput_Dir)</LinkerOptimizerInputPath>
+      <LinkerOptimizerOutputPath>$(_WasmPackager_LinkerOutput_Dir)</LinkerOptimizerOutputPath>
+      <LinkerOptimizerEnabled>true</LinkerOptimizerEnabled>
+      <LinkerOptimizerExtraLinkerArguments>--verbose -l none -c link -u link --deterministic --disable-opt unreachablebodies --exclude-feature com --exclude-feature remoting --exclude-feature etw</LinkerOptimizerExtraLinkerArguments>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(WasmPackager_AddBinding)' == 'true'">
+      <LinkerOptimizerExtraLinkerArguments>$(LinkerOptimizerExtraLinkerArguments) -p link %(__WasmPackager_Bindings.Identity) -r %(__WasmPackager_Bindings.Identity)</LinkerOptimizerExtraLinkerArguments>
+    </PropertyGroup>
+
+    <GetFirstItem Input="@(_WasmPackager_Assemblies)">
+      <Output TaskParameter="Output" ItemName="__WasmPackager_FirstInput" />
+    </GetFirstItem>
+
+    <ItemGroup>
+      <LinkerOptimizerInputAssembly Include="%(__WasmPackager_FirstInput.LinkerInput)" />
+      <LinkerOptimizerDependencyInput Include="%(_WasmPackager_Assemblies.LinkerInput)" Condition="'%(_WasmPackager_Assemblies.SkipLink)' != 'true'" />
+      <LinkerOptimizerDependencyInput Remove="%(__WasmPackager_FirstInput.LinkerInput)" />
+      <LinkerOptimizerBaseClassLibraryPath Include="$(WasmPackager_MonoBclPath);$(WasmPackager_MonoBclPath)/Facades" />
+      <LinkerOptimizerBaseClassLibraryPath Include="@(WasmPackager_FrameworkDirectories)" />
+    </ItemGroup>
+
+    <Message Importance="High" Text="WasmPackager - prepare optimizer config" />
+    <Message Text="  input assembly: %(LinkerOptimizerInputAssembly.Identity)" />
+    <Message Text="  dependency:     %(LinkerOptimizerDependencyInput.Identity)" />
+    <Message Text="  arguments:      $(LinkerOptimizerExtraLinkerArguments)" />
+
+  </Target>
+
+  <Target Name="_WasmPackager_ResolveLinkerOutputs"
+    DependsOnTargets="_LinkerOptimizer_LinkApplication">
+
+    <Message Importance="High" Text="_WasmPackager_ResolveLinkerOutputs" />
+
+    <!-- Now filter those missing in the output dir. -->
+    <ItemGroup>
+      <__WasmPackager_PostLink_Dummies Include="@(_WasmPackager_Assemblies)" Condition="!Exists('%(LinkerOutput)')">
+        <Dummy>$(_WasmPackager_LinkerOutput_Dir)/%(Filename).cs</Dummy>
+        <LinkerOutput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</LinkerOutput>
+      </__WasmPackager_PostLink_Dummies>
+    </ItemGroup>
+
+    <Message Importance="High" Text="_WasmPackager_ResolveLinkerOutputs done: @(__WasmPackager_PostLink_Dummies)" />
+
   </Target>
 
 </Project>

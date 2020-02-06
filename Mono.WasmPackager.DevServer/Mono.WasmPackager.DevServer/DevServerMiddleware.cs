@@ -59,6 +59,7 @@ namespace Mono.WasmPackager.DevServer
 
 			var contentTypeProvider = new FileExtensionContentTypeProvider ();
 			AddMapping (contentTypeProvider, ".dll", MediaTypeNames.Application.Octet);
+			AddMapping (contentTypeProvider, ".exe", MediaTypeNames.Application.Octet);
 			if (DevServerOptions.EnableDebugging)
 				AddMapping (contentTypeProvider, ".pdb", MediaTypeNames.Application.Octet);
 

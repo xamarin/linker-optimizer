@@ -1,12 +1,8 @@
-//
-// AUTO-GENERATED FILE - DO NOT MODIFY!
-// This file has been auto-generated from launch-blazor.json.
-//
 {
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "SimpleBlazor",
+            "name": "@PROJECT@",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/../.packages/mono.wasmpackager.devserver/1.0.0/tools/Mono.WasmPackager.DevServer.dll",
@@ -23,7 +19,7 @@
             "console": "internalConsole"
         },
         {
-            "name": "SimpleBlazor Optimizer",
+            "name": "@PROJECT@ Optimizer",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/../../../Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",

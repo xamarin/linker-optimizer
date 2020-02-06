@@ -54,6 +54,7 @@
     <!-- Copy from the public property and turn it off when it's not supported. -->
     <_WasmPackager_CilStrip>$(WasmPackager_CilStrip)</_WasmPackager_CilStrip>
     <_WasmPackager_CilStrip Condition="'$(WasmPackager_ExecMode)' != 'Aot'">false</_WasmPackager_CilStrip>
+    <_WasmPackager_CilStrip Condition="'$(WasmPackager_EnableDebug)' == 'true'">false</_WasmPackager_CilStrip>
 
     <_WasmPackager_MonoConfig>$(WasmPackager_BuildDir)/mono-config.js</_WasmPackager_MonoConfig>
     <_WasmPackager_DriverGen>$(WasmPackager_BuildDir)/driver-gen.c</_WasmPackager_DriverGen>
@@ -139,6 +140,7 @@
     <Message Importance="High" Text="WasmPackager - Resolve Properties: $(WasmPackager_MonoBclPath)" />
     <Message Importance="High" Text="  RootAssemblies: %(_WasmPackager_RootAssemblies.Identity)" />
     <Message Importance="High" Text="  ItermediateAssembly: %(IntermediateAssembly.Identity)" />
+    <Message Importance="High" Text="  Sdk Sources: %(_WasmPackager_SdkSources.Identity)" />
 
     <!-- Keep this at the end to assign default metadata -->
     <ItemGroup>
@@ -227,6 +229,14 @@
       </_WasmPackager_Assemblies>
     </ItemGroup>
 
+    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' != 'true'">
+      <_WasmPackager_Assemblies>
+        <LinkerOutput>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</LinkerOutput>
+      </_WasmPackager_Assemblies>
+    </ItemGroup>
+
+    <Message Importance="Normal" Text="TEST: $(WasmPackager_EnableLinker) $(WasmPackager_BuildDir) $(_WasmPackager_AotInput_Dir)" />
+
     <ItemGroup Condition="'$(_WasmPackager_EnableAot)' == 'true'">
       <_WasmPackager_Assemblies>
         <AotInput>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</AotInput>
@@ -271,9 +281,13 @@
       <_WasmPackager_Copy_Outputs Include="%(_WasmPackager_SdkSources.Intermediate)" />
     </ItemGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' == 'true'">
       <_WasmPackager_Copy_Inputs Include="%(_WasmPackager_Assemblies.Identity)" Condition="'%(_WasmPackager_Assemblies.LinkerInput)' != '' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
       <_WasmPackager_Copy_Outputs Include="%(_WasmPackager_Assemblies.LinkerInput)" Condition="'%(_WasmPackager_Assemblies.LinkerInput)' != '' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' != 'true'">
+      <_WasmPackager_Copy_Inputs Include="%(_WasmPackager_Assemblies.Identity)" Condition="'%(_WasmPackager_Assemblies.LinkerOutput)' != '' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
+      <_WasmPackager_Copy_Outputs Include="%(_WasmPackager_Assemblies.LinkerOutput)" Condition="'%(_WasmPackager_Assemblies.LinkerOutput)' != '' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
     </ItemGroup>
 
     <!-- Copy PDB Files -->
@@ -282,12 +296,21 @@
       <_WasmPackager_Assemblies>
         <PDB_File Condition="'%(PDB)' == 'true'">$([System.IO.Path]::ChangeExtension('%(Identity)', '.pdb'))</PDB_File>
       </_WasmPackager_Assemblies>
-      <_WasmPackager_Assemblies Condition="'$(WasmPackager_EnableLinker)' == 'true'">
+    </ItemGroup>
+    <ItemGroup Condition="'$(WasmPackager_EnableDebug)' == 'true' AND '$(WasmPackager_EnableLinker)' == 'true'">
+      <_WasmPackager_Assemblies>
         <LinkerInput_Pdb Condition="'%(PDB)' == 'true'">$(_WasmPackager_LinkerInput_Dir)/%(Filename).pdb</LinkerInput_Pdb>
         <LinkerOutput_Pdb Condition="'%(PDB)' == 'true'">$(_WasmPackager_LinkerOutput_Dir)/%(Filename).pdb</LinkerOutput_Pdb>
       </_WasmPackager_Assemblies>
       <_WasmPackager_Copy_Inputs Include="%(_WasmPackager_Assemblies.PDB_File)" Condition="'%(_WasmPackager_Assemblies.PDB)' == 'true' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
       <_WasmPackager_Copy_Outputs Include="%(_WasmPackager_Assemblies.LinkerInput_Pdb)" Condition="'%(_WasmPackager_Assemblies.PDB)' == 'true' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(WasmPackager_EnableDebug)' == 'true' AND '$(WasmPackager_EnableLinker)' != 'true'">
+      <_WasmPackager_Assemblies>
+        <LinkerOutput_Pdb Condition="'%(PDB)' == 'true'">$(_WasmPackager_AotInput_Dir)/%(Filename).pdb</LinkerOutput_Pdb>
+      </_WasmPackager_Assemblies>
+      <_WasmPackager_Copy_Inputs Include="%(_WasmPackager_Assemblies.PDB_File)" Condition="'%(_WasmPackager_Assemblies.PDB)' == 'true' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
+      <_WasmPackager_Copy_Outputs Include="%(_WasmPackager_Assemblies.LinkerOutput_Pdb)" Condition="'%(_WasmPackager_Assemblies.PDB)' == 'true' AND '%(_WasmPackager_Assemblies.SkipCopy)' != 'true'" />
     </ItemGroup>
 
     <ItemGroup>
@@ -306,8 +329,8 @@
     <Message Importance="Normal" Text="  Assemblies: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.Identity)" />
     <Message Importance="Normal" Text="  FileList: %(_WasmPackager_FileList.Identity)" />
     <Message Importance="Normal" Text="  SDK Sources: %(_WasmPackager_SdkSources.Identity) - %(_WasmPackager_SdkSources.Source) - %(_WasmPackager_SdkSources.Intermediate)" />
-    <Message Importance="Normal" Text="  Linker Inputs: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.LinkerInput)" />
-    <Message Importance="Normal" Text="  Linker Outputs: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.LinkerOutput)" />
+    <Message Importance="Normal" Text="  Linker Inputs: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.LinkerInput)" Condition="'$(WasmPackager_EnableLinker)' == 'true'" />
+    <Message Importance="Normal" Text="  Linker Outputs: %(_WasmPackager_Assemblies.Name) - %(_WasmPackager_Assemblies.LinkerOutput)" Condition="'$(WasmPackager_EnableLinker)' == 'true'" />
 
     <!-- Include all the results here and separate item lists. -->
     <ItemGroup>
