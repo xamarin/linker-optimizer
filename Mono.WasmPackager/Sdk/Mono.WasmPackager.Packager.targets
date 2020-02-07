@@ -145,10 +145,27 @@ config = {
       <Message Importance="High" Text="WasmPackager - copy sources done" />
   </Target>
 
+  <Target Name="_WasmPackager_ResolvePostLinkDummies"
+    DependsOnTargets="$(_WasmPackager_Require_Link)">
+
+    <Message Importance="High" Text="_WasmPackager_ResolvePostLinkDummies" />
+
+    <!-- Now filter those missing in the output dir. -->
+    <ItemGroup>
+      <__WasmPackager_PostLink_Dummies Include="@(_WasmPackager_Assemblies)" Condition="!Exists('%(LinkerOutput)')">
+        <Dummy>$(_WasmPackager_LinkerOutput_Dir)/%(Filename).cs</Dummy>
+        <LinkerOutput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</LinkerOutput>
+      </__WasmPackager_PostLink_Dummies>
+    </ItemGroup>
+
+    <Message Importance="High" Text="_WasmPackager_ResolvePostLinkDummies done: @(__WasmPackager_PostLink_Dummies)" />
+
+  </Target>
+
   <Target Name="_WasmPackager_CreateDummyAssemblies"
     Inputs="@(__WasmPackager_PostLink_Dummies->'%(Dummy)')"
     Outputs="@(__WasmPackager_PostLink_Dummies->'%(LinkerOutput)')"
-    DependsOnTargets="$(_WasmPackager_Require_Link)">
+    DependsOnTargets="$(_WasmPackager_Require_Link);_WasmPackager_ResolvePostLinkDummies">
 
     <Message Importance="High" Text="_WasmPackager_CreateDummyAssemblies" />
 

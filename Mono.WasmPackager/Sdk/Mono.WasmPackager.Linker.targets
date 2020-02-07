@@ -14,7 +14,6 @@
     <_WasmPackager_Require_Link>
       $(_WasmPackager_Require_Link);
       _LinkerOptimizer_LinkApplication;
-      _WasmPackager_ResolveLinkerOutputs;
     </_WasmPackager_Require_Link>
   </PropertyGroup>
 
@@ -52,23 +51,6 @@
     <Message Text="  input assembly: %(LinkerOptimizerInputAssembly.Identity)" />
     <Message Text="  dependency:     %(LinkerOptimizerDependencyInput.Identity)" />
     <Message Text="  arguments:      $(LinkerOptimizerExtraLinkerArguments)" />
-
-  </Target>
-
-  <Target Name="_WasmPackager_ResolveLinkerOutputs"
-    DependsOnTargets="_LinkerOptimizer_LinkApplication">
-
-    <Message Importance="High" Text="_WasmPackager_ResolveLinkerOutputs" />
-
-    <!-- Now filter those missing in the output dir. -->
-    <ItemGroup>
-      <__WasmPackager_PostLink_Dummies Include="@(_WasmPackager_Assemblies)" Condition="!Exists('%(LinkerOutput)')">
-        <Dummy>$(_WasmPackager_LinkerOutput_Dir)/%(Filename).cs</Dummy>
-        <LinkerOutput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</LinkerOutput>
-      </__WasmPackager_PostLink_Dummies>
-    </ItemGroup>
-
-    <Message Importance="High" Text="_WasmPackager_ResolveLinkerOutputs done: @(__WasmPackager_PostLink_Dummies)" />
 
   </Target>
 

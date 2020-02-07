@@ -25,6 +25,9 @@
 			"path": "Tests/Packager/SimpleWeb2"
 		},
 		{
+			"path": "Tests/Packager/WebBindings"
+		},
+		{
 			"path": "Tests/Packager/PristineBlazor"
 		},
 		{
@@ -97,5 +100,6 @@
 			"**/.emscripten-target": true,
 			"**/.emscripten-cache": true
 		},
+		"git.autoRepositoryDetection": false,
 	},
 }

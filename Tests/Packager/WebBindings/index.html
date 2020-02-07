@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en-us">
+	<head>
+	</head>
+	<body>
+		<button text="Click Me" onclick="buttonClicked()">TEST!</button>
+		<script type="text/javascript">
+			var App = {
+				init: function () {
+					BINDING.call_static_method("[WebBindings] WebBindings.Hello:Main", []);
+				},
+			}
+			function buttonClicked() {
+				BINDING.call_static_method("[WebBindings] WebBindings.Hello:Request", []);
+			}
+		</script>
+		<script type="text/javascript" src="mono-config.js"></script>
+		<script type="text/javascript" src="runtime.js"></script>
+		<script defer type="text/javascript" src="dotnet.js"></script>
+	</body>
+</html>

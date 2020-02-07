@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 
-using WsProxy;
+using WebAssembly.Net.Debugging;
 
 namespace Mono.WasmPackager.DevServer
 {

@@ -82,8 +82,8 @@
       <_WasmPackager_IcallTable Condition="'$(WasmPackager_LinkIcalls)' == 'true'">$(WasmPackager_BuildDir)/icall-table.h</_WasmPackager_IcallTable>
       <_WasmPackager_LinkerInput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-in</_WasmPackager_LinkerInput_Dir>
       <_WasmPackager_LinkerOutput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-out</_WasmPackager_LinkerOutput_Dir>
-      <_WasmPackager_AotInput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(_WasmPackager_LinkerOutput_Dir)</_WasmPackager_AotInput_Dir>
-      <_WasmPackager_AotInput_Dir Condition="'$(WasmPackager_EnableLinker)' != 'true'">$(WasmPackager_BuildDir)</_WasmPackager_AotInput_Dir>
+      <_WasmPackager_LinkerOutput_Dir Condition="'$(WasmPackager_EnableLinker)' != 'true'">$(WasmPackager_BuildDir)</_WasmPackager_LinkerOutput_Dir>
+      <_WasmPackager_AotInput_Dir>$(_WasmPackager_LinkerOutput_Dir)</_WasmPackager_AotInput_Dir>
       <_WasmPackager_CilStripOutput_Dir Condition="'$(_WasmPackager_CilStrip)' == 'true'">$(WasmPackager_BuildDir)/ilstrip-out</_WasmPackager_CilStripOutput_Dir>
       <_WasmPackager_AotDummy Condition="'$(_WasmPackager_EnableDedup)' == 'true'">$(_WasmPackager_AotInput_Dir)/aot-dummy.dll</_WasmPackager_AotDummy>
 
@@ -222,16 +222,15 @@
       <_WasmPackager_FileList Include="aot-dummy.dll" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' == 'true'">
+    <ItemGroup>
       <_WasmPackager_Assemblies>
-        <LinkerInput>$(_WasmPackager_LinkerInput_Dir)/%(Filename)%(Extension)</LinkerInput>
         <LinkerOutput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</LinkerOutput>
       </_WasmPackager_Assemblies>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' != 'true'">
+    <ItemGroup Condition="'$(WasmPackager_EnableLinker)' == 'true'">
       <_WasmPackager_Assemblies>
-        <LinkerOutput>$(_WasmPackager_AotInput_Dir)/%(Filename)%(Extension)</LinkerOutput>
+        <LinkerInput>$(_WasmPackager_LinkerInput_Dir)/%(Filename)%(Extension)</LinkerInput>
       </_WasmPackager_Assemblies>
     </ItemGroup>
 

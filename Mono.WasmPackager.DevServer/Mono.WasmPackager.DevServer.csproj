@@ -3,9 +3,11 @@
     <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
     <NuspecFile>Mono.WasmPackager.DevServer.nuspec</NuspecFile>
     <MonoWebAssemblySdkVersion>0.2.2</MonoWebAssemblySdkVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <OutputType>exe</OutputType>
     <IsPackable>true</IsPackable>
     <NoWarn>NU5128</NoWarn>
+    <UseDebugProxyPackage>true</UseDebugProxyPackage>
   </PropertyGroup>
 
   <Target Name="CopyPackage" AfterTargets="Pack">
@@ -20,7 +22,19 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Mono.WasmPackager.DevServer/**.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseDebugProxyPackage)' == 'true'">
     <PackageReference Include="Mono.WebAssembly.DebuggerProxy" Version="0.2.2" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseDebugProxyPackage)' != 'true'">
+    <PackageReference Include="Mono.Cecil" Version="0.11.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <Compile Include="Mono.WebAssembly.DebuggerProxy/**.cs" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 use strict;
 
 my @CONSOLE_DIRS = qw[SimpleDebug SimpleHello SimpleInterpreter SimpleMixed DontLink];
-my @WEB_DIRS = qw[SimpleWeb SimpleWeb2];
+my @WEB_DIRS = qw[SimpleWeb SimpleWeb2 WebBindings];
 my @BLAZOR_DIRS = qw[SimpleBlazor];
 
 sub update($$$)
