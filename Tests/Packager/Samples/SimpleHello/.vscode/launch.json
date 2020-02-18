@@ -1,0 +1,34 @@
+//
+// AUTO-GENERATED FILE - DO NOT MODIFY!
+// This file has been auto-generated from launch-console.json.
+//
+{
+   "version": "0.2.0",
+   "configurations": [
+        {
+            "name": "SimpleHello Debug Build",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "debug-build",
+            "program": "${workspaceFolder}/../../../../Tests/DebugBuild/bin/Debug/netcoreapp3.0/DebugBuild.dll",
+            "args": [
+                "${workspaceFolder}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "SimpleHello Optimizer",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/../../../../Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",
+            "args": [
+                "@aot/linker-in/linker-optimizer.response"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": true
+        }
+    ]
+}

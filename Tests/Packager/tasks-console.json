@@ -8,7 +8,7 @@
             "args": [
                 "build",
                 "/nologo",
-                "${workspaceFolder}/../../DebugBuild",
+                "@ROOT@/Tests/DebugBuild",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -21,7 +21,7 @@
             "args": [
                 "pack",
                 "/nologo",
-                "${workspaceFolder}/../../../Mono.Linker.Optimizer",
+                "@ROOT@/Mono.Linker.Optimizer",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -34,7 +34,7 @@
             "args": [
                 "pack",
                 "/nologo",
-                "${workspaceFolder}/../../../Mono.Linker.CilStrip",
+                "@ROOT@/Mono.Linker.CilStrip",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -47,7 +47,7 @@
             "args": [
                 "pack",
                 "/nologo",
-                "${workspaceFolder}/../../../Mono.WasmPackager",
+                "@ROOT@/Mono.WasmPackager",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -65,7 +65,7 @@
             "args": [
                 "clean",
                 "/nologo",
-                "${workspaceFolder}/../../../Mono.Linker.Optimizer",
+                "@ROOT@/Mono.Linker.Optimizer",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -78,7 +78,7 @@
             "args": [
                 "clean",
                 "/nologo",
-                "${workspaceFolder}/../../../Mono.Linker.CilStrip",
+                "@ROOT@/Mono.Linker.CilStrip",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -91,7 +91,7 @@
             "args": [
                 "clean",
                 "/nologo",
-                "${workspaceFolder}/../../../Mono.WasmPackager",
+                "@ROOT@/Mono.WasmPackager",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],

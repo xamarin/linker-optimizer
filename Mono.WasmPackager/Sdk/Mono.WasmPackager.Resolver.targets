@@ -141,6 +141,7 @@
     <Message Importance="High" Text="  RootAssemblies: %(_WasmPackager_RootAssemblies.Identity)" />
     <Message Importance="High" Text="  ItermediateAssembly: %(IntermediateAssembly.Identity)" />
     <Message Importance="High" Text="  Sdk Sources: %(_WasmPackager_SdkSources.Identity)" />
+    <Message Importance="High" Text="  CilStrip: $(_WasmPackager_CilStrip)" />
 
     <!-- Keep this at the end to assign default metadata -->
     <ItemGroup>

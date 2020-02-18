@@ -3,9 +3,12 @@
 
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Settings.targets" />
 
-  <Import Sdk="Mono.WasmPackager.Emscripten" Version="1.0.0" Project="Sdk.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
-
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Resolver.targets" />
+
+  <Import Sdk="Mono.Linker.CilStrip" Version="1.0.0" Project="Sdk.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
+
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Emscripten.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
+
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Linker.targets"  Condition="'$(WasmPackager_EnableLinker)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Packager.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
 

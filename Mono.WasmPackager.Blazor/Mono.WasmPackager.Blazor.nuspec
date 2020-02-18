@@ -17,7 +17,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/Debug/netstandard2.0/*.dll" target="tools" />
     <file src="Sdk/*" target="Sdk/" />
   </files>
 </package>

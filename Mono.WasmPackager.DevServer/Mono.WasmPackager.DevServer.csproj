@@ -2,23 +2,11 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
     <NuspecFile>Mono.WasmPackager.DevServer.nuspec</NuspecFile>
-    <MonoWebAssemblySdkVersion>0.2.2</MonoWebAssemblySdkVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <OutputType>exe</OutputType>
     <IsPackable>true</IsPackable>
-    <NoWarn>NU5128</NoWarn>
-    <UseDebugProxyPackage>true</UseDebugProxyPackage>
+    <UseDebugProxyPackage>false</UseDebugProxyPackage>
   </PropertyGroup>
-
-  <Target Name="CopyPackage" AfterTargets="Pack">
-    <PropertyGroup>
-      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
-    </PropertyGroup>
-    <Copy
-      SourceFiles="$(OutputPath)\$(PackageFileName)"
-      DestinationFolder="$(MSBuildThisFileDirectory)..\artifacts\" />
-    <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
-  </Target>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
@@ -29,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseDebugProxyPackage)' == 'true'">
-    <PackageReference Include="Mono.WebAssembly.DebuggerProxy" Version="0.2.2" />
+    <PackageReference Include="Mono.WebAssembly.DebuggerProxy" Version="$(MonoWebAssemblySdkVersion)" />
   </ItemGroup>
   <ItemGroup Condition="'$(UseDebugProxyPackage)' != 'true'">
     <PackageReference Include="Mono.Cecil" Version="0.11.1" />

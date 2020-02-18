@@ -3,48 +3,18 @@
 
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <ArtifactsDirectory>$(RepoRoot)/artifacts</ArtifactsDirectory>
+    <LocalPackagesDirectory>$(RepoRoot)/Tests/Packager/.packages</LocalPackagesDirectory>
+    <LocalTestPackagesDirectory>$(RepoRoot)/Tests/Packager/.test-packages</LocalTestPackagesDirectory>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseLocalBuild)' == 'true'">
-    <AspNetVersion>3.0.0-dev</AspNetVersion>
-    <AspNetCoreVersion>3.0.0-dev</AspNetCoreVersion>
-    <EntityFrameworkVersion>3.0.0-dev</EntityFrameworkVersion>
-    <BlazorVersion>3.0.0-dev</BlazorVersion>
-
-    <LocalDotNetRoot>$(RepoRoot).dotnet\</LocalDotNetRoot>
-    <LocalDotNet>$(LocalDotNetRoot)dotnet</LocalDotNet>
-
-    <LocalBuildRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</LocalBuildRoot>
-    <LocalRestoreSources>
-      $(LocalBuildRoot)/Blazor/artifacts/packages/Debug/Shipping/;
-      $(LocalBuildRoot)/Extensions/artifacts/packages/Debug/Shipping/;
-      $(LocalBuildRoot)/Extensions/artifacts/packages/Debug/NonShipping/;
-      $(LocalBuildRoot)/AspNetCore/artifacts/packages/Debug/Shipping/;
-      $(LocalBuildRoot)/AspNetCore/artifacts/packages/Debug/NonShipping/;
-      $(LocalBuildRoot)/AspNetCore-Tooling/artifacts/packages/Debug/Shipping/;
-      $(LocalBuildRoot)/AspNetCore-Tooling/artifacts/packages/Debug/NonShipping/;
-      $(LocalBuildRoot)/EntityFrameworkCore/artifacts/packages/Debug/Shipping/;
-    </LocalRestoreSources>
-
-    <RestoreSources>
-      $(RestoreSources);
-      $(LocalRestoreSources);
-    </RestoreSources>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(UseLocalBuild)' != 'true'">
-    <LocalDotNet>dotnet</LocalDotNet>
-    <AspNetVersion>3.0.0-preview9.19465.2</AspNetVersion>
-    <AspNetCoreVersion>3.0.0-rc1.19457.4</AspNetCoreVersion>
-    <EntityFrameworkVersion>3.0.0-rc1.19456.14</EntityFrameworkVersion>
-    <BlazorVersion>3.0.0-preview9.19465.2</BlazorVersion>
-    <MSBuildFrameworkVersion>16.3.0</MSBuildFrameworkVersion>
-  </PropertyGroup>
-
-  <!-- Set this to replace the assemblies with a local Mono build.
   <PropertyGroup>
-    <MonoOverrideBaseClassLibraryPath>/Workspace/mono-master/mcs/class/lib/wasm</MonoOverrideBaseClassLibraryPath>
+    <XUnitPackageVersion>2.4.0</XUnitPackageVersion>
+    <MSBuildFrameworkVersion>16.3.0</MSBuildFrameworkVersion>
+    <DebuggerProxyVersion>1.0.0</DebuggerProxyVersion>
+
+    <!-- This needs to be changed both here as well as in Mono.WasmPackager/Sdk/Sdk.props -->
+    <MonoWebAssemblySdkVersion>0.2.2-martin-20200214.1</MonoWebAssemblySdkVersion>
   </PropertyGroup>
-  -->
 
 </Project>

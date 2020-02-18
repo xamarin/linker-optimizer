@@ -153,7 +153,7 @@ config = {
     <!-- Now filter those missing in the output dir. -->
     <ItemGroup>
       <__WasmPackager_PostLink_Dummies Include="@(_WasmPackager_Assemblies)" Condition="!Exists('%(LinkerOutput)')">
-        <Dummy>$(_WasmPackager_LinkerOutput_Dir)/%(Filename).cs</Dummy>
+        <Dummy>$(_WasmPackager_LinkerOutput_Dir)/%(Filename).dummy</Dummy>
         <LinkerOutput>$(_WasmPackager_LinkerOutput_Dir)/%(Filename)%(Extension)</LinkerOutput>
       </__WasmPackager_PostLink_Dummies>
     </ItemGroup>

@@ -1,19 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
     <NuspecFile>Mono.WasmPackager.Blazor.nuspec</NuspecFile>
     <NoWarn>NU5128</NoWarn>
   </PropertyGroup>
-
-  <Target Name="CopyPackage" AfterTargets="Pack">
-    <PropertyGroup>
-      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
-    </PropertyGroup>
-    <Copy
-      SourceFiles="$(OutputPath)\$(PackageFileName)"
-      DestinationFolder="$(MSBuildThisFileDirectory)..\artifacts\" />
-    <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
-  </Target>
 
   <ItemGroup>
     <PackageReference Include="Mono.WasmPackager" Version="1.0.0" />

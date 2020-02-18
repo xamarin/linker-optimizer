@@ -7,6 +7,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.IO;
 using System.Text;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 namespace WebAssembly.Net.Debugging {
@@ -66,9 +67,9 @@ namespace WebAssembly.Net.Debugging {
 			return tcs.Task;
 		}
 
-		protected virtual void DumpProtocol (string msg){
-			// Console.WriteLine (msg);
-			//XXX make logging not stupid
+		protected virtual void DumpProtocol (string msg)
+		{
+			Debug.WriteLine (msg);
 		}
 	}
 } 

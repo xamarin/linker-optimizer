@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../..'))" />
+
   <PropertyGroup>
     <BlazorVersion>3.0.0-preview9.19465.2</BlazorVersion>
 
+    <_Test_NuGet_GlobalsFolder Condition="'$(RestorePackagesPath)' == ''">$(MSBuildThisFileDirectory)\.packages</_Test_NuGet_GlobalsFolder>
+    <_Test_NuGet_GlobalsFolder Condition="'$(RestorePackagesPath)' != ''">$(RestorePackagesPath)</_Test_NuGet_GlobalsFolder>
+
     <!-- Keep in sync with the nuget.config in this folder. -->
-    <Test_NuGet_GlobalsFolder>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\.packages'))</Test_NuGet_GlobalsFolder>
+    <Test_NuGet_GlobalsFolder>$([System.IO.Path]::GetFullPath('$(_Test_NuGet_GlobalsFolder)'))</Test_NuGet_GlobalsFolder>
     <!-- When set to true, we will always wipe the $(Test_NuGet_GlobalsFolder) prior to restoring. -->
-    <Test_NuGet_ForceReinstall>true</Test_NuGet_ForceReinstall>
+    <Test_NuGet_ForceReinstall Condition="'$(Test_NuGet_ForceReinstall)' == ''">true</Test_NuGet_ForceReinstall>
 
     <WasmPackager_EmsdkCacheDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\.emscripten-cache'))</WasmPackager_EmsdkCacheDir>
   </PropertyGroup>

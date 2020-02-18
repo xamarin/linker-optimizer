@@ -5,6 +5,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.IO;
 using System.Text;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 namespace WebAssembly.Net.Debugging {
@@ -99,7 +100,7 @@ namespace WebAssembly.Net.Debugging {
 			Func<CancellationToken, Task> send,
 			CancellationToken token) {
 
-			Console.WriteLine ("connecting to {0}", uri);
+			Debug.WriteLine ("connecting to {0}", uri);
 			this.socket = new ClientWebSocket ();
 			this.socket.Options.KeepAliveInterval = Timeout.InfiniteTimeSpan;
 

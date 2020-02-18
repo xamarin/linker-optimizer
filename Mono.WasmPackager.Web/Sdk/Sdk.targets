@@ -4,9 +4,18 @@
   <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.targets" />
 
   <PropertyGroup>
-    <WasmPackager_DevServer_RootDir>$(WasmPackager_AppDir)</WasmPackager_DevServer_RootDir>
-    <WasmPackager_DevServer_Arguments>--web-root $([System.IO.Path]::GetFullPath('$(WasmPackager_AppDir)'))</WasmPackager_DevServer_Arguments>
+    <WasmPackager_DevServer_RootDir>$([System.IO.Path]::GetFullPath('$(WasmPackager_AppDir)'))</WasmPackager_DevServer_RootDir>
+    <WasmPackager_DevServer_Arguments>--web-root $(WasmPackager_DevServer_RootDir)</WasmPackager_DevServer_Arguments>
   </PropertyGroup>
+
+  <ItemGroup>
+    <WasmPackager_DevServer_Settings Include="DevServer_RootDir">
+      <Value>$(WasmPackager_DevServer_RootDir)</Value>
+    </WasmPackager_DevServer_Settings>
+    <WasmPackager_DevServer_Settings Include="DevServer_Arguments">
+      <Value>$(WasmPackager_DevServer_Arguments)</Value>
+    </WasmPackager_DevServer_Settings>
+  </ItemGroup>
 
   <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.targets" />
 

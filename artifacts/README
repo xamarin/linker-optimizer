@@ -1,0 +1,4 @@
+Local nuget packages are placed in this directory.
+
+The directory needs to exist or VS Code will give you an error message
+when attempting to restore packages.

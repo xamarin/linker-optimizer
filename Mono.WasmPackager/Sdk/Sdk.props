@@ -2,7 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MonoWebAssemblySdkVersion>0.2.2</MonoWebAssemblySdkVersion>
+    <MonoWebAssemblySdkVersion>0.2.2-martin-20200214.1</MonoWebAssemblySdkVersion>
 
     <_LinkerOptimizer_Standalone>false</_LinkerOptimizer_Standalone>
 
@@ -77,9 +77,9 @@
     <!-- <WasmPackager_AotProfile>test</WasmPackager_AotProfile> -->
   </PropertyGroup>
 
-  <Import Sdk="Mono.WasmPackager.Emscripten" Version="1.0.0" Project="Sdk.props" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
-
   <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.props" Condition="'$(WasmPackager_EnableLinker)' == 'true'" />
+
+  <Import Sdk="Mono.Linker.CilStrip" Version="1.0.0" Project="Sdk.props" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
 
   <PropertyGroup Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'">
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>

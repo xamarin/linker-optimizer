@@ -1,13 +1,16 @@
 <Project>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.targets', '$(MSBuildThisFileDirectory)../..'))" />
+
     <Target
         Name="Test_NuGet_ForceReinstall" BeforeTargets="Restore"
-        Condition="'$(Test_NuGet_ForceReinstall)' == 'true' AND '$(Test_NuGet_GlobalsFolder)' != ''">
+        Condition="'$(Test_NuGet_ForceReinstall)' == 'true' AND '$(Test_NuGet_GlobalsFolder)' != '' AND Exists('$(Test_NuGet_GlobalsFolder)')">
         <Message Importance="High" Text="Forcing reinstall - wiping $(Test_NuGet_GlobalsFolder)." />
+        <Message Importance="High" Text="TEST: $(LocalPackagesDirectory)" />
 
-        <!-- mono.wasmpackager.emscripten is a little big and takes a couple of seconds to reinstall -->
+        <!-- mono.webassembly.emscripten is a little big and takes a couple of seconds to reinstall -->
         <ItemGroup>
             <__Test_NuGet_PackageDirs Include="$([System.IO.Directory]::GetDirectories(&quot;$(Test_NuGet_GlobalsFolder)&quot;))" />
-            <__Test_NuGet_WipeDirs Include="@(__Test_NuGet_PackageDirs)" Condition="'%(Filename)%(Extension)' != 'mono.wasmpackager.emscripten'" />
+            <__Test_NuGet_WipeDirs Include="@(__Test_NuGet_PackageDirs)" Condition="'%(Filename)%(Extension)' != 'mono.webassembly.emscripten'" />
         </ItemGroup>
 
         <RemoveDir Directories="%(__Test_NuGet_WipeDirs.Identity)" />

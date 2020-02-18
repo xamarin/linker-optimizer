@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 
 using System.Net.WebSockets;
 using System.Threading;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -162,7 +163,7 @@ namespace WebAssembly.Net.Debugging {
 		void Send (WebSocket to, JObject o, CancellationToken token)
 		{
 			var sender = browser == to ? "Send-browser" : "Send-ide";
-			Log ("protocol", $"{sender}: {o}");
+			// Log ("protocol", $"{sender}: {o}");
 			var bytes = Encoding.UTF8.GetBytes (o.ToString ());
 
 			var queue = GetQueueForSocket (to);
@@ -352,16 +353,16 @@ namespace WebAssembly.Net.Debugging {
 		{
 			switch (priority) {
 			case "protocol":
-				//Console.WriteLine (msg);
+				// Debug.WriteLine (msg);
 				break;
 			case "verbose":
-				//Console.WriteLine (msg);
+				Debug.WriteLine (msg);
 				break;
 			case "info":
 			case "warning":
 			case "error":
 			default:
-				Console.WriteLine (msg);
+				Debug.WriteLine (msg);
 				break;
 			}
 		}

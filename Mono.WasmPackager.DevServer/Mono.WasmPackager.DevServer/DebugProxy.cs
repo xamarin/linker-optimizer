@@ -21,13 +21,13 @@ namespace Mono.WasmPackager.DevServer
 {
 	public class DebugProxy
 	{
-		public DevServerOptions Options {
+		public ServerOptions Options {
 			get;
 		}
 
 		public Uri DevToolsHost => Options.DevToolsUrl;
 
-		public DebugProxy (DevServerOptions options)
+		public DebugProxy (ServerOptions options)
 		{
 			Options = options;
 		}

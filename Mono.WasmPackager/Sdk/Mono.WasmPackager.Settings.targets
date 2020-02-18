@@ -17,8 +17,8 @@
 
   <!-- Packager settings -->
   <PropertyGroup>
-    <WasmPackager_BuildDir>$(IntermediateOutputPath)aot</WasmPackager_BuildDir>
-    <WasmPackager_AppDir>$(OutputPath)app</WasmPackager_AppDir>
+    <WasmPackager_BuildDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/aot'))</WasmPackager_BuildDir>
+    <WasmPackager_AppDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/app'))</WasmPackager_AppDir>
     <WasmPackager_VfsPrefix>managed</WasmPackager_VfsPrefix>
     <WasmPackager_DeployPrefix>managed</WasmPackager_DeployPrefix>
   </PropertyGroup>

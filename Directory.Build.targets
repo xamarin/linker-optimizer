@@ -1,3 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+
+  <Target Name="CopyPackage" AfterTargets="Pack" Condition="'$(IsPackable)' == 'true'">
+    <PropertyGroup>
+      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
+      <PackageFolder>$(LocalPackagesDirectory)/$(PackageId.ToLowerInvariant())</PackageFolder>
+      <TestPackageFolder>$(LocalTestPackagesDirectory)/$(PackageId.ToLowerInvariant())</TestPackageFolder>
+    </PropertyGroup>
+    <Copy
+      SourceFiles="bin\$(Configuration)\$(PackageFileName)"
+      DestinationFolder="$(ArtifactsDirectory)" />
+    <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
+
+    <Message Importance="High" Text="Clearing $(PackageFolder)." Condition="Exists('$(PackageFolder)')" />
+    <RemoveDir Directories="$(PackageFolder)" Condition="Exists('$(PackageFolder)')" />
+
+    <Message Importance="High" Text="Clearing $(TestPackageFolder)." Condition="Exists('$(TestPackageFolder)')" />
+    <RemoveDir Directories="$(TestPackageFolder)" Condition="Exists('$(TestPackageFolder)')" />
+  </Target>
+
 </Project>

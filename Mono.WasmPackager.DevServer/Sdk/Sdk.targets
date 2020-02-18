@@ -7,4 +7,61 @@
     <RunWorkingDirectory>$(WasmPackager_DevServer_RootDir)</RunWorkingDirectory>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PrepareForBuildDependsOn>
+      $(PrepareForBuildDependsOn);
+      _WasmPackager_DevServer_FilterSources;
+    </PrepareForBuildDependsOn>
+    <_WasmPackager_DevServer_Settings>
+      $([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/obj/$(MSBuildProjectName).TestSettings.g.cs'))
+    </_WasmPackager_DevServer_Settings>
+  </PropertyGroup>
+
+  <Target Name="_WasmPackager_DevServer_FilterSources"
+      DependsOnTargets="$(_WasmPackager_DevServer_FilterSources_DependsOn)"
+      Outputs="$(_WasmPackager_DevServer_Settings)">
+
+    <Message Importance="High" Text="filter sources" />
+    <Message Importance="Normal" Text="  settings: %(WasmPackager_DevServer_Settings.Identity) = %(Value)" />
+    <Message Importance="Normal" Text="  assembly: $(TargetFileName)" />
+
+    <ItemGroup>
+      <WasmPackager_DevServer_Settings Include="DevServer_Assembly" Condition="'$(_WasmPackager_IsTestSuite)' != 'true'">
+        <Value>$(TargetFileName)</Value>
+      </WasmPackager_DevServer_Settings>
+      <Compile Include="$(_WasmPackager_DevServer_Settings)" />
+      <_WasmPackager_DevServer_Settings_Lines Include="      public string %(WasmPackager_DevServer_Settings.Identity) { get%3B } = &quot;%(Value)&quot;%3B" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <__WasmPackager_DevServer_Settings_Interfaces Condition="'@(_WasmPackager_DevServer_Settings_Interfaces)' != ''">
+      : @(_WasmPackager_DevServer_Settings_Interfaces, ',')
+      </__WasmPackager_DevServer_Settings_Interfaces>
+      <__WasmPackager_DevServer_Settings_Contents>
+// AUTO-GENERATED FILE - DO NOT MODIFY!
+namespace Mono.WasmPackager.DevServer
+{
+    partial class TestSettings$(__WasmPackager_DevServer_Settings_Interfaces)
+    {
+@(_WasmPackager_DevServer_Settings_Lines)
+    }
+}
+      </__WasmPackager_DevServer_Settings_Contents>
+    </PropertyGroup>
+
+    <WriteLinesToFile
+        Lines="$(__WasmPackager_DevServer_Settings_Contents)"
+        File="$(_WasmPackager_DevServer_Settings)"
+        Overwrite="True"
+        WriteOnlyWhenDifferent="True" />
+
+    <Message Importance="High" Text="settings file: $(_WasmPackager_DevServer_Settings)" />
+
+  </Target>
+
+  <Target Name="WasmPackager_DevServer_Build"
+      Outputs="$(_WasmPackager_DevServer_Settings)">
+    <Message Importance="High" Text="WasmPackager_DevServer_Build: $(IntermediateOutputPath) - $(_WasmPackager_DevServer_Settings)" />
+  </Target>
+
 </Project>

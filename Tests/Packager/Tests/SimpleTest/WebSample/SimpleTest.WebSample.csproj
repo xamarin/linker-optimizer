@@ -1,0 +1,11 @@
+<Project Sdk="Mono.WasmPackager.Web/1.0.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <WasmPackager_ExecMode>Interp</WasmPackager_ExecMode>
+    <WasmPackager_AddBinding>true</WasmPackager_AddBinding>
+    <WasmPackager_EnableDebug>true</WasmPackager_EnableDebug>
+    <WasmPackager_EnableLinker>false</WasmPackager_EnableLinker>
+  </PropertyGroup>
+
+</Project>

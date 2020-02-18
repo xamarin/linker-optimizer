@@ -1,61 +1,84 @@
 {
 	"folders": [
 		{
-			"path": "Tests/Packager/SimpleHello"
+			"name": "SimpleTest",
+			"path": "Tests/Packager/Tests/SimpleTest"
 		},
 		{
-			"path": "Tests/Packager/SimpleInterpreter"
+			"name": "Samples/SimpleHello",
+			"path": "Tests/Packager/Samples/SimpleHello"
 		},
 		{
-			"path": "Tests/Packager/SimpleMixed"
+			"name": "Samples/SimpleInterpreter",
+			"path": "Tests/Packager/Samples/SimpleInterpreter"
 		},
 		{
-			"path": "Tests/Packager/SimpleDebug"
+			"name": "Samples/SimpleMixed",
+			"path": "Tests/Packager/Samples/SimpleMixed"
 		},
 		{
-			"path": "Tests/Packager/DontLink"
+			"name": "Samples/SimpleDebug",
+			"path": "Tests/Packager/Samples/SimpleDebug"
 		},
 		{
-			"path": "Tests/Packager/StandaloneOptimizer"
+			"name": "Samples/DontLink",
+			"path": "Tests/Packager/Samples/DontLink"
 		},
 		{
-			"path": "Tests/Packager/SimpleWeb"
+			"name": "Samples/StandaloneOptimizer",
+			"path": "Tests/Packager/Samples/StandaloneOptimizer"
 		},
 		{
-			"path": "Tests/Packager/SimpleWeb2"
+			"name": "Samples/SimpleWeb",
+			"path": "Tests/Packager/Samples/SimpleWeb"
 		},
 		{
-			"path": "Tests/Packager/WebBindings"
+			"name": "Samples/SimpleWeb2",
+			"path": "Tests/Packager/Samples/SimpleWeb2"
 		},
 		{
-			"path": "Tests/Packager/PristineBlazor"
+			"name": "Samples/WebBindings",
+			"path": "Tests/Packager/Samples/WebBindings"
 		},
 		{
-			"path": "Tests/Packager/SimpleBlazor"
+			"name": "Samples/PristineBlazor",
+			"path": "Tests/Packager/Samples/PristineBlazor"
 		},
 		{
+			"name": "Samples/SimpleBlazor",
+			"path": "Tests/Packager/Samples/SimpleBlazor"
+		},
+		{
+			"name": "DebugBuild",
 			"path": "Tests/DebugBuild"
 		},
 		{
+			"name": "Mono.Linker.Optimizer",
 			"path": "Mono.Linker.Optimizer"
 		},
 		{
+			"name": "Mono.Linker.CilStrip",
 			"path": "Mono.Linker.CilStrip"
 		},
 		{
+			"name": "Mono.WasmPackager",
 			"path": "Mono.WasmPackager"
 		},
 		{
+			"name": "Mono.WasmPackager.Web",
 			"path": "Mono.WasmPackager.Web"
 		},
 		{
+			"name": "Mono.WasmPackager.DevServer",
 			"path": "Mono.WasmPackager.DevServer"
 		},
 		{
+			"name": "Mono.WasmPackager.Blazor",
 			"path": "Mono.WasmPackager.Blazor"
 		},
 		{
-			"path": "Mono.WasmPackager.Emscripten"
+			"name": "Mono.WasmPackager.TestSuite",
+			"path": "Mono.WasmPackager.TestSuite"
 		}
 	],
 	"settings": {
@@ -83,7 +106,6 @@
 		"[csharp]": {
 			"editor.defaultFormatter": "ms-vscode.csharp"
 		},
-		"editor.codeLens": false,
 		"debug.onTaskErrors": "showErrors",
 		"task.slowProviderWarning": [
 			"ant"
@@ -101,5 +123,17 @@
 			"**/.emscripten-cache": true
 		},
 		"git.autoRepositoryDetection": false,
+		"dotnet-test-explorer.testProjectPath": "*.Test.csproj",
+	},
+	"extensions": {
+		"recommendations": [
+			"doggy8088.netcore-extension-pack",
+			"formulahendry.dotnet",
+			"formulahendry.dotnet-test-explorer",
+			"ms-vscode.csharp",
+			"leopotam.csharpfixformat",
+			"tintoy.msbuild-project-tools",
+			"spmeesseman.vscode-taskexplorer"
+		]
 	},
 }

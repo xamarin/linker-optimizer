@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "debug-build",
-            "program": "${workspaceFolder}/../../DebugBuild/bin/Debug/netcoreapp3.0/DebugBuild.dll",
+            "program": "@ROOT@/Tests/DebugBuild/bin/Debug/netcoreapp3.0/DebugBuild.dll",
             "args": [
                 "${workspaceFolder}"
             ],
@@ -18,7 +18,7 @@
             "name": "@PROJECT@ Optimizer",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/../../../Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",
+            "program": "@ROOT@/Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",
             "args": [
                 "@aot/linker-in/linker-optimizer.response"
             ],

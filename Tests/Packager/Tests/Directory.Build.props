@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <!-- Set this to false in here because it makes VS Code's Task Explorer really slow. -->
+    <Test_NuGet_ForceReinstall>false</Test_NuGet_ForceReinstall>
+  </PropertyGroup>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+
+</Project>

@@ -1,0 +1,7 @@
+<Project Sdk="Mono.WasmPackager.TestSuite/1.0.0">
+
+  <PropertyGroup>
+    <SampleProject>WebSample</SampleProject>
+  </PropertyGroup>
+
+</Project>

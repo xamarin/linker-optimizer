@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+
+  <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.targets" />
+
+  <PropertyGroup>
+    <_WasmPackager_DevServer_FilterSources_DependsOn>
+      _WasmPackager_TestSuite_FilterSources;
+    </_WasmPackager_DevServer_FilterSources_DependsOn>
+  </PropertyGroup>
+
+  <Target Name="_WasmPackager_TestSuite_FilterSources">
+    <Message Importance="High" Text="_WasmPackager_TestSuite_FilterSources" />
+
+    <Error Text="'SampleProject' must be set!" Condition="'$(SampleProject)' == ''" />
+
+    <ItemGroup>
+      <Compile Remove="$(SampleProject)/**/*.cs" />
+      <WasmPackager_DevServer_Settings Include="TestSuite_SampleProject">
+        <Value>$(SampleProject)</Value>
+      </WasmPackager_DevServer_Settings>
+      <__WasmPackager_TestSuite_SampleProject Include="$(SampleProject)/*.csproj" />
+      <_WasmPackager_DevServer_Settings_Interfaces Include="Mono.WasmPackager.TestSuite.ITestSuiteSettings" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <__WasmPackager_TestSuite_SampleProject>@(__WasmPackager_TestSuite_SampleProject)</__WasmPackager_TestSuite_SampleProject>
+    </PropertyGroup>
+
+    <Message Importance="Normal" Text="  source: %(Compile.Identity)" />
+    <Message Importance="Normal" Text="  project: $(__WasmPackager_TestSuite_SampleProject)" />
+
+    <Message Importance="High" Text="Building sample project $(__WasmPackager_TestSuite_SampleProject)" />
+
+    <MSBuild Projects="$(__WasmPackager_TestSuite_SampleProject)" Targets="WasmPackager_DevServer_Build">
+      <Output TaskParameter="TargetOutputs" ItemName="__WasmPackager_TestSuite_ChildOutputs" />
+    </MSBuild>
+
+    <Message Importance="High" Text="Done building sample project $(__WasmPackager_TestSuite_SampleProject)" />
+    <Message Importance="Normal" Text="  sample output: %(__WasmPackager_TestSuite_ChildOutputs.Identity)" />
+
+    <ItemGroup>
+      <Compile Include="@(__WasmPackager_TestSuite_ChildOutputs)" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="BuildSample" DependsOnTargets="_WasmPackager_TestSuite_FilterSources">
+
+    <Message Importance="High" Text="BuildSample: $(__WasmPackager_TestSuite_SampleProject)" />
+
+    <MSBuild
+        Projects="$(__WasmPackager_TestSuite_SampleProject)"
+        Targets="WasmPackager_DevServer_Build"
+        RebaseOutputs="true"
+    >
+      <Output TaskParameter="TargetOutputs" ItemName="__WasmPackager_TestSuite_ChildOutputs" />
+    </MSBuild>
+
+    <Message Importance="High" Text="DONE: %(__WasmPackager_TestSuite_ChildOutputs.Identity)" />
+
+  </Target>
+
+</Project>

@@ -2,23 +2,13 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
     <NuspecFile>Mono.WasmPackager.Web.nuspec</NuspecFile>
-    <MonoWebAssemblySdkVersion>0.2.2</MonoWebAssemblySdkVersion>
     <NoWarn>NU5128</NoWarn>
   </PropertyGroup>
-
-  <Target Name="CopyPackage" AfterTargets="Pack">
-    <PropertyGroup>
-      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
-    </PropertyGroup>
-    <Copy
-      SourceFiles="$(OutputPath)\$(PackageFileName)"
-      DestinationFolder="$(MSBuildThisFileDirectory)..\artifacts\" />
-    <Message Importance="High" Text="Copied $(PackageFileName) to artifacts directoy." />
-  </Target>
 
   <ItemGroup>
     <PackageReference Include="Mono.WasmPackager" Version="1.0.0" />
     <PackageReference Include="Mono.WasmPackager.DevServer" Version="1.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
 </Project>

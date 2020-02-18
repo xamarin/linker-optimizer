@@ -1,0 +1,250 @@
+//
+// AUTO-GENERATED FILE - DO NOT MODIFY!
+// This file has been auto-generated from tasks-web.json.
+//
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "debug-build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../DebugBuild",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "package-optimizer",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.Linker.Optimizer",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "package-cilstrip",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.Linker.CilStrip",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "package-devserver",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.WasmPackager.DevServer",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "package-packager",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.WasmPackager",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-optimizer",
+                "package-cilstrip"
+            ]
+        },
+        {
+            "label": "package-web",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.WasmPackager.Web",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-packager",
+                "package-devserver"
+            ]
+        },
+        {
+            "label": "package-blazor",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.WasmPackager.Blazor",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-web"
+            ]
+        },
+        {
+            "label": "clean-optimizer",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.Linker.Optimizer",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "clean-cilstrip",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.Linker.CilStrip",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "clean-packager",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.WasmPackager",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "clean-devserver",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.WasmPackager.DevServer",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "clean-web",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.WasmPackager.Web",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "clean-blazor",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "${workspaceFolder}/../../../../Mono.WasmPackager.Blazor",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/SimpleBlazor.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary",
+                "/verbosity:normal"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-blazor"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "${workspaceFolder}/SimpleBlazor.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "clean-optimizer",
+                "clean-cilstrip",
+                "clean-packager",
+                "clean-web",
+                "clean-devserver",
+                "clean-blazor"
+            ]
+        },
+        {
+            "label": "run",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--no-build"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
