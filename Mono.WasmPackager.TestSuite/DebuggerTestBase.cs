@@ -22,28 +22,6 @@ namespace Mono.WasmPackager.TestSuite
 		Task serverTask;
 		bool disposed;
 
-		static string[] PROBE_LIST = {
-			"/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
-			"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-			"/usr/bin/chromium",
-			"/usr/bin/chromium-browser",
-		};
-		static string chrome_path;
-		static string FindChromePath ()
-		{
-			if (chrome_path != null)
-				return chrome_path;
-
-			foreach (var s in PROBE_LIST) {
-				if (File.Exists (s)) {
-					chrome_path = s;
-					Debug.WriteLine ($"Using chrome path: {s}");
-					return s;
-				}
-			}
-			throw new Exception ("Could not find an installed Chrome to use");
-		}
-
 		public ITestSuiteSettings Settings {
 			get;
 		}
@@ -61,9 +39,8 @@ namespace Mono.WasmPackager.TestSuite
 			if (Settings == null)
 				throw new InvalidOperationException ("Unable to resolve test settings.");
 
-			var chrome = FindChromePath ();
-			Debug.WriteLine ($"DebuggerTestBase: {chrome} {Settings.DevServer_RootDir}");
-			Server = Server.CreateTestHarness (Settings.DevServer_RootDir, chrome);
+			Debug.WriteLine ($"DebuggerTestBase: {Settings.DevServer_RootDir}");
+			Server = Server.CreateTestHarness (Settings.DevServer_RootDir);
 			serverTask = Server.Host.StartAsync ();
 		}
 

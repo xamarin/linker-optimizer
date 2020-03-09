@@ -9,7 +9,7 @@
             "name": "SimpleWeb",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+//            "preLaunchTask": "build",
             "program": "${workspaceFolder}/../../.packages/mono.wasmpackager.devserver/1.0.0/tools/Mono.WasmPackager.DevServer.dll",
             "args": [
                 "--debug",

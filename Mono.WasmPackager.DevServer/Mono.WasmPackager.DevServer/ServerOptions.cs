@@ -7,8 +7,6 @@ namespace Mono.WasmPackager.DevServer
 	{
 		public Uri DevToolsUrl { get; set; } = new Uri ("http://localhost:9222");
 
-		public Uri DebugServerUri => new Uri ($"http://localhost:{DebugServerPort}/");
-
 		public int DebugServerPort { get; set; } = 9300;
 
 		public int FileServerPort { get; set; } = 8000;
@@ -21,11 +19,11 @@ namespace Mono.WasmPackager.DevServer
 
 		public bool EnableTestHarness { get; set; }
 
-		public string ChromePath { get; set; }
-
 		public bool Headless { get; set; } = true;
  
 		public string PagePath { get; set; } = "index.html";
+
+		public bool VerboseLogging { get; set; } = true;
 
 		public FileServerOptions FileServerOptions { get; set; } = new FileServerOptions ();
 	}

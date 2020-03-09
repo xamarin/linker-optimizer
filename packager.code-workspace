@@ -57,10 +57,6 @@
 			"path": "Mono.Linker.Optimizer"
 		},
 		{
-			"name": "Mono.Linker.CilStrip",
-			"path": "Mono.Linker.CilStrip"
-		},
-		{
 			"name": "Mono.WasmPackager",
 			"path": "Mono.WasmPackager"
 		},
@@ -120,10 +116,16 @@
 			"**/bin": true,
 			"**/obj": true,
 			"**/.emscripten-target": true,
-			"**/.emscripten-cache": true
+			"**/.emscripten-cache": true,
+			"**/Mono.Linker.CilStrip/**": true,
+			"Mono.Linker.CilStrip": true,
+			"external/**/*": true,
+			"external": true
 		},
 		"git.autoRepositoryDetection": false,
 		"dotnet-test-explorer.testProjectPath": "*.Test.csproj",
+		"omnisharp.enableEditorConfigSupport": true,
+		"omnisharp.enableRoslynAnalyzers": true,
 	},
 	"extensions": {
 		"recommendations": [

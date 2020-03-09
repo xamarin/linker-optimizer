@@ -8,5 +8,15 @@ namespace SimpleTest.WebSample
 		{
 			Console.WriteLine ("Hello World!");
 		}
+
+		public static void Message ()
+		{
+			Console.WriteLine ("Write Message");
+		}
+
+		public static void Throw ()
+		{
+			throw new InvalidOperationException ("Throwing here.");
+		}
 	}
 }

@@ -3,14 +3,41 @@
 	<head>
 	</head>
 	<body>
-		(Open the Developer Console -usually F12- to see the result.)
 		<script type="text/javascript">
+			// Keep in sync with the managed side
+			const messageText = "MESSAGE BUTTON CLICKED"
+			const messageText2 = "MESSAGE BUTTON CLICKED - BACK FROM MANAGED"
+			const textReady = "READY"
+			const textMessage = "MESSAGE"
+			const throwMessage = "THROW"
+
 			var App = {
 				init: function () {
+					this.output = document.getElementById ("output");
+					this.button = document.getElementById ("button");
 					BINDING.call_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Main", []);
+					this.message = BINDING.bind_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Message", []);
+					this.throw = BINDING.bind_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Throw", []);
+					this.output.innerText = textReady
+				},
+				onClickMessage: function () {
+					console.log(messageText)
+					this.message()
+					console.log(messageText2)
+					this.output.innerText = textMessage
+				},
+				onClickThrow: function () {
+					console.log("THROW BUTTON CLICKED")
+					this.output.innerText = throwMessage;
+					this.throw()
+					console.log("SHOULD NEVER GET HERE")
 				},
 			};
 		</script>
+		<p>Test Paragraph.</p>
+		<div id="output">INIT</div>
+		<button type="button" onclick="App.onClickMessage()" id="message">SendEvent</button>
+		<button type="button" onclick="App.onClickThrow()" id="throw">SendEvent</button>
 		<script type="text/javascript" src="mono-config.js"></script>
 		<script type="text/javascript" src="runtime.js"></script>
 		<script defer type="text/javascript" src="dotnet.js"></script>

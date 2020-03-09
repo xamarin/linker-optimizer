@@ -33,13 +33,15 @@ namespace Mono.WasmPackager.TestSuite
 		Browser browser;
 		BrowserContext context;
 		Page page;
+		CDPSession session;
 
-		InspectorClient client;
+		NewDevToolsClient client;
+		AbstractConnection connection;
 		CancellationTokenSource cts;
-		TaskCompletionSource<object> readyTcs;
-		TaskCompletionSource<object> completedTcs;
 
-		protected InspectorClient Client => client;
+		protected Page Page => page;
+
+		protected virtual bool Headless => true;
 
 		string ME => $"[{GetType ().Name}]";
 
@@ -48,15 +50,12 @@ namespace Mono.WasmPackager.TestSuite
 			await base.InitializeAsync ();
 
 			cts = new CancellationTokenSource ();
-			completedTcs = new TaskCompletionSource<object> ();
-			readyTcs = new TaskCompletionSource<object> ();
 
 			var chromiumPath = await TestSuiteSetup.GetChromiumPath ();
 
-			var options = new LaunchOptions ()
-			{
-				Headless = true,
-				Args = new[] {
+			var options = new LaunchOptions () {
+				Headless = Headless,
+				Args = new [] {
 					"--disable-gpu",
 					$"--remote-debugging-port=0"
 				},
@@ -69,27 +68,62 @@ namespace Mono.WasmPackager.TestSuite
 			context = await browser.CreateIncognitoBrowserContextAsync ();
 			page = await context.NewPageAsync ();
 
+			session = await page.Target.CreateCDPSessionAsync ();
+
 			var url = $"http://localhost:{Server.ServerOptions.FileServerPort}/{Server.ServerOptions.PagePath}";
 
 			await page.GoToAsync (url);
 
 			Debug.WriteLine ($"{ME} loaded page {url} - {page.Target.TargetId}");
 
-			client = new InspectorClient ();
+			var targetId = page.Target.TargetId;
+			var uri = new Uri ($"ws://localhost:{Server.ServerOptions.DebugServerPort}/connect-to-puppeteer?instance-id={targetId}");
 
-			readyTcs = new TaskCompletionSource<object> ();
-			LaunchProxy (page.Target);
-			await readyTcs.Task;
+			if (!TestHarnessStartup.Registration.TryAdd (targetId, session))
+				throw new InvalidOperationException ($"Failed to register target '{targetId}'.");
+
+			connection = new ClientWebSocketConnection (uri, null);
+
+			try {
+				client = new NewDevToolsClient (connection);
+
+				await connection.Start (OnEvent, cts.Token).ConfigureAwait (false);
+
+				Task [] init_cmds = {
+					client.SendCommand ("Profiler.enable", null, cts.Token),
+					client.SendCommand ("Runtime.enable", null, cts.Token),
+					client.SendCommand ("Debugger.enable", null, cts.Token),
+					client.SendCommand ("Runtime.runIfWaitingForDebugger", null, cts.Token),
+					WaitFor (READY)
+				};
+				// await Task.WhenAll (init_cmds);
+				Debug.WriteLine ("waiting for the runtime to be ready");
+
+				while (true) {
+					var delay = Task.Delay (2500);
+					var task = await Task.WhenAny (delay, init_cmds [4]);
+					if (task != delay)
+						break;
+					Debug.WriteLine ($"STILL WAITING");
+				}
+
+				Debug.WriteLine ($"GOT READY EVENT");
+			} finally {
+				TestHarnessStartup.Registration.Remove (targetId, out var _);
+			}
 		}
 
 		public override async Task DisposeAsync ()
 		{
-			completedTcs.TrySetResult (null);
-
 			if (client != null) {
 				await client.Close (cts.Token);
 				client.Dispose ();
 				client = null;
+			}
+
+			if (connection != null) {
+				connection.Dispose ();
+				connection = null;
 			}
 
 			cts.Cancel ();
@@ -103,6 +137,7 @@ namespace Mono.WasmPackager.TestSuite
 				page.Dispose ();
 				page = null;
 			}
+
 			await base.DisposeAsync ();
 		}
 
@@ -111,7 +146,7 @@ namespace Mono.WasmPackager.TestSuite
 			if (notifications.ContainsKey (what))
 				throw new Exception ($"Invalid internal state, waiting for {what} while another wait is already setup");
 			var n = new TaskCompletionSource<JObject> ();
-			notifications[what] = n;
+			notifications [what] = n;
 			return n.Task;
 		}
 
@@ -119,66 +154,36 @@ namespace Mono.WasmPackager.TestSuite
 		{
 			if (!notifications.ContainsKey (what))
 				throw new Exception ($"Invalid internal state, notifying of {what}, but nobody waiting");
-			notifications[what].SetResult (args);
+			notifications [what].SetResult (args);
 			notifications.Remove (what);
 		}
 
 		public void On (string evtName, Func<JObject, CancellationToken, Task> cb)
 		{
-			eventListeners[evtName] = cb;
+			eventListeners [evtName] = cb;
 		}
 
-		async Task OnMessage (string method, JObject args, CancellationToken token)
+		async Task OnEvent (ConnectionEventArgs args, CancellationToken token)
 		{
-			// Debug.WriteLine ("OnMessage " + method + args);
-			switch (method) {
-				case "Debugger.paused":
-					NotifyOf (PAUSE, args);
-					break;
-				case "Mono.runtimeReady":
-					NotifyOf (READY, args);
-					break;
-				case "Runtime.DebugAPICalled":
-					Debug.WriteLine ("CWL: {0}", args?["args"]?[0]?["value"]);
-					break;
+			switch (args.Message) {
+			case "Debugger.paused":
+				NotifyOf (PAUSE, args.Arguments);
+				break;
+			case "Mono.runtimeReady":
+				NotifyOf (READY, args.Arguments);
+				break;
+			case "Runtime.DebugAPICalled":
+				Debug.WriteLine ("CWL: {0}", args.Arguments? ["args"]? [0]? ["value"]);
+				break;
+			case "Debugger.scriptParsed":
+			case "Runtime.consoleAPICalled":
+				break;
+			default:
+				Debug.WriteLine ($"ON MESSAGE: {args.Message} {args.Arguments}");
+				break;
 			}
-			if (eventListeners.ContainsKey (method))
-				await eventListeners[method] (args, token);
-		}
-
-		async void LaunchProxy (Target target)
-		{
-			var browserUri = new Uri (browser.WebSocketEndpoint);
-			var uri = new Uri ($"ws://localhost:{Server.ServerOptions.DebugServerPort}/connect-to-puppeteer?puppeteer-port={browserUri.Port}&page-id={target.TargetId}");
-
-			await client.Connect (uri, OnMessage, async token =>
-			{
-				Task[] init_cmds = {
-					client.SendCommand ("Profiler.enable", null, token),
-					client.SendCommand ("Runtime.enable", null, token),
-					client.SendCommand ("Debugger.enable", null, token),
-					client.SendCommand ("Runtime.runIfWaitingForDebugger", null, token),
-					WaitFor (READY)
-				};
-				// await Task.WhenAll (init_cmds);
-				Debug.WriteLine ("waiting for the runtime to be ready");
-				await init_cmds[4];
-				Debug.WriteLine ("runtime ready, TEST TIME");
-
-				readyTcs.TrySetResult (null);
-
-				await completedTcs.Task;
-
-				Debug.WriteLine ("inner completed");
-			}, cts.Token);
-
-			Debug.WriteLine ($"CONNECT DONE!");
-
-			try {
-				await client.Close (cts.Token);
-			} catch {
-				; // ignore
-			}
+			if (eventListeners.ContainsKey (args.Message))
+				await eventListeners [args.Message] (args.Arguments, token);
 		}
 
 		public Task<Result> SendCommand (string message, JObject args)

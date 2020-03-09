@@ -100,10 +100,14 @@ namespace Mono.WasmPackager.DevServer
 
 			var endpoint = new Uri ($"ws://{DevToolsHost.Authority}{context.Request.Path.ToString ()}");
 			try {
-				var proxy = new MonoProxy ();
-				var ideSocket = await context.WebSockets.AcceptWebSocketAsync ();
+				var proxy = new NewMonoProxy ();
 
-				await proxy.Run (endpoint, ideSocket);
+				var browserConnection = new ClientWebSocketConnection (endpoint, null, "brower");
+				var ideConnection = new ServerWebSocketConnection (context.WebSockets, null, "ide");
+
+				await proxy.Run (browserConnection, ideConnection);
+
+				await Task.Delay (TimeSpan.FromHours (1));
 			} catch (Exception e) {
 				Console.WriteLine ("got exception {0}", e);
 			}

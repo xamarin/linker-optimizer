@@ -150,10 +150,10 @@ namespace WebAssembly.Net.Debugging {
 			var id = SourceId.TryParse (obj ["scriptId"]?.Value<string> ());
 			var line = obj ["lineNumber"]?.Value<int> ();
 			var column = obj ["columnNumber"]?.Value<int> ();
-			if (id == null || line == null || column == null)
+			if (id == null || line == null)
 				return null;
 
-			return new SourceLocation (id, line.Value, column.Value);
+			return new SourceLocation (id, line.Value, column ?? 0);
 		}
 
 		internal JObject ToJObject ()
@@ -501,7 +501,7 @@ namespace WebAssembly.Net.Debugging {
 		IList<AssemblyInfo> assemblies;
 		HttpClient client = new HttpClient ();
 
-		public async Task Load (MonoProxy proxy, SessionId sessionId, string[] loaded_files, CancellationToken token)
+		public async Task Load (IMonoProxy proxy, SessionId sessionId, string[] loaded_files, CancellationToken token)
 		{
 			var resolver = new DebugStoreLoader (proxy, sessionId, loaded_files, token);
 			assemblies = await resolver.Load ().ConfigureAwait (false);
@@ -530,6 +530,9 @@ namespace WebAssembly.Net.Debugging {
 			if (start.Column > spStart.Column && start.Line == sp.StartLine)
 				return false;
 
+			if (end == null)
+				return true;
+
 			if (end.Line < spEnd.Line)
 				return false;
 
@@ -542,7 +545,7 @@ namespace WebAssembly.Net.Debugging {
 		public List<SourceLocation> FindPossibleBreakpoints (SourceLocation start, SourceLocation end)
 		{
 			//XXX FIXME no idea what todo with locations on different files
-			if (start.Id != end.Id)
+			if (end != null && start.Id != end.Id)
 				return null;
 			var src_id = start.Id;
 

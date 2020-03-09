@@ -58,19 +58,17 @@ namespace Mono.WasmPackager.DevServer
 			server.Host.Run ();
 		}
 
-		public static Server CreateTestHarness (string root, string chrome)
+		public static Server CreateTestHarness (string root)
 		{
 			if (string.IsNullOrEmpty (root))
 				throw new ArgumentNullException (nameof (root));
-			if (string.IsNullOrEmpty (chrome))
-				throw new ArgumentNullException (nameof (chrome));
 
 			var options = new ServerOptions
 			{
 				WebRoot = root,
-				ChromePath = chrome,
 				EnableDebugging = true,
-				EnableTestHarness = true
+				EnableTestHarness = true,
+				VerboseLogging = false
 			};
 
 			options.FileServerOptions.EnableDirectoryBrowsing = true;
@@ -90,8 +88,10 @@ namespace Mono.WasmPackager.DevServer
 				.UseIISIntegration ()
 				.ConfigureLogging (logging =>
 				{
-					logging.AddConsole ();
-					logging.AddDebug ();
+					if (options.VerboseLogging) {
+						logging.AddDebug ();
+						logging.AddConsole ();
+					}
 				})
 				.ConfigureServices (services =>
 				{

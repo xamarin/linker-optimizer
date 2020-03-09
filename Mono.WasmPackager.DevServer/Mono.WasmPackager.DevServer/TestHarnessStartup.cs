@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.StaticFiles;
 using WebAssembly.Net.Debugging;
 using Newtonsoft.Json.Linq;
+using PuppeteerSharp;
 
 namespace Mono.WasmPackager.DevServer
 {
@@ -23,6 +26,10 @@ namespace Mono.WasmPackager.DevServer
 		public Server Server {
 			get;
 		}
+
+		public static ConcurrentDictionary<string, CDPSession> Registration {
+			get;
+		} = new ConcurrentDictionary<string, CDPSession> ();
 
 		static readonly TimeSpan StartupTimeout = TimeSpan.FromDays (10);
 
@@ -33,77 +40,7 @@ namespace Mono.WasmPackager.DevServer
 			Server = server;
 		}
 
-		public async Task LaunchAndServe (HttpContext context, Func<string, Task<string>> extract_conn_url)
-		{
-			if (!context.WebSockets.IsWebSocketRequest) {
-				context.Response.StatusCode = 400;
-				return;
-			}
-
-			var tcs = new TaskCompletionSource<string> ();
-
-			var headless = Options.Headless ? "--headless " : string.Empty;
-
-			var psi = new ProcessStartInfo
-			{
-				Arguments = $"{headless} -incognito --disable-gpu --remote-debugging-port={Options.DevToolsUrl.Port} http://localhost:{Options.FileServerPort}/{Options.PagePath}",
-				UseShellExecute = false,
-				FileName = Options.ChromePath,
-				RedirectStandardError = true,
-				RedirectStandardOutput = true
-			};
-
-			var proc = Process.Start (psi);
-			try {
-				proc.ErrorDataReceived += (sender, e) =>
-				{
-					var str = e.Data;
-					if (string.IsNullOrEmpty (str))
-						return;
-					Debug.WriteLine ($"stderr: {str}");
-
-					if (str.Contains ("listening on", StringComparison.Ordinal)) {
-						var res = str.Substring (str.IndexOf ("ws://", StringComparison.Ordinal));
-						if (res != null)
-							tcs.TrySetResult (res);
-					}
-				};
-
-				proc.OutputDataReceived += (sender, e) =>
-				{
-					Debug.WriteLine ($"stdout: {e.Data}");
-				};
-
-				proc.BeginErrorReadLine ();
-				proc.BeginOutputReadLine ();
-
-				if (await Task.WhenAny (tcs.Task, Task.Delay (StartupTimeout)) != tcs.Task) {
-					Debug.WriteLine ("Didnt get the con string after 2s.");
-					throw new Exception ("node.js timedout");
-				}
-				var line = await tcs.Task;
-				var con_str = extract_conn_url != null ? await extract_conn_url (line) : line;
-
-				Debug.WriteLine ($"lauching proxy for {con_str}");
-
-				var proxy = new MonoProxy ();
-				var browserUri = new Uri (con_str);
-				var ideSocket = await context.WebSockets.AcceptWebSocketAsync ();
-
-				await proxy.Run (browserUri, ideSocket);
-				Debug.WriteLine ("Proxy done");
-			} catch (Exception e) {
-				Debug.WriteLine ("got exception {0}", e);
-			} finally {
-				proc.CancelErrorRead ();
-				proc.CancelOutputRead ();
-				proc.Kill ();
-				proc.WaitForExit ();
-				proc.Close ();
-			}
-		}
-
-		public async Task ServePuppeteer (HttpContext context, string puppeteerUrl)
+		public async Task ServePuppeteer (HttpContext context, CDPSession instance)
 		{
 			if (!context.WebSockets.IsWebSocketRequest) {
 				context.Response.StatusCode = 400;
@@ -113,11 +50,15 @@ namespace Mono.WasmPackager.DevServer
 			var tcs = new TaskCompletionSource<string> ();
 
 			try {
-				var proxy = new MonoProxy ();
-				var browserUri = new Uri (puppeteerUrl);
-				var ideSocket = await context.WebSockets.AcceptWebSocketAsync ();
+				var proxy = new NewMonoProxy ();
+				var connection = new PuppeteerConnection (instance);
+//				await connection.Start (CancellationToken.None);
 
-				await proxy.Run (browserUri, ideSocket);
+				var ideConnection = new ServerWebSocketConnection (context.WebSockets, instance.SessionId);
+//				await ideConnection.Start (CancellationToken.None);
+
+				await proxy.Run (connection, ideConnection);
+
 				Debug.WriteLine ("Proxy done");
 			} catch (Exception e) {
 				Debug.WriteLine ("got exception {0}", e);
@@ -150,7 +91,7 @@ namespace Mono.WasmPackager.DevServer
 			if (obj == null || obj.Count < 1)
 				return null;
 
-			var wsURl = obj[0]?["webSocketDebuggerUrl"]?.Value<string> ();
+			var wsURl = obj [0]? ["webSocketDebuggerUrl"]?.Value<string> ();
 			Debug.WriteLine ($">>> {wsURl}");
 
 			return wsURl;
@@ -158,19 +99,14 @@ namespace Mono.WasmPackager.DevServer
 
 		public void Configure (IEndpointRouteBuilder router)
 		{
-			router.MapGet ("launch-chrome-and-connect", async context =>
-			{
-				Debug.WriteLine ("New test request");
-				var client = new HttpClient ();
-				await LaunchAndServe (context, str => GetPageUrl (client, str));
-			});
-			router.MapGet ("connect-to-puppeteer", async context =>
-			{
-				var puppeteerPort = context.Request.Query["puppeteer-port"];
-				var pageId = context.Request.Query["page-id"];
-				Debug.WriteLine ($"New test request: {puppeteerPort} {pageId}");
-				var pageUrl = $"ws://127.0.0.1:{puppeteerPort}/devtools/page/{pageId}";
-				await ServePuppeteer (context, pageUrl);
+			router.MapGet ("connect-to-puppeteer", async context => {
+				var instanceId = context.Request.Query ["instance-id"];
+				Debug.WriteLine ($"New puppeteer instance test request: {instanceId}");
+				if (!Registration.TryGetValue (instanceId, out var session)) {
+					context.Response.StatusCode = 400;
+					return;
+				}
+				await ServePuppeteer (context, session);
 			});
 		}
 	}

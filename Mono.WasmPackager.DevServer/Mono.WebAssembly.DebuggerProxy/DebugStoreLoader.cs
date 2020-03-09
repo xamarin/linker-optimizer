@@ -16,7 +16,7 @@ namespace WebAssembly.Net.Debugging
 		readonly IDictionary<string, AssemblyDefinition> cache;
 		readonly IDictionary<string, AssemblyEntry> assemblies;
 		readonly HttpClient client;
-		readonly MonoProxy proxy;
+		readonly IMonoProxy proxy;
 		readonly SessionId session;
 		CancellationTokenSource cancellationTokenSource;
 
@@ -80,7 +80,7 @@ namespace WebAssembly.Net.Debugging
 			}
 		}
 
-		public DebugStoreLoader (MonoProxy proxy, SessionId session, string[] loaded_files, CancellationToken token)
+		public DebugStoreLoader (IMonoProxy proxy, SessionId session, string[] loaded_files, CancellationToken token)
 		{
 			this.proxy = proxy;
 			this.session = session;
