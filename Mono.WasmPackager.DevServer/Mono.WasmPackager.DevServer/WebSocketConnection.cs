@@ -37,16 +37,18 @@ namespace Mono.WasmPackager.DevServer
 
 		protected abstract Task<WebSocket> CreateSocket (CancellationToken token);
 
-		async Task ReadOne (CancellationToken token)
+		async Task<bool> ReadOne (CancellationToken token)
 		{
 			byte [] buff = new byte [4000];
 			var mem = new MemoryStream ();
 			var complete = false;
 
-			while (!complete) {
+			while (!complete && !token.IsCancellationRequested) {
+				if (socket.State == WebSocketState.CloseReceived || socket.State == WebSocketState.Aborted)
+					return false;
 				var result = await socket.ReceiveAsync (new ArraySegment<byte> (buff), token);
 				if (result.MessageType == WebSocketMessageType.Close) {
-					return;
+					return false;
 				}
 
 				mem.Write (buff, 0, result.Count);
@@ -66,6 +68,8 @@ namespace Mono.WasmPackager.DevServer
 				if (args != null)
 					await OnEvent (args);
 			}
+
+			return !token.IsCancellationRequested;
 		}
 
 		protected abstract ConnectionEventArgs Decode (JObject message);
@@ -119,13 +123,14 @@ namespace Mono.WasmPackager.DevServer
 
 		protected virtual void DumpProtocol (string msg)
 		{
-			Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
+			// Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
 		}
 
 		public override async Task Close (CancellationToken cancellationToken)
 		{
 			if (socket.State == WebSocketState.Open)
 				await socket.CloseOutputAsync (WebSocketCloseStatus.NormalClosure, "Closing", cancellationToken);
+			await base.Close (cancellationToken).ConfigureAwait (false);
 		}
 
 		async Task Send (Command command, CancellationToken token)
@@ -142,7 +147,13 @@ namespace Mono.WasmPackager.DevServer
 		async void MainLoop (CancellationToken token)
 		{
 			while (!token.IsCancellationRequested) {
-				await ReadOne (token).ConfigureAwait (false);
+				try {
+					var result = await ReadOne (token).ConfigureAwait (false);
+					if (!result)
+						return;
+				} catch (TaskCanceledException) {
+					return;
+				}
 			}
 		}
 	}

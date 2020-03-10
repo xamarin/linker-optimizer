@@ -12,15 +12,22 @@ using WebAssembly.Net.Debugging;
 
 namespace Mono.WasmPackager.DevServer
 {
-	public abstract class NewDevToolsProxy
+	public abstract class NewDevToolsProxy : IDisposable
 	{
 		TaskCompletionSource<bool> side_exception = new TaskCompletionSource<bool> ();
 		TaskCompletionSource<bool> client_initiated_close = new TaskCompletionSource<bool> ();
 		AbstractConnection ideConnection;
 		AbstractConnection browserConnection;
 		AsyncQueue<ConnectionEventArgs> eventQueue;
+		TaskCompletionSource<bool> exitTcs;
+		int disposed;
 
-		protected delegate Task EventHandler (CancellationToken token);
+		protected NewDevToolsProxy (AbstractConnection browserConnection, AbstractConnection ideConnection)
+		{
+			this.browserConnection = browserConnection;
+			this.ideConnection = ideConnection;
+			exitTcs = new TaskCompletionSource<bool> ();
+		}
 
 		protected abstract void AcceptEvent (SessionId sessionId, ConnectionEventArgs eventArgs);
 
@@ -34,11 +41,14 @@ namespace Mono.WasmPackager.DevServer
 
 			Log ("verbose", $"sending to browser: {method} {args}");
 
-			var result = await browserConnection.SendAsync (id, method, args).ConfigureAwait (false);
-
-			Log ("verbose", $"sending to browser - response: {method} {result}");
-
-			return Result.FromJson (result);
+			try {
+				var result = await browserConnection.SendAsync (id, method, args).ConfigureAwait (false);
+				Log ("verbose", $"sending to browser - response: {method} {result}");
+				return Result.FromJson (result);
+			} catch (Exception e) {
+				Log ("verbose", $"sending to browser - error: {method} {e.Message}");
+				return Result.Exception (e);
+			}
 		}
 
 		public async Task SendEvent (SessionId sessionId, string method, JObject args, CancellationToken token)
@@ -60,13 +70,9 @@ namespace Mono.WasmPackager.DevServer
 			Log ("protocol", $"queued {sender} event done: {args}");
 		}
 
-		public async Task Run (AbstractConnection browserConnection, AbstractConnection ideConnection)
+		public async Task Start ()
 		{
-			Log ("info", $"DevToolsProxy: Starting on {browserConnection}");
-			this.ideConnection = ideConnection;
-			this.browserConnection = browserConnection;
-
-			Log ("verbose", $"DevToolsProxy: IDE waiting for browserConnection on {browserConnection}");
+			Log ("info", $"DevToolsProxy starting");
 
 			var x = new CancellationTokenSource ();
 
@@ -111,14 +117,16 @@ namespace Mono.WasmPackager.DevServer
 			}, x.Token);
 		}
 
+		public Task WaitForExit () => exitTcs.Task;
+
 		protected void Log (string priority, string msg)
 		{
 			switch (priority) {
 			case "protocol":
-				Debug.WriteLine (msg);
+				// Debug.WriteLine (msg);
 				break;
 			case "verbose":
-				Debug.WriteLine (msg);
+				// Debug.WriteLine (msg);
 				break;
 			case "info":
 			case "warning":
@@ -127,6 +135,18 @@ namespace Mono.WasmPackager.DevServer
 				Debug.WriteLine (msg);
 				break;
 			}
+		}
+
+		public void Dispose ()
+		{
+			if (Interlocked.CompareExchange (ref disposed, 1, 0) == 0)
+				DoDispose ();
+		}
+
+		protected virtual void DoDispose ()
+		{
+			browserConnection.Dispose ();
+			ideConnection.Dispose ();
 		}
 	}
 }

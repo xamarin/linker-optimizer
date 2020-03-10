@@ -99,17 +99,10 @@ namespace Mono.WasmPackager.DevServer
 			}
 
 			var endpoint = new Uri ($"ws://{DevToolsHost.Authority}{context.Request.Path.ToString ()}");
-			try {
-				var proxy = new NewMonoProxy ();
+			using (var proxy = NewMonoProxy.Create (endpoint, context.WebSockets)) {
+				await proxy.Start ().ConfigureAwait (false);
 
-				var browserConnection = new ClientWebSocketConnection (endpoint, null, "brower");
-				var ideConnection = new ServerWebSocketConnection (context.WebSockets, null, "ide");
-
-				await proxy.Run (browserConnection, ideConnection);
-
-				await Task.Delay (TimeSpan.FromHours (1));
-			} catch (Exception e) {
-				Console.WriteLine ("got exception {0}", e);
+				await proxy.WaitForExit ().ConfigureAwait (false);
 			}
 		}
 

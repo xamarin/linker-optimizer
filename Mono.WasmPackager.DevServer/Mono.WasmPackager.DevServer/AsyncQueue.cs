@@ -24,6 +24,8 @@ namespace Mono.WasmPackager.DevServer
 		readonly bool allowParallel;
 		readonly CancellationTokenSource cts;
 		Func<T, CancellationToken, Task> handler;
+		TaskCompletionSource<bool> completedTcs;
+		volatile int closed;
 		int disposed;
 		int running;
 
@@ -57,6 +59,7 @@ namespace Mono.WasmPackager.DevServer
 			queue = new ConcurrentQueue<QueueEntry> ();
 			queueEvent = new AutoResetEvent (false);
 			cts = new CancellationTokenSource ();
+			completedTcs = new TaskCompletionSource<bool> ();
 			pending = new List<Task> ();
 		}
 
@@ -97,7 +100,7 @@ namespace Mono.WasmPackager.DevServer
 
 		async Task<QueueEntry> WaitForEvent ()
 		{
-			while (!cts.Token.IsCancellationRequested) {
+			while (!cts.IsCancellationRequested) {
 				if (queue.TryDequeue (out var entry))
 					return entry;
 
@@ -115,7 +118,7 @@ namespace Mono.WasmPackager.DevServer
 		{
 			Log ($"HANDLE EVENT: {entry.Item}");
 			var handlerTask = handler (entry.Item, cts.Token);
-			while (!cts.Token.IsCancellationRequested) {
+			while (closed == 0 && !cts.IsCancellationRequested) {
 				var handlerTimeout = Task.Delay (TimeSpan.FromSeconds (HandlerTimout));
 				var handlerRes = await Task.WhenAny (handlerTimeout, handlerTask);
 
@@ -136,7 +139,7 @@ namespace Mono.WasmPackager.DevServer
 			pending.Add (WaitForEvent ());
 			pending.Add (Task.Delay (MainLoopTimeout));
 
-			while (!cts.Token.IsCancellationRequested) {
+			while (closed == 0 && !cts.IsCancellationRequested) {
 				Log ($"MAIN LOOP");
 				var task = await Task.WhenAny (pending);
 				if (task == pending [1]) {
@@ -155,7 +158,8 @@ namespace Mono.WasmPackager.DevServer
 					continue;
 				}
 
-				cts.Token.ThrowIfCancellationRequested ();
+				if (closed == 1 || cts.IsCancellationRequested)
+					break;
 
 				if (!allowParallel) {
 					await HandleEvent (entry);
@@ -164,11 +168,23 @@ namespace Mono.WasmPackager.DevServer
 
 				pending.Add (HandleEvent (entry));
 			}
+
+			completedTcs.TrySetResult (!cts.IsCancellationRequested);
+			Log ($"MAIN LOOP - DONE");
 		}
 
 		protected virtual void Log (string msg)
 		{
-			Debug.WriteLine ($"[AsyncQueue:{typeof (T).Name}:{Name}:{queue.Count}:{pending.Count}]: {msg}");
+			// Debug.WriteLine ($"[AsyncQueue:{typeof (T).Name}:{Name}:{queue.Count}:{pending.Count}]: {msg}");
+		}
+
+		public async Task Close ()
+		{
+			if (Interlocked.CompareExchange (ref closed, 1, 0) != 0)
+				return;
+
+			await completedTcs.Task.ConfigureAwait (false);
+			Log ($"CLOSE - DONE");
 		}
 
 		public void Dispose ()

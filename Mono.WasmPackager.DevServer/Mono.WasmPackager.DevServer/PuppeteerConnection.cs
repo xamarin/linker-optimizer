@@ -20,8 +20,8 @@ namespace Mono.WasmPackager.DevServer
 			get;
 		}
 
-		internal PuppeteerConnection (CDPSession session)
-			: base (session.SessionId, session.SessionId)
+		internal PuppeteerConnection (CDPSession session, string name = null)
+			: base (session.SessionId, name)
 		{
 			Session = session;
 		}
@@ -37,11 +37,10 @@ namespace Mono.WasmPackager.DevServer
 			return Task.CompletedTask;
 		}
 
-		public override Task Close (CancellationToken cancellationToken) => Task.CompletedTask;
-
-		public override Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true)
+		public override async Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true)
 		{
-			return Session.SendAsync (method, args, waitForCallback);
+			var obj = await Session.SendAsync (method, args, waitForCallback);
+			return JObject.FromObject (new { result = obj });
 		}
 	}
 }

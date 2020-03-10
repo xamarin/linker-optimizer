@@ -34,6 +34,8 @@ namespace Mono.WasmPackager.DevServer
 					true);
 				tokenRegistration = token.Register (_ => tcs.TrySetCanceled (), null);
 				return await tcs.Task;
+			} catch (TaskCanceledException) {
+				return default (T);
 			} finally {
 				if (registeredHandle != null)
 					registeredHandle.Unregister (null);

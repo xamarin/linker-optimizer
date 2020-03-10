@@ -58,7 +58,10 @@ namespace Mono.WasmPackager.DevServer
 
 		protected abstract Task Start (CancellationToken token);
 
-		public abstract Task Close (CancellationToken cancellationToken);
+		public virtual async Task Close (CancellationToken cancellationToken)
+		{
+			await asyncQueue.Close ();
+		}
 
 		public abstract Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true);
 

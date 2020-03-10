@@ -115,15 +115,16 @@ namespace Mono.WasmPackager.TestSuite
 
 		public override async Task DisposeAsync ()
 		{
+			if (connection != null) {
+				await connection.Close (cts.Token);
+				connection.Dispose ();
+				connection = null;
+			}
+
 			if (client != null) {
 				await client.Close (cts.Token);
 				client.Dispose ();
 				client = null;
-			}
-
-			if (connection != null) {
-				connection.Dispose ();
-				connection = null;
 			}
 
 			cts.Cancel ();

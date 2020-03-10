@@ -10,6 +10,8 @@ using System.Net.WebSockets;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using WebAssembly.Net.Debugging;
+using Microsoft.AspNetCore.Http;
+using P = PuppeteerSharp;
 
 namespace Mono.WasmPackager.DevServer
 {
@@ -23,7 +25,23 @@ namespace Mono.WasmPackager.DevServer
 		int ctx_id;
 		JObject aux_ctx_data;
 
-		public NewMonoProxy () { }
+		NewMonoProxy (AbstractConnection browserConnection, AbstractConnection ideConnection)
+			: base (browserConnection, ideConnection)
+		{ }
+
+		public static NewMonoProxy Create (P.CDPSession session, WebSocketManager manager)
+		{
+			var browserConnection = new PuppeteerConnection (session, "browser");
+			var ideConnection = new ServerWebSocketConnection (manager, session.SessionId, "ide");
+			return new NewMonoProxy (browserConnection, ideConnection);
+		}
+
+		public static NewMonoProxy Create (Uri endpoint, WebSocketManager manager, string sessionId = null)
+		{
+			var browserConnection = new ClientWebSocketConnection (endpoint, sessionId, "brower");
+			var ideConnection = new ServerWebSocketConnection (manager, sessionId, "ide");
+			return new NewMonoProxy (browserConnection, ideConnection);
+		}
 
 		internal Task<Result> SendMonoCommand (SessionId id, MonoCommands cmd, CancellationToken token)
 			=> SendCommand (id, "Runtime.evaluate", JObject.FromObject (cmd), token);
@@ -173,7 +191,7 @@ namespace Mono.WasmPackager.DevServer
 		{
 			Log ("info", "RUNTIME READY, PARTY TIME");
 			await RuntimeReady (sessionId, token);
-			await SendCommand (sessionId, "Debugger.resume", new JObject (), token);
+			// await SendCommand (sessionId, "Debugger.resume", new JObject (), token);
 			await SendEvent (sessionId, "Mono.runtimeReady", new JObject (), token);
 		}
 

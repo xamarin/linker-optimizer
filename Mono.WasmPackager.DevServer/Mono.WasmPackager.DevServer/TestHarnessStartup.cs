@@ -47,21 +47,12 @@ namespace Mono.WasmPackager.DevServer
 				return;
 			}
 
-			var tcs = new TaskCompletionSource<string> ();
+			using (var proxy = NewMonoProxy.Create (instance, context.WebSockets)) {
+				await proxy.Start ().ConfigureAwait (false);
 
-			try {
-				var proxy = new NewMonoProxy ();
-				var connection = new PuppeteerConnection (instance);
-//				await connection.Start (CancellationToken.None);
-
-				var ideConnection = new ServerWebSocketConnection (context.WebSockets, instance.SessionId);
-//				await ideConnection.Start (CancellationToken.None);
-
-				await proxy.Run (connection, ideConnection);
+				await proxy.WaitForExit ().ConfigureAwait (false);
 
 				Debug.WriteLine ("Proxy done");
-			} catch (Exception e) {
-				Debug.WriteLine ("got exception {0}", e);
 			}
 		}
 
