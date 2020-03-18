@@ -1,3 +1,4 @@
+#if FIXME
 using System;
 using System.IO;
 using System.Linq;
@@ -195,3 +196,4 @@ namespace WebAssembly.Net.Debugging
 		}
 	}
 }
+#endif

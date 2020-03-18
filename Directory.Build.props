@@ -14,7 +14,7 @@
     <DebuggerProxyVersion>1.0.0</DebuggerProxyVersion>
 
     <!-- This needs to be changed both here as well as in Mono.WasmPackager/Sdk/Sdk.props -->
-    <MonoWebAssemblySdkVersion>0.2.2-martin-20200313.1</MonoWebAssemblySdkVersion>
+    <MonoWebAssemblySdkVersion>0.2.2-martin-20200320.1</MonoWebAssemblySdkVersion>
   </PropertyGroup>
 
 </Project>

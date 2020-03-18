@@ -28,6 +28,10 @@ namespace Mono.WasmPackager.DevServer
 			get; internal set;
 		}
 
+		public bool Close {
+			get; internal set;
+		}
+
 		public Func<CancellationToken, Task> Handler {
 			get; internal set;
 		}

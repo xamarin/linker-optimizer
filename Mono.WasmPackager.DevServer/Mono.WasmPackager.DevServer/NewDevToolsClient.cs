@@ -24,9 +24,9 @@ namespace Mono.WasmPackager.DevServer
 				DoDispose ();
 		}
 
-		public Task Close (CancellationToken cancellationToken)
+		public Task Close (bool wait, CancellationToken cancellationToken)
 		{
-			return connection.Close (cancellationToken);
+			return connection.Close (wait, cancellationToken);
 		}
 
 		protected virtual void DoDispose ()
@@ -36,7 +36,7 @@ namespace Mono.WasmPackager.DevServer
 
 		public async Task<Result> SendCommand (string method, JObject args, CancellationToken token)
 		{
-			var result = await connection.SendAsync (null, method, args);
+			var result = await connection.SendAsync (default (SessionId), method, args);
 			return DevToolsHelper.ResultFromJObject (result);
 		}
 	}

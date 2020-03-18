@@ -47,7 +47,7 @@ namespace Mono.WasmPackager.DevServer
 				return;
 			}
 
-			using (var proxy = NewMonoProxy.Create (instance, context.WebSockets)) {
+			using (var proxy = NewDevToolsProxy.Create (instance, context.WebSockets)) {
 				await proxy.Start ().ConfigureAwait (false);
 
 				await proxy.WaitForExit ().ConfigureAwait (false);

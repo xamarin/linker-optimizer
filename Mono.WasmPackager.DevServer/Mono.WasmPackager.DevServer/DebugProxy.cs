@@ -99,7 +99,7 @@ namespace Mono.WasmPackager.DevServer
 			}
 
 			var endpoint = new Uri ($"ws://{DevToolsHost.Authority}{context.Request.Path.ToString ()}");
-			using (var proxy = NewMonoProxy.Create (endpoint, context.WebSockets)) {
+			using (var proxy = NewDevToolsProxy.Create (endpoint, context.WebSockets)) {
 				await proxy.Start ().ConfigureAwait (false);
 
 				await proxy.WaitForExit ().ConfigureAwait (false);

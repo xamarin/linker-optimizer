@@ -100,7 +100,7 @@
 		"taskExplorer.enableSideBar": true,
 		"taskExplorer.enableTsc": false,
 		"[csharp]": {
-			"editor.defaultFormatter": "ms-vscode.csharp"
+			"editor.defaultFormatter": "ms-dotnettools.csharp"
 		},
 		"debug.onTaskErrors": "showErrors",
 		"task.slowProviderWarning": [

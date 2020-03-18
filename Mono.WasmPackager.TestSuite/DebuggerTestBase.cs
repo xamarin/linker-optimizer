@@ -32,6 +32,8 @@ namespace Mono.WasmPackager.TestSuite
 
 		protected DebuggerTestBase (Assembly caller = null)
 		{
+			Trace.Listeners.Add (new ConsoleTraceListener ());
+
 			if (caller == null)
 				caller = Assembly.GetCallingAssembly ();
 			var type = caller.GetType ("Mono.WasmPackager.DevServer.TestSettings");

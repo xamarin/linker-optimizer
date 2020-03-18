@@ -1,10 +1,10 @@
 <Project>
   <ItemGroup>
-    <PackageReference Include="Mono.WebAssembly.Emscripten" Version="$(MonoWebAssemblySdkVersion)" />
+    <PackageReference Include="Mono.WebAssembly.Emscripten" Version="$(MonoWebAssemblyEmscriptenVersion)" />
   </ItemGroup>
 
   <PropertyGroup>
-    <WasmPackager_Emscripten_SdkDir>$(NugetPackageRoot)/mono.webassembly.emscripten/$(MonoWebAssemblySdkVersion)/emsdk</WasmPackager_Emscripten_SdkDir>
+    <WasmPackager_Emscripten_SdkDir>$(NugetPackageRoot)/mono.webassembly.emscripten/$(MonoWebAssemblyEmscriptenVersion)/emsdk</WasmPackager_Emscripten_SdkDir>
   </PropertyGroup>
 
   <UsingTask TaskName="Mono.WasmPackager.Emscripten.SourceEnvironment" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />

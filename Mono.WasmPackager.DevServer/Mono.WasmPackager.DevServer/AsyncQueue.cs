@@ -38,9 +38,14 @@ namespace Mono.WasmPackager.DevServer
 				get;
 			}
 
-			public QueueEntry (T item)
+			public bool Close {
+				get;
+			}
+
+			public QueueEntry (T item, bool close = false)
 			{
 				Item = item;
+				Close = close;
 				Completed = new TaskCompletionSource<object> ();
 			}
 		}
@@ -72,20 +77,20 @@ namespace Mono.WasmPackager.DevServer
 			MainLoop ();
 		}
 
-		public async Task EnqueueAsync (T args)
+		public async Task EnqueueAsync (T args, bool close = false)
 		{
 			Log ($"ENQUEUE ASYNC: {args}");
-			var item = new QueueEntry (args);
+			var item = new QueueEntry (args, close);
 			queue.Enqueue (item);
 			queueEvent.Set ();
 			await item.Completed.Task.ConfigureAwait (false);
 			Log ($"ENQUEUE ASYNC DONE: {args}");
 		}
 
-		public void Enqueue (T args)
+		public void Enqueue (T args, bool close = false)
 		{
 			Log ($"ENQUEUE: {args}");
-			queue.Enqueue (new QueueEntry (args));
+			queue.Enqueue (new QueueEntry (args, close));
 			queueEvent.Set ();
 		}
 
@@ -161,6 +166,12 @@ namespace Mono.WasmPackager.DevServer
 				if (closed == 1 || cts.IsCancellationRequested)
 					break;
 
+				if (entry.Close) {
+					Log ($"MAIN LOOP - GOT CLOSE EVENT");
+					await HandleEvent (entry);
+					break;
+				}
+
 				if (!allowParallel) {
 					await HandleEvent (entry);
 					continue;
@@ -175,7 +186,7 @@ namespace Mono.WasmPackager.DevServer
 
 		protected virtual void Log (string msg)
 		{
-			// Debug.WriteLine ($"[AsyncQueue:{typeof (T).Name}:{Name}:{queue.Count}:{pending.Count}]: {msg}");
+			Debug.WriteLine ($"[AsyncQueue:{typeof (T).Name}:{Name}:{queue.Count}:{pending.Count}]: {msg}");
 		}
 
 		public async Task Close ()

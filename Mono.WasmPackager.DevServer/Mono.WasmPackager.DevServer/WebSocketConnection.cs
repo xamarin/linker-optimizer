@@ -46,8 +46,10 @@ namespace Mono.WasmPackager.DevServer
 			while (!complete && !token.IsCancellationRequested) {
 				if (socket.State == WebSocketState.CloseReceived || socket.State == WebSocketState.Aborted)
 					return false;
-				var result = await socket.ReceiveAsync (new ArraySegment<byte> (buff), token);
+				var result = await socket.ReceiveAsync (new ArraySegment<byte> (buff), CancellationToken.None);
+				Log ($"READ: {socket} {result.Count} {result.MessageType}");
 				if (result.MessageType == WebSocketMessageType.Close) {
+					await OnEvent (new ConnectionEventArgs { Close = true }).ConfigureAwait (false);
 					return false;
 				}
 
@@ -106,10 +108,10 @@ namespace Mono.WasmPackager.DevServer
 			}
 		}
 
-		public override async Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true)
+		internal override async Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true)
 		{
 			DumpProtocol ($"SEND COMMAND: {method}");
-			var command = new Command (sessionId?.sessionId ?? SessionId, method, args, waitForCallback);
+			var command = new Command (sessionId.sessionId ?? SessionId, method, args, waitForCallback);
 			command.Encoded = Encode (command);
 			DumpProtocol ($"SEND COMMAND #1: {method} {waitForCallback} {command.Encoded}");
 			await sendQueue.EnqueueAsync (command).ConfigureAwait (false);
@@ -121,16 +123,22 @@ namespace Mono.WasmPackager.DevServer
 			return result;
 		}
 
-		protected virtual void DumpProtocol (string msg)
+		void Log (string msg)
 		{
-			// Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
+			Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
 		}
 
-		public override async Task Close (CancellationToken cancellationToken)
+		protected virtual void DumpProtocol (string msg)
 		{
+			Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
+		}
+
+		public override async Task Close (bool wait, CancellationToken cancellationToken)
+		{
+			Log ($"CLOSE: {socket} {socket.State}");
 			if (socket.State == WebSocketState.Open)
 				await socket.CloseOutputAsync (WebSocketCloseStatus.NormalClosure, "Closing", cancellationToken);
-			await base.Close (cancellationToken).ConfigureAwait (false);
+			await base.Close (wait, cancellationToken).ConfigureAwait (false);
 		}
 
 		async Task Send (Command command, CancellationToken token)
@@ -153,6 +161,10 @@ namespace Mono.WasmPackager.DevServer
 						return;
 				} catch (TaskCanceledException) {
 					return;
+				} catch (WebSocketException ex) {
+					if (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+						return;
+					throw;
 				}
 			}
 		}

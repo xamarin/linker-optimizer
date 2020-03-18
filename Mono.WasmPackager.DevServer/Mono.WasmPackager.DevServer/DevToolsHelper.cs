@@ -1,103 +1,47 @@
 using System;
 using Newtonsoft.Json.Linq;
-using WebAssembly.Net.Debugging;
 
 namespace WebAssembly.Net.Debugging
 {
-	internal class MonoCommands {
-		public string expression { get; set; }
-		public string objectGroup { get; set; } = "mono-debugger";
-		public bool includeCommandLineAPI { get; set; } = false;
-		public bool silent { get; set; } = false;
-		public bool returnByValue { get; set; } = true;
+	internal struct SessionId {
+		public readonly string sessionId;
 
-		public MonoCommands (string expression)
-			=> this.expression = expression;
-
-		public static MonoCommands GetCallStack ()
-			=> new MonoCommands ("MONO.mono_wasm_get_call_stack()");
-
-		public static MonoCommands IsRuntimeReady ()
-			=> new MonoCommands ("MONO.mono_wasm_runtime_is_ready");
-
-		public static MonoCommands StartSingleStepping (StepKind kind)
-			=> new MonoCommands ($"MONO.mono_wasm_start_single_stepping ({(int)kind})");
-
-		public static MonoCommands GetLoadedFiles ()
-			=> new MonoCommands ("MONO.mono_wasm_get_loaded_files()");
-
-		public static MonoCommands ClearAllBreakpoints ()
-			=> new MonoCommands ("MONO.mono_wasm_clear_all_breakpoints()");
-
-		public static MonoCommands GetObjectProperties (int objectId)
-			=> new MonoCommands ($"MONO.mono_wasm_get_object_properties({objectId})");
-
-		public static MonoCommands GetArrayValues (int objectId)
-			=> new MonoCommands ($"MONO.mono_wasm_get_array_values({objectId})");
-
-		public static MonoCommands GetScopeVariables (int scopeId, params int[] vars)
-			=> new MonoCommands ($"MONO.mono_wasm_get_variables({scopeId}, [ {string.Join (",", vars)} ])");
-
-		public static MonoCommands SetBreakpoint (string assemblyName, int methodToken, int ilOffset)
-			=> new MonoCommands ($"MONO.mono_wasm_set_breakpoint (\"{assemblyName}\", {methodToken}, {ilOffset})");
-
-		public static MonoCommands RemoveBreakpoint (int breakpointId)
-			=> new MonoCommands ($"MONO.mono_wasm_remove_breakpoint({breakpointId})");
-	}
-
-	public enum MonoErrorCodes {
-		BpNotFound = 100000,
-	}
-
-	internal class MonoConstants {
-		public const string RUNTIME_IS_READY = "mono_wasm_runtime_ready";
-	}
-
-	class Frame {
-		public Frame (MethodInfo method, SourceLocation location, int id)
+		public SessionId (string sessionId)
 		{
-			this.Method = method;
-			this.Location = location;
-			this.Id = id;
+			this.sessionId = sessionId;
 		}
 
-		public MethodInfo Method { get; private set; }
-		public SourceLocation Location { get; private set; }
-		public int Id { get; private set; }
+		public override int GetHashCode ()
+			=> sessionId?.GetHashCode () ?? 0;
+
+		public override bool Equals (object obj)
+			=> (obj is SessionId) ? ((SessionId) obj).sessionId == sessionId : false;
+
+		public override string ToString ()
+			=> $"session-{sessionId}";
 	}
 
-	class Breakpoint {
-		public SourceLocation Location { get; private set; }
-		public int LocalId { get; private set; }
-		public int RemoteId { get; set; }
-		public BreakPointState State { get; set; }
+	internal struct MessageId {
+		public readonly string sessionId;
+		public readonly int id;
 
-		public Breakpoint (SourceLocation loc, int localId, BreakPointState state)
+		public MessageId (string sessionId, int id)
 		{
-			this.Location = loc;
-			this.LocalId = localId;
-			this.State = state;
+			this.sessionId = sessionId;
+			this.id = id;
 		}
-	}
 
-	enum BreakPointState {
-		Active,
-		Disabled,
-		Pending
-	}
+		public static implicit operator SessionId (MessageId id)
+			=> new SessionId (id.sessionId);
 
-	enum StepKind {
-		Into,
-		Out,
-		Over
-	}
-	
-	public class SessionId {
-		public string sessionId;
-	}
+		public override string ToString ()
+			=> $"msg-{sessionId}:::{id}";
 
-	public class MessageId : SessionId {
-		public int id;
+		public override int GetHashCode ()
+			=> (sessionId?.GetHashCode () ?? 0) ^ id.GetHashCode ();
+
+		public override bool Equals (object obj)
+			=> (obj is MessageId) ? ((MessageId) obj).sessionId == sessionId && ((MessageId) obj).id == id : false;
 	}
 
 	public struct Result {
@@ -109,8 +53,17 @@ namespace WebAssembly.Net.Debugging
 
 		Result (JObject result, JObject error)
 		{
-			this.Value = result;
-			this.Error = error;
+			if (result != null && error != null)
+				throw new ArgumentException ($"Both {nameof(result)} and {nameof(error)} arguments cannot be non-null.");
+
+			bool resultHasError = String.Compare ((result? ["result"] as JObject)? ["subtype"]?. Value<string> (), "error") == 0;
+			if (result != null && resultHasError) {
+				this.Value = null;
+				this.Error = result;
+			} else {
+				this.Value = result;
+				this.Error = error;
+			}
 		}
 
 		public static Result FromJson (JObject obj)
@@ -122,13 +75,16 @@ namespace WebAssembly.Net.Debugging
 		public static Result Ok (JObject ok)
 			=> new Result (ok, null);
 
+		public static Result OkFromObject (object ok)
+			=> Ok (JObject.FromObject(ok));
+
 		public static Result Err (JObject err)
 			=> new Result (null, err);
 
 		public static Result Exception (Exception e)
 			=> new Result (null, JObject.FromObject (new { message = e.Message }));
 
-		public JObject ToJObject (MessageId target) {
+		internal JObject ToJObject (MessageId target) {
 			if (IsOk) {
 				return JObject.FromObject (new {
 					target.id,
@@ -144,7 +100,7 @@ namespace WebAssembly.Net.Debugging
 			}
 		}
 	}
-	
+
 	static class DevToolsHelper
 	{
 		public static Result ResultFromJObject (JObject result)

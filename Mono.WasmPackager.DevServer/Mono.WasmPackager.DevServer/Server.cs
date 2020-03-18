@@ -63,6 +63,10 @@ namespace Mono.WasmPackager.DevServer
 			if (string.IsNullOrEmpty (root))
 				throw new ArgumentNullException (nameof (root));
 
+			AppDomain.CurrentDomain.UnhandledException += (sender, e) => {
+				Debug.WriteLine ($"UNHANDLED EXCEPTION: {e.ExceptionObject}");
+			};
+
 			var options = new ServerOptions
 			{
 				WebRoot = root,

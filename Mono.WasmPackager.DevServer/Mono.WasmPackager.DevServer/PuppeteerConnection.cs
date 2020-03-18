@@ -37,7 +37,7 @@ namespace Mono.WasmPackager.DevServer
 			return Task.CompletedTask;
 		}
 
-		public override async Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true)
+		internal override async Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true)
 		{
 			var obj = await Session.SendAsync (method, args, waitForCallback);
 			return JObject.FromObject (new { result = obj });

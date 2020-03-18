@@ -39,12 +39,12 @@ namespace Mono.WasmPackager.DevServer
 
 		protected Task OnEvent (ConnectionEventArgs args)
 		{
-			return asyncQueue.EnqueueAsync (args);
+			return asyncQueue.EnqueueAsync (args, args.Close);
 		}
 
 		protected void OnEventSync (ConnectionEventArgs args)
 		{
-			asyncQueue.Enqueue (args);
+			asyncQueue.Enqueue (args, args.Close);
 		}
 
 		public async Task Start (Func<ConnectionEventArgs, CancellationToken, Task> handler, CancellationToken token)
@@ -58,12 +58,13 @@ namespace Mono.WasmPackager.DevServer
 
 		protected abstract Task Start (CancellationToken token);
 
-		public virtual async Task Close (CancellationToken cancellationToken)
+		public virtual async Task Close (bool wait, CancellationToken cancellationToken)
 		{
-			await asyncQueue.Close ();
+			if (wait)
+				await asyncQueue.Close ();
 		}
 
-		public abstract Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true);
+		internal abstract Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true);
 
 		public override string ToString () => $"[{GetType ().Name}:{Name}]";
 
