@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <NuspecFile>Mono.Linker.Optimizer.nuspec</NuspecFile>
+    <LangVersion>8.0</LangVersion>
     <NoWarn>NU5128</NoWarn>
   </PropertyGroup>
 

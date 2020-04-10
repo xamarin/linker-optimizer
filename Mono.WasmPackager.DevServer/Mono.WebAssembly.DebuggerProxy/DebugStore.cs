@@ -66,13 +66,13 @@ namespace WebAssembly.Net.Debugging {
 			var line = request? ["lineNumber"]?.Value<int> ();
 			var column = request? ["columnNumber"]?.Value<int> ();
 
-			if (line == null || column == null)
+			if (line == null)
 				return false;
 
 			Assembly = sourceFile.AssemblyName;
 			File = sourceFile.DebuggerFileName;
 			Line = line.Value;
-			Column = column.Value;
+			Column = column ?? 0;
 			return true;
 		}
 
@@ -658,11 +658,13 @@ namespace WebAssembly.Net.Debugging {
 			if (start.Column > spEnd.Column && start.Line == spEnd.Line)
 				return false;
 
-			if (end.Line < spStart.Line)
-				return false;
+			if (end != null) {
+				if (end.Line < spStart.Line)
+					return false;
 
-			if (end.Column < spStart.Column && end.Line == spStart.Line)
-				return false;
+				if (end.Column < spStart.Column && end.Line == spStart.Line)
+					return false;
+			}
 
 			return true;
 		}
@@ -670,7 +672,7 @@ namespace WebAssembly.Net.Debugging {
 		public List<SourceLocation> FindPossibleBreakpoints (SourceLocation start, SourceLocation end)
 		{
 			//XXX FIXME no idea what todo with locations on different files
-			if (start.Id != end.Id) {
+			if (end != null && start.Id != end.Id) {
 				logger.LogDebug ($"FindPossibleBreakpoints: documents differ (start: {start.Id}) (end {end.Id}");
 				return null;
 			}

@@ -18,8 +18,6 @@ namespace Mono.WasmPackager.DevServer
 	public class NewDevToolsProxy : IDisposable
 	{
 		MonoProxy proxy;
-		TaskCompletionSource<bool> side_exception = new TaskCompletionSource<bool> ();
-		TaskCompletionSource<bool> client_initiated_close = new TaskCompletionSource<bool> ();
 		AbstractConnection ideConnection;
 		AbstractConnection browserConnection;
 		AsyncQueue<ConnectionEventArgs> eventQueue;
@@ -39,10 +37,10 @@ namespace Mono.WasmPackager.DevServer
 			proxy = new MonoProxy (browserConnection, ideConnection, this, loggerFactory);
 		}
 
-		public static NewDevToolsProxy Create (P.CDPSession session, WebSocketManager manager)
+		public static NewDevToolsProxy Create (TestSession session, WebSocketManager manager)
 		{
 			var browserConnection = new PuppeteerConnection (session, "browser");
-			var ideConnection = new ServerWebSocketConnection (manager, session.SessionId, "ide");
+			var ideConnection = new ServerWebSocketConnection (manager, session.Session.SessionId, "ide");
 			return new NewDevToolsProxy (browserConnection, ideConnection);
 		}
 
@@ -147,7 +145,12 @@ namespace Mono.WasmPackager.DevServer
 			}, x.Token);
 		}
 
-		public Task WaitForExit () => exitTcs.Task;
+		public async Task WaitForExit ()
+		{
+			await exitTcs.Task.ConfigureAwait (false);
+			await ideConnection.Close (false, CancellationToken.None).ConfigureAwait (false);
+			await browserConnection.Close (false, CancellationToken.None).ConfigureAwait (false);
+		}
 
 		protected internal void Log (string priority, string msg)
 		{

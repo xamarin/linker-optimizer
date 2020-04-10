@@ -74,7 +74,7 @@ namespace Mono.Linker.Optimizer
 
 		void MarkAndPreserveAll (TypeDefinition type)
 		{
-			Annotations.MarkAndPush (type);
+			Annotations.Mark (type, new DependencyInfo (DependencyKind.RootAssembly, type.Module.Assembly));
 			Annotations.SetPreserve (type, TypePreserve.All);
 
 			if (type.HasNestedTypes) {

@@ -16,19 +16,19 @@ namespace Mono.WasmPackager.DevServer
 {
 	public class PuppeteerConnection : AbstractConnection
 	{
-		public CDPSession Session {
+		public TestSession Session {
 			get;
 		}
 
-		internal PuppeteerConnection (CDPSession session, string name = null)
-			: base (session.SessionId, name)
+		internal PuppeteerConnection (TestSession session, string name = null)
+			: base (session.Session.SessionId, name)
 		{
 			Session = session;
 		}
 
 		protected override Task Start (CancellationToken token)
 		{
-			Session.MessageReceived += (sender, e) => OnEventSync (new ConnectionEventArgs {
+			Session.Session.MessageReceived += (sender, e) => OnEventSync (new ConnectionEventArgs {
 				Sender = Name,
 				SessionId = SessionId,
 				Message = e.MessageID,
@@ -39,8 +39,15 @@ namespace Mono.WasmPackager.DevServer
 
 		internal override async Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true)
 		{
-			var obj = await Session.SendAsync (method, args, waitForCallback);
+			var obj = await Session.Session.SendAsync (method, args, waitForCallback);
 			return JObject.FromObject (new { result = obj });
 		}
+
+		public override async Task Close (bool wait, CancellationToken cancellationToken)
+		{
+			await Session.Target.Browser.CloseAsync ();
+			await base.Close (wait, cancellationToken);
+		}
+
 	}
 }

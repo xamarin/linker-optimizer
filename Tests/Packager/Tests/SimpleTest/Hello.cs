@@ -14,11 +14,9 @@ namespace SimpleTest
 	public class Hello : DebuggerTestBase
 	{
 		[Fact]
-		public async Task StartServer ()
+		public void StartServer ()
 		{
 			Debug.WriteLine ($"SERVER READY");
-
-			await Task.Delay (-1);
 		}
 	}
 }

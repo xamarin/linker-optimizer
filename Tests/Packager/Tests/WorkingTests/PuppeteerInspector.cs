@@ -11,7 +11,7 @@ using Xunit;
 using Mono.WasmPackager.TestSuite;
 using Mono.WasmPackager.DevServer;
 
-namespace SimpleTest
+namespace WorkingTests
 {
 	public class PuppeteerInspector : PuppeteerTestBase
 	{

@@ -63,18 +63,18 @@ namespace Mono.Linker.Optimizer
 
 		public void LogMessage (MessageImportance importance, string message)
 		{
-			Context.Logger.LogMessage (importance, message);
+			Context.LogMessage (importance, message);
 		}
 
 		public void LogWarning (string message)
 		{
-			Context.Logger.LogMessage (MessageImportance.High, message);
+			Context.LogMessage (MessageImportance.High, message);
 		}
 
 		[Conditional ("DEBUG")]
 		public void LogDebug (string message)
 		{
-			Context.Logger.LogMessage (MessageImportance.Low, message);
+			Context.LogMessage (MessageImportance.Low, message);
 		}
 
 		static bool initialized;

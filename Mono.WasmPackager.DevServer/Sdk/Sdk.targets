@@ -5,6 +5,7 @@
     <RunCommand>dotnet</RunCommand>
     <RunArguments>$(MSBuildThisFileDirectory)../tools/Mono.WasmPackager.DevServer.dll $(WasmPackager_DevServer_Arguments)</RunArguments>
     <RunWorkingDirectory>$(WasmPackager_DevServer_RootDir)</RunWorkingDirectory>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <PropertyGroup>

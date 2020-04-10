@@ -15,9 +15,9 @@
 				init: function () {
 					this.output = document.getElementById ("output");
 					this.button = document.getElementById ("button");
-					BINDING.call_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Main", []);
-					this.message = BINDING.bind_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Message", []);
-					this.throw = BINDING.bind_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Throw", []);
+					BINDING.call_static_method("[WorkingTests.WebSample] WorkingTests.WebSample.Hello:Main", []);
+					this.message = BINDING.bind_static_method("[WorkingTests.WebSample] WorkingTests.WebSample.Hello:Message", []);
+					this.throw = BINDING.bind_static_method("[WorkingTests.WebSample] WorkingTests.WebSample.Hello:Throw", []);
 					this.output.innerText = textReady
 				},
 				onClickMessage: function () {

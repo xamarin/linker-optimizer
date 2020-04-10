@@ -27,9 +27,9 @@ namespace Mono.WasmPackager.DevServer
 			get;
 		}
 
-		public static ConcurrentDictionary<string, CDPSession> Registration {
+		public static ConcurrentDictionary<string, TestSession> Registration {
 			get;
-		} = new ConcurrentDictionary<string, CDPSession> ();
+		} = new ConcurrentDictionary<string, TestSession> ();
 
 		static readonly TimeSpan StartupTimeout = TimeSpan.FromDays (10);
 
@@ -40,7 +40,7 @@ namespace Mono.WasmPackager.DevServer
 			Server = server;
 		}
 
-		public async Task ServePuppeteer (HttpContext context, CDPSession instance)
+		public async Task ServePuppeteer (HttpContext context, TestSession instance)
 		{
 			if (!context.WebSockets.IsWebSocketRequest) {
 				context.Response.StatusCode = 400;
@@ -98,6 +98,8 @@ namespace Mono.WasmPackager.DevServer
 					return;
 				}
 				await ServePuppeteer (context, session);
+				Debug.WriteLine ($"Puppeteer instance test request done: {instanceId}");
+				await context.Response.CompleteAsync ();
 			});
 		}
 	}

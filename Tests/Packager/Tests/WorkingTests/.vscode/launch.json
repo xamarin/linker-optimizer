@@ -1,15 +1,15 @@
 //
 // AUTO-GENERATED FILE - DO NOT MODIFY!
-// This file has been auto-generated from launch-web.json.
+// This file has been auto-generated from launch-test.json.
 //
 {
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "SimpleWeb2",
+            "name": "WorkingTests.Test",
             "type": "coreclr",
             "request": "launch",
-//            "preLaunchTask": "build",
+            "preLaunchTask": "build",
             "program": "${workspaceFolder}/../../.packages/mono.wasmpackager.devserver/1.0.0/tools/Mono.WasmPackager.DevServer.dll",
             "args": [
                 "--debug",
@@ -21,7 +21,7 @@
             "console": "internalConsole"
         },
         {
-            "name": "SimpleWeb2 Optimizer",
+            "name": "WorkingTests.Test Optimizer",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/../../../../Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",

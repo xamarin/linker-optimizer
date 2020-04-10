@@ -35,6 +35,10 @@ namespace Mono.WasmPackager.TestSuite
 		Page page;
 		CDPSession session;
 
+		public TestSession Session {
+			get; private set;
+		}
+
 		NewDevToolsClient client;
 		AbstractConnection connection;
 		CancellationTokenSource cts;
@@ -68,7 +72,9 @@ namespace Mono.WasmPackager.TestSuite
 			context = await browser.CreateIncognitoBrowserContextAsync ();
 			page = await context.NewPageAsync ();
 
-			session = await page.Target.CreateCDPSessionAsync ();
+			var session = await page.Target.CreateCDPSessionAsync ();
+
+			Session = new TestSession (page.Target, session);
 
 			var url = $"http://localhost:{Server.ServerOptions.FileServerPort}/{Server.ServerOptions.PagePath}";
 
@@ -79,7 +85,7 @@ namespace Mono.WasmPackager.TestSuite
 			var targetId = page.Target.TargetId;
 			var uri = new Uri ($"ws://localhost:{Server.ServerOptions.DebugServerPort}/connect-to-puppeteer?instance-id={targetId}");
 
-			if (!TestHarnessStartup.Registration.TryAdd (targetId, session))
+			if (!TestHarnessStartup.Registration.TryAdd (targetId, Session))
 				throw new InvalidOperationException ($"Failed to register target '{targetId}'.");
 
 			connection = new ClientWebSocketConnection (uri, null);
@@ -116,7 +122,7 @@ namespace Mono.WasmPackager.TestSuite
 		public override async Task DisposeAsync ()
 		{
 			if (connection != null) {
-				await connection.Close (true, cts.Token);
+				await connection.Close (false, cts.Token);
 				connection.Dispose ();
 				connection = null;
 			}
@@ -134,6 +140,7 @@ namespace Mono.WasmPackager.TestSuite
 				browser.Dispose ();
 				browser = null;
 			}
+
 			if (page != null) {
 				page.Dispose ();
 				page = null;

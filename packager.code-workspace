@@ -5,6 +5,14 @@
 			"path": "Tests/Packager/Tests/SimpleTest"
 		},
 		{
+			"name": "WorkingTests",
+			"path": "Tests/Packager/Tests/WorkingTests"
+		},
+		{
+			"name": "SimpleTest/WebSample",
+			"path": "Tests/Packager/Tests/SimpleTest/WebSample"
+		},
+		{
 			"name": "Samples/SimpleHello",
 			"path": "Tests/Packager/Samples/SimpleHello"
 		},
@@ -132,7 +140,6 @@
 			"doggy8088.netcore-extension-pack",
 			"formulahendry.dotnet",
 			"formulahendry.dotnet-test-explorer",
-			"ms-vscode.csharp",
 			"leopotam.csharpfixformat",
 			"tintoy.msbuild-project-tools",
 			"spmeesseman.vscode-taskexplorer"

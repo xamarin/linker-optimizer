@@ -66,8 +66,6 @@ namespace Mono.Linker.Optimizer
 			while (_conditional_methods.Count > 0) {
 				var conditional = _conditional_methods.Dequeue ();
 
-				Tracer.Push (conditional);
-
 				var scanner = _block_scanner_by_method [conditional];
 				if (scanner.DebugLevel > 0) {
 					OptimizerContext.LogMessage (MessageImportance.Normal, $"CONDITIONAL METHOD: {conditional}");
@@ -76,8 +74,6 @@ namespace Mono.Linker.Optimizer
 
 				scanner.RewriteConditionals ();
 				base.MarkMethodBody (conditional.Body);
-
-				Tracer.Pop ();
 			}
 		}
 
@@ -114,12 +110,12 @@ namespace Mono.Linker.Optimizer
 			base.MarkMethodBody (body);
 		}
 
-		protected override TypeDefinition MarkType (TypeReference reference)
+		protected override TypeDefinition MarkType (TypeReference reference, DependencyInfo reason)
 		{
 			if (reference == null)
 				return null;
 
-			reference = GetOriginalType (reference);
+			(reference, reason) = GetOriginalType (reference, reason);
 
 			if (reference is FunctionPointerType)
 				return null;
@@ -146,10 +142,10 @@ namespace Mono.Linker.Optimizer
 			if (ProcessingConditionals && OptimizerContext.IsConditionalTypeMarked (type))
 				OptimizerContext.AttemptingToRedefineConditional (type);
 
-			return base.MarkType (reference);
+			return base.MarkType (reference, reason);
 		}
 
-		protected override void EnqueueMethod (MethodDefinition method)
+		protected override void EnqueueMethod (MethodDefinition method, in DependencyInfo reason)
 		{
 			if (OptimizerContext.Options.EnableDebugging (OptimizerContext, method)) {
 				OptimizerContext.LogMessage (MessageImportance.Normal, $"ENQUEUE METHOD: {method}");
@@ -161,7 +157,7 @@ namespace Mono.Linker.Optimizer
 			if (_conditional_methods.Contains (method))
 				return;
 
-			base.EnqueueMethod (method);
+			base.EnqueueMethod (method, reason);
 		}
 	}
 }

@@ -113,9 +113,8 @@ namespace Mono.WasmPackager.DevServer
 			DumpProtocol ($"SEND COMMAND: {method}");
 			var command = new Command (sessionId.sessionId ?? SessionId, method, args, waitForCallback);
 			command.Encoded = Encode (command);
-			DumpProtocol ($"SEND COMMAND #1: {method} {waitForCallback} {command.Encoded}");
 			await sendQueue.EnqueueAsync (command).ConfigureAwait (false);
-			DumpProtocol ($"SEND COMMAND #2: {method} {waitForCallback}");
+			DumpProtocol ($"SEND COMMAND #1: {method} {waitForCallback}");
 			if (!waitForCallback)
 				return null;
 			var result = await command.Completion.Task.ConfigureAwait (false);
@@ -138,7 +137,9 @@ namespace Mono.WasmPackager.DevServer
 			Log ($"CLOSE: {socket} {socket.State}");
 			if (socket.State == WebSocketState.Open)
 				await socket.CloseOutputAsync (WebSocketCloseStatus.NormalClosure, "Closing", cancellationToken);
+			Log ($"CLOSE #1: {socket} {socket.State}");
 			await base.Close (wait, cancellationToken).ConfigureAwait (false);
+			Log ($"CLOSE #2: {socket} {socket.State}");
 		}
 
 		async Task Send (Command command, CancellationToken token)
@@ -147,7 +148,7 @@ namespace Mono.WasmPackager.DevServer
 			var bytes = Encoding.UTF8.GetBytes (str);
 
 			await socket.SendAsync (new ArraySegment<byte> (bytes), WebSocketMessageType.Text, true, token).ConfigureAwait (false);
-			DumpProtocol ($"SEND: {command.Method}: {str}");
+			DumpProtocol ($"SEND: {command.Method}");
 		}
 
 		protected abstract JObject Encode (Command command);

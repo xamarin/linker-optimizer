@@ -60,12 +60,16 @@ namespace Mono.WasmPackager.DevServer
 			DumpProtocol ($"ENCODE: {id} {command.Method}");
 			pendingCmds.Add ((id, command));
 
-			return JObject.FromObject (new {
+			var obj = JObject.FromObject (new {
 				id = id,
-				sessionId = command.SessionId,
 				method = command.Method,
 				@params = args
 			});
+
+			if (command.SessionId != null)
+				obj["sessionId"] = command.SessionId;
+
+			return obj;
 		}
 	}
 }

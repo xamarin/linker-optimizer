@@ -33,7 +33,7 @@ using Mono.Linker.Steps;
 
 namespace Mono.Linker.Optimizer
 {
-	public static class Program
+	public class Program : Driver
 	{
 		static readonly OptimizerOptions options = new OptimizerOptions ();
 		static string mainModule;
@@ -41,14 +41,16 @@ namespace Mono.Linker.Optimizer
 
 		internal const string ProgramName = "Mono Linker Optimizer";
 
-		public static int Main (string[] args)
+		new public static int Main (string [] args)
 		{
 			if (args.Length == 0) {
 				Console.Error.WriteLine ("No parameters specified");
 				return 1;
 			}
 
-			var arguments = ProcessResponseFile (args);
+			if (!ProcessResponseFile (args, out var arguments))
+				return 1;
+
 			ParseArguments (arguments);
 
 			var env = Environment.GetEnvironmentVariable ("LINKER_OPTIMIZER_OPTIONS");
@@ -59,51 +61,45 @@ namespace Mono.Linker.Optimizer
 
 			moduleEnabled &= !options.DisableModule;
 
-			if (mainModule != null) {
-				// arguments.Insert(0, "-a");
-				// arguments.Insert(1, mainModule);
-			} else if (moduleEnabled) {
+			if (moduleEnabled && mainModule == null) {
 				Console.Error.WriteLine ("Missing main module argument.");
 				return 1;
 			}
 
 			if (moduleEnabled) {
-				arguments.Add ("--custom-step");
-				arguments.Add ($"{typeof (InitializeStep).AssemblyQualifiedName}:ResolveFromAssemblyStep");
-
 				if (!options.IsFeatureEnabled (MonoLinkerFeature.ReflectionEmit)) {
-					arguments.Add ("--exclude-feature");
-					arguments.Add ("sre");
+					arguments.Enqueue ("--exclude-feature");
+					arguments.Enqueue ("sre");
 				}
 				if (!options.IsFeatureEnabled (MonoLinkerFeature.Security)) {
-					arguments.Add ("--exclude-feature");
-					arguments.Add ("security");
+					arguments.Enqueue ("--exclude-feature");
+					arguments.Enqueue ("security");
 				}
 				if (!options.IsFeatureEnabled (MonoLinkerFeature.Remoting)) {
-					arguments.Add ("--exclude-feature");
-					arguments.Add ("remoting");
+					arguments.Enqueue ("--exclude-feature");
+					arguments.Enqueue ("remoting");
 				}
 				if (!options.IsFeatureEnabled (MonoLinkerFeature.Globalization)) {
-					arguments.Add ("--exclude-feature");
-					arguments.Add ("globalization");
+					arguments.Enqueue ("--exclude-feature");
+					arguments.Enqueue ("globalization");
 				}
 				if (mainModule != null) {
-					arguments.Add ("-a");
-					arguments.Add (mainModule);
+					arguments.Enqueue ("-a");
+					arguments.Enqueue (mainModule);
 				}
 			} else {
 				Console.Error.WriteLine ($"Optimizer is disabled.");
 			}
 
 			// Always disable the RemoveUnreachableBlocksStep; it is incomplete and does not work.
-			arguments.Add ("--disable-opt");
-			arguments.Add ("ipconstprop");
+			arguments.Enqueue ("--disable-opt");
+			arguments.Enqueue ("ipconstprop");
 
 			var watch = new Stopwatch ();
 			watch.Start ();
 
 			try {
-				var driver = new Driver (arguments.ToArray ());
+				var driver = new Program (arguments);
 				driver.Run ();
 			} catch (OptimizerException ex) {
 				Console.Error.WriteLine ($"Fatal error in {ProgramName}: {ex.Message}");
@@ -130,9 +126,34 @@ namespace Mono.Linker.Optimizer
 			return 0;
 		}
 
-		static List<string> ProcessResponseFile (string[] args)
+		public Program (Queue<string> arguments)
+			: base (arguments)
 		{
-			var result = new Queue<string> ();
+		}
+
+		protected override LinkContext GetDefaultContext (Pipeline pipeline)
+		{
+			if (moduleEnabled) {
+				var step = new InitializeStep (mainModule);
+				pipeline.PrependStep (step);
+			}
+			return base.GetDefaultContext (pipeline);
+		}
+
+		static IStep FindStep (Pipeline pipeline, string name)
+		{
+			foreach (IStep step in pipeline.GetSteps ()) {
+				Type t = step.GetType ();
+				if (t.Name == name)
+					return step;
+			}
+
+			return null;
+		}
+
+		static bool ProcessResponseFile (string [] args, out Queue<string> result)
+		{
+			result = new Queue<string> ();
 			foreach (string arg in args) {
 				if (arg.StartsWith ("@", StringComparison.Ordinal)) {
 					try {
@@ -141,57 +162,52 @@ namespace Mono.Linker.Optimizer
 						Driver.ParseResponseFileLines (responseFileLines, result);
 					} catch (Exception e) {
 						Console.Error.WriteLine ("Cannot read response file with exception " + e.Message);
-						Environment.Exit (1);
+						return false;
 					}
 				} else {
 					result.Enqueue (arg);
 				}
 			}
-			return result.ToList ();
+			return true;
 		}
 
-		static void ParseArguments (List<string> arguments)
+		static void ParseArguments (Queue<string> arguments)
 		{
 			while (arguments.Count > 0) {
-				var token = arguments[0];
+				var token = arguments.Peek ();
 				if (token == "--") {
-					arguments.RemoveAt (0);
+					arguments.Dequeue ();
 					break;
 				}
 				if (!token.StartsWith ("--optimizer", StringComparison.Ordinal))
 					break;
 
-				arguments.RemoveAt (0);
+				arguments.Dequeue ();
 				switch (token) {
 				case "--optimizer":
 					if (mainModule != null) {
 						Console.Error.WriteLine ($"Duplicate --optimizer argument.");
 						Environment.Exit (1);
 					}
-					mainModule = arguments[0];
-					arguments.RemoveAt (0);
+					mainModule = arguments.Dequeue ();
 					LoadFile (mainModule);
 					moduleEnabled = true;
 					continue;
 				case "--optimizer-xml":
-					var filename = arguments[0];
-					arguments.RemoveAt (0);
+					var filename = arguments.Dequeue ();
 					OptionsReader.Read (options, filename);
 					moduleEnabled = true;
 					break;
 				case "--optimizer-options":
-					options.ParseOptions (arguments[0]);
-					arguments.RemoveAt (0);
+					options.ParseOptions (arguments.Dequeue ());
 					moduleEnabled = true;
 					break;
 				case "--optimizer-report":
-					filename = arguments [0];
-					arguments.RemoveAt (0);
+					filename = arguments.Dequeue ();
 					options.ReportFileName = filename;
 					break;
 				case "--optimizer-ref":
-					filename = arguments [0];
-					arguments.RemoveAt (0);
+					filename = arguments.Dequeue ();
 					options.AssemblyReferences.Add (filename);
 					break;
 				}
@@ -207,9 +223,18 @@ namespace Mono.Linker.Optimizer
 
 		class InitializeStep : IStep
 		{
+			public string MainModule {
+				get;
+			}
+
+			public InitializeStep (string mainModule)
+			{
+				MainModule = mainModule;
+			}
+
 			public void Process (LinkContext context)
 			{
-				OptimizerContext.Initialize (context, mainModule, options);
+				OptimizerContext.Initialize (context, MainModule, options);
 			}
 		}
 	}

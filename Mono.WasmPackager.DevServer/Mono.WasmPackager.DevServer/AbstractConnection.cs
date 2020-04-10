@@ -17,6 +17,7 @@ namespace Mono.WasmPackager.DevServer
 	{
 		public string SessionId {
 			get;
+			protected set;
 		}
 
 		public string Name {

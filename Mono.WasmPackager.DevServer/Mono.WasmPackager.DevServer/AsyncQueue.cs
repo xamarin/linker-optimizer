@@ -14,8 +14,8 @@ namespace Mono.WasmPackager.DevServer
 		where T : class
 	{
 		const int DefaultTimeout = -1;
-		const int MainLoopTimeout = 15;
-		const int HandlerTimout = 60;
+		const int MainLoopTimeout = 120;
+		const int HandlerTimout = 500;
 
 		readonly List<Task> pending;
 
@@ -145,12 +145,13 @@ namespace Mono.WasmPackager.DevServer
 			pending.Add (Task.Delay (MainLoopTimeout));
 
 			while (closed == 0 && !cts.IsCancellationRequested) {
-				Log ($"MAIN LOOP");
 				var task = await Task.WhenAny (pending);
 				if (task == pending [1]) {
 					Log ($"MAIN LOOP - STILL RUNNING");
 					pending [1] = Task.Delay (TimeSpan.FromSeconds (MainLoopTimeout));
 					continue;
+				} else {
+					Log ($"MAIN LOOP - GOT EVENT");
 				}
 
 				var entry = ((Task<QueueEntry>)task).Result;
@@ -194,6 +195,7 @@ namespace Mono.WasmPackager.DevServer
 			if (Interlocked.CompareExchange (ref closed, 1, 0) != 0)
 				return;
 
+			Log ($"CLOSE");
 			await completedTcs.Task.ConfigureAwait (false);
 			Log ($"CLOSE - DONE");
 		}

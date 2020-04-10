@@ -13,5 +13,10 @@ namespace SimpleWeb2
 		{
 			throw new InvalidTimeZoneException ("I LIVE ON THE MOON!");
 		}
+
+		public static void TestMessage ()
+		{
+			Console.WriteLine ($"HELLO WORLD!");
+		}
 	}
 }
