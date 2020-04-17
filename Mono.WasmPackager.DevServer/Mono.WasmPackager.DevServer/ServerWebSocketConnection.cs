@@ -31,7 +31,6 @@ namespace Mono.WasmPackager.DevServer
 
 		protected override ConnectionEventArgs Decode (JObject message)
 		{
-			DumpProtocol ($"DECODE: {message}");
 			var args = new ConnectionEventArgs {
 				Sender = Name,
 				SessionId = SessionId,
@@ -55,12 +54,6 @@ namespace Mono.WasmPackager.DevServer
 			if (command.Method == null && args["id"] != null) {
 				id = args["id"].Value<int> ();
 				o = (JObject)command.Arguments;
-				/*
-				o = JObject.FromObject (new {
-					id = id,
-					@params = args
-				});
-				*/
 			} else {
 				id = ++next_cmd_id;
 				o = JObject.FromObject (new {
@@ -69,7 +62,6 @@ namespace Mono.WasmPackager.DevServer
 				});
 			}
 
-			DumpProtocol ($"ENCODE: {id} {command.Method}");
 			pendingCmds.Add ((id, command));
 
 			return o;

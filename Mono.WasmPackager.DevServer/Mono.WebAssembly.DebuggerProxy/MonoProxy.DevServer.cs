@@ -112,11 +112,14 @@ namespace WebAssembly.Net.Debugging {
 
 		internal void AcceptCommand (MessageId id, ConnectionEventArgs eventArgs)
 		{
+			if (!contexts.TryGetValue (id, out var context))
+				return;
+
 			var args = eventArgs.Arguments;
 			var method = eventArgs.Message;
 			switch (method) {
 			case "Debugger.enable": {
-					eventArgs.Handler = token => OnDebuggerEnable (id, method, args, token);
+					eventArgs.Handler = token => OnDebuggerEnable (id, method, args, context, token);
 					break;
 				}
 
@@ -144,12 +147,12 @@ namespace WebAssembly.Net.Debugging {
 				}
 
 			case "Debugger.setBreakpointByUrl": {
-					eventArgs.Handler = token => OnSetBreakpointByUrl (id, method, args, token);
+					eventArgs.Handler = token => OnSetBreakpointByUrl (id, method, args, context, token);
 					break;
 				}
 
 			case "Debugger.removeBreakpoint": {
-					eventArgs.Handler = token => RemoveBreakpoint (id, args, token);
+					eventArgs.Handler = token => OnRemoveBreakpoint (id, method, args, context, token);
 					break;
 				}
 

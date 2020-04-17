@@ -27,13 +27,13 @@ namespace Mono.WasmPackager.TestSuite
 		Dictionary<string, TaskCompletionSource<JObject>> notifications = new Dictionary<string, TaskCompletionSource<JObject>> ();
 		Dictionary<string, Func<JObject, CancellationToken, Task>> eventListeners = new Dictionary<string, Func<JObject, CancellationToken, Task>> ();
 
+		public const string RESUME = "resume";
 		public const string PAUSE = "pause";
 		public const string READY = "ready";
 
 		Browser browser;
 		BrowserContext context;
 		Page page;
-		CDPSession session;
 
 		public TestSession Session {
 			get; private set;
@@ -174,6 +174,9 @@ namespace Mono.WasmPackager.TestSuite
 		async Task OnEvent (ConnectionEventArgs args, CancellationToken token)
 		{
 			switch (args.Message) {
+			case "Debugger.resumed":
+				NotifyOf (RESUME, args.Arguments);
+				break;
 			case "Debugger.paused":
 				NotifyOf (PAUSE, args.Arguments);
 				break;

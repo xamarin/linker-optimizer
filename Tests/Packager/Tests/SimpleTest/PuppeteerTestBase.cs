@@ -15,6 +15,15 @@ namespace SimpleTest
 {
 	public abstract class PuppeteerTestBase : InspectorTestBase
 	{
+		// Keep in sync with the javascript side
+		protected const string MessageText = "MESSAGE BUTTON CLICKED";
+		protected const string MessageText2 = "MESSAGE BUTTON CLICKED - BACK FROM MANAGED";
+		protected const string TextReady = "READY";
+		protected const string TextMessage = "MESSAGE";
+		protected const string ThrowMessage = "THROW";
+
+		protected const int DefaultTimeout = 15;
+
 		protected Task<string> WaitForConsole (string message, bool regex = false)
 		{
 			var tcs = new TaskCompletionSource<string> ();
@@ -134,6 +143,33 @@ namespace SimpleTest
 
 			var bp1_res = await SendCommand ("Debugger.getPossibleBreakpoints", bp1_req);
 			Assert.True (bp1_res.IsOk);
+		}
+
+		protected async Task<string> InsertBreakpoint (string file, int line)
+		{
+			var request = JObject.FromObject (new
+			{
+				lineNumber = line,
+				url = FileToUrl[$"dotnet://{Settings.DevServer_Assembly}/{file}"],
+			});
+
+			var result = await SendCommand ("Debugger.setBreakpointByUrl", request);
+			Assert.True (result.IsOk);
+			var breakpointId = (string)result.Value ["breakpointId"];
+			Assert.EndsWith (file, breakpointId);
+			Assert.Equal (1, result.Value["locations"]?.Value<JArray> ()?.Count);
+			return breakpointId;
+		}
+
+		protected async Task RemoveBreakpoint (string breakpointId)
+		{
+			var request = JObject.FromObject (new
+			{
+				breakpointId = breakpointId
+			});
+
+			var result = await SendCommand ("Debugger.removeBreakpoint", request);
+			Assert.True (result.IsOk);
 		}
 	}
 }

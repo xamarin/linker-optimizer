@@ -53,25 +53,23 @@ namespace Mono.WasmPackager.DevServer
 
 		internal async Task<Result> SendCommand (SessionId id, string method, JObject args, CancellationToken token)
 		{
-			Log ("verbose", $"sending command {method}: {args}");
+			LogProtocol (method, "sending command", args);
 			if (id.sessionId != null && id.sessionId != browserConnection.SessionId)
 				throw new InvalidOperationException ();
 
-			Log ("verbose", $"sending to browser: {method} {args}");
-
 			try {
 				var result = await browserConnection.SendAsync (id, method, args).ConfigureAwait (false);
-				Log ("verbose", $"sending to browser - response: {method} {result}");
+				LogProtocol (method, "sending to browser - response", result);
 				return Result.FromJson (result);
 			} catch (Exception e) {
-				Log ("verbose", $"sending to browser - error: {method} {e.Message}");
+				LogProtocol (method, "sending to browser - error", e.Message);
 				return Result.Exception (e);
 			}
 		}
 
 		internal async Task SendEvent (SessionId sessionId, string method, JObject args, CancellationToken token)
 		{
-			Log ("verbose", $"sending to ide: {method} {args}");
+			LogProtocol (method, "sending to ide", args);
 			await ideConnection.SendAsync (sessionId, method, args, false).ConfigureAwait (false);
 		}
 
@@ -118,7 +116,7 @@ namespace Mono.WasmPackager.DevServer
 					exitTcs.TrySetResult (false);
 					return;
 				}
-				Log ("verbose", $"BROWSER MESSAGE: {args.Message} {args.Arguments}");
+				LogProtocol (args.Message, "BROWSER MESSAGE", args.Arguments);
 				var sessionId = new SessionId (args.SessionId);
 				proxy.AcceptEvent (sessionId, args);
 				if (args.Handler != null)
@@ -133,7 +131,7 @@ namespace Mono.WasmPackager.DevServer
 					exitTcs.TrySetResult (false);
 					return;
 				}
-				Log ("verbose", $"IDE MESSAGE: {args.Message} {args.Arguments}");
+				LogProtocol (args.Message, "IDE MESSAGE", args.Arguments);
 				var id = new MessageId (args.SessionId, args.Id);
 				proxy.AcceptCommand (id, args);
 				if (args.Handler != null)
@@ -150,6 +148,18 @@ namespace Mono.WasmPackager.DevServer
 			await exitTcs.Task.ConfigureAwait (false);
 			await ideConnection.Close (false, CancellationToken.None).ConfigureAwait (false);
 			await browserConnection.Close (false, CancellationToken.None).ConfigureAwait (false);
+		}
+
+		protected internal void LogProtocol (string method, string msg, object args)
+		{
+			switch (method) {
+			case "Runtime.consoleAPICalled":
+				Debug.WriteLine ($"{msg}: {method}");
+				break;
+			default:
+				Debug.WriteLine ($"{msg}: {method} {args}");
+				break;
+			}
 		}
 
 		protected internal void Log (string priority, string msg)

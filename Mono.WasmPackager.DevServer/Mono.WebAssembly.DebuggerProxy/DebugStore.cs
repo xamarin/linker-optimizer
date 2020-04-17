@@ -171,10 +171,10 @@ namespace WebAssembly.Net.Debugging {
 
 			var line = obj ["lineNumber"]?.Value<int> ();
 			var column = obj ["columnNumber"]?.Value<int> ();
-			if (id == null || line == null || column == null)
+			if (id == null || line == null)
 				return null;
 
-			return new SourceLocation (id, line.Value, column.Value);
+			return new SourceLocation (id, line.Value, column ?? 0);
 		}
 
 		internal object AsLocation ()

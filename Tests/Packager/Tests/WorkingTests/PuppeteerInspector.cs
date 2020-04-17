@@ -15,13 +15,6 @@ namespace WorkingTests
 {
 	public class PuppeteerInspector : PuppeteerTestBase
 	{
-		// Keep in sync with the javascript side
-		const string MessageText = "MESSAGE BUTTON CLICKED";
-		const string MessageText2 = "MESSAGE BUTTON CLICKED - BACK FROM MANAGED";
-		const string TextReady = "READY";
-		const string TextMessage = "MESSAGE";
-		const string ThrowMessage = "THROW";
-
 		[Fact]
 		public async Task TestMessage ()
 		{

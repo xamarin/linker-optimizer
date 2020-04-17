@@ -187,7 +187,9 @@ namespace Mono.WasmPackager.DevServer
 
 		protected virtual void Log (string msg)
 		{
+#if DEBUG_ASYNC_QUEUE
 			Debug.WriteLine ($"[AsyncQueue:{typeof (T).Name}:{Name}:{queue.Count}:{pending.Count}]: {msg}");
+#endif
 		}
 
 		public async Task Close ()

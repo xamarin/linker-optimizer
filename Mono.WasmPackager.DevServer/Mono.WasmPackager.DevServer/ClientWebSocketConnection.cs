@@ -45,7 +45,6 @@ namespace Mono.WasmPackager.DevServer
 
 			var id = message ["id"].Value<int> ();
 			var idx = pendingCmds.FindIndex (e => e.Item1 == id);
-			DumpProtocol ($"ON MESSAGE: {id} {idx}");
 			var command = pendingCmds [idx];
 			pendingCmds.RemoveAt (idx);
 			command.Item2.Completion.SetResult (message);
@@ -57,8 +56,7 @@ namespace Mono.WasmPackager.DevServer
 			int id = ++next_cmd_id;
 			var args = command.Arguments ?? new JObject ();
 
-			DumpProtocol ($"ENCODE: {id} {command.Method}");
-			pendingCmds.Add ((id, command));
+ 			pendingCmds.Add ((id, command));
 
 			var obj = JObject.FromObject (new {
 				id = id,
