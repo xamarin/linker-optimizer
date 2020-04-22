@@ -21,10 +21,13 @@
     <ProjectReference Include="..\..\external\linker\external\cecil\Mono.Cecil.csproj" />
     <ProjectReference Include="..\..\external\linker\external\cecil\symbols\mdb\Mono.Cecil.Mdb.csproj" />
     <ProjectReference Include="..\..\external\linker\external\cecil\symbols\pdb\Mono.Cecil.Pdb.csproj" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.0" />
+    <PackageReference Include="System.Text.Json" Version="4.7.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\..\external\linker\src\linker\Linker\*.cs" />
+    <Compile Include="..\..\external\linker\src\linker\Linker.DataFlow\*.cs" />
     <Compile Include="..\..\external\linker\src\linker\Linker.Steps\*.cs" />
   </ItemGroup>
 

@@ -87,7 +87,7 @@ namespace Mono.WasmPackager
 
 		const string BINDINGS_ASM_NAME = "WebAssembly.Bindings";
 		const string BINDINGS_RUNTIME_CLASS_NAME = "WebAssembly.Runtime";
-		const string HTTP_ASM_NAME = "WebAssembly.Net.Http";
+		const string HTTP_ASM_NAME = "System.Net.Http.WebAssemblyHttpHandler";
 		const string WEBSOCKETS_ASM_NAME = "WebAssembly.Net.WebSockets";
 		const string BINDINGS_MODULE = "corebindings.o";
 		const string BINDINGS_MODULE_SUPPORT = "$tool_prefix/src/binding_support.js";

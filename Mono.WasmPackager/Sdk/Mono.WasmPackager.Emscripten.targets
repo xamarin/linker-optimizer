@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <UsingTask TaskName="Mono.WasmPackager.Emscripten.SourceEnvironment" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
+  <UsingTask TaskName="Mono.WasmPackager.Emscripten.ConstructEmccEnv" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
   <UsingTask TaskName="Mono.WasmPackager.Emscripten.Emcc" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
 
   <PropertyGroup>
@@ -29,7 +30,12 @@
       Outputs="$(_WasmPackager_EmsdkEnv)">
     <Message Importance="High" Text="WasmPackager - generating emsdk env: $(_WasmPackager_EmsdkEnv)" />
     <MakeDir Directories="$(WasmPackager_BuildDir)" />
-    <Exec Command="$(WasmPackager_Emscripten_SdkDir)/emsdk construct_env $(_WasmPackager_EmsdkEnv)" />
+    <MakeDir Directories="$(WasmPackager_EmsdkCacheDir)" />
+
+    <ConstructEmccEnv
+          SdkDir="$(WasmPackager_Emscripten_SdkDir)"
+          EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
+          ConfigFile="$(WasmPackager_EmsdkConfigFile)" />
 
     <Message Importance="High" Text="_WasmPackager_Emcc_ConstructEnv: $(_WasmPackager_EnableAot)" />
     <Message Importance="Normal" Text="  WasmPackager_Emcc_Sources: %(WasmPackager_Emcc_Sources.Identity) - %(Emcc_Input) - %(Emcc_Output)" />
@@ -64,6 +70,7 @@
     <Emcc SdkDir="$(WasmPackager_Emscripten_SdkDir)"
           EmsdkEnv="$(_WasmPackager_EmsdkEnv)"
           CacheDir="$(WasmPackager_EmsdkCacheDir)"
+          ConfigFile="$(WasmPackager_EmsdkConfigFile)"
           Input="@(__WasmPackager_LinkEmcc_Inputs, ' ') @(WasmPackager_Emcc_JsLibraries->'--js-library %(Identity)', ' ')"
           Output="$(WasmPackager_Emcc_Output)"
           Flags="$(WasmPackager_Emcc_Flags) $(WasmPackager_Emcc_Link_Flags)" />

@@ -26,6 +26,10 @@ namespace Mono.WasmPackager.Emscripten
 			get; set;
 		}
 
+		public string ConfigFile {
+			get; set;
+		}
+
 		public string Output {
 			get; set;
 		}
@@ -45,8 +49,14 @@ namespace Mono.WasmPackager.Emscripten
 			foreach (var var in environment)
 				psi.EnvironmentVariables[var.Key] = var.Value;
 
-			if (!string.IsNullOrEmpty (CacheDir))
+			if (!string.IsNullOrEmpty (CacheDir)) {
+				Log.LogMessage (MessageImportance.Normal, $"  Cache Dir: {CacheDir}");
 				psi.EnvironmentVariables["EM_CACHE"] = CacheDir;
+			}
+			if (!string.IsNullOrEmpty (ConfigFile)) {
+				Log.LogMessage (MessageImportance.Normal, $"  Config File: {ConfigFile}");
+				psi.EnvironmentVariables["EM_CONFIG"] = ConfigFile;
+			}
 
 			if (string.IsNullOrEmpty (Output))
 				Output = Path.ChangeExtension (Input, ".o");
@@ -55,7 +65,7 @@ namespace Mono.WasmPackager.Emscripten
 			arguments.Add (Input);
 			arguments.Add (Flags);
 			arguments.Add ($"-o {Output}");
-//			arguments.Add ("--verbose");
+			arguments.Add ("--verbose");
 
 			psi.Arguments = string.Join (" ", arguments);
 

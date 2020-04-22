@@ -38,7 +38,7 @@
     <PackageReference Include="Mono.WebAssembly.Runtime" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime.Aot" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="WebAssembly.Bindings" Version="$(MonoWebAssemblySdkVersion)" />
-    <PackageReference Include="WebAssembly.Net.Http" Version="$(MonoWebAssemblySdkVersion)" />
+    <PackageReference Include="System.Net.Http.WebAssemblyHttpHandler" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="WebAssembly.Net.WebSockets" Version="$(MonoWebAssemblySdkVersion)" />
   </ItemGroup>
 

@@ -7,6 +7,7 @@
     <WasmPackager_RuntimeTemplate Condition="'$(WasmPackager_RuntimeTemplate)' == ''">runtime-tests.js</WasmPackager_RuntimeTemplate>
     <WasmPackager_EnableDebug Condition="'$(WasmPackager_EnableDebug)' == ''">false</WasmPackager_EnableDebug>
     <WasmPackager_EmsdkCacheDir Condition="'$(WasmPackager_EmsdkCacheDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/.emscripten-cache'))</WasmPackager_EmsdkCacheDir>
+    <WasmPackager_EmsdkConfigFile Condition="'$(WasmPackager_EmsdkConfigFile)' == ''">$(WasmPackager_EmsdkCacheDir)/.emscripten</WasmPackager_EmsdkConfigFile>
   </PropertyGroup>
 
   <!-- FIXME -->
