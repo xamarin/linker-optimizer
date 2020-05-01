@@ -7,9 +7,10 @@ using Newtonsoft.Json.Linq;
 using Xunit;
 
 using Mono.WasmPackager.TestSuite;
+using Mono.WasmPackager.TestSuite.Messaging.Debugger;
 using Mono.WasmPackager.DevServer;
 
-namespace SimpleTest
+namespace WorkingTests
 {
 	public class TestInspector : InspectorTestBase
 	{
@@ -27,24 +28,23 @@ namespace SimpleTest
 		{
 			Debug.WriteLine ($"SERVER READY: {ScriptsIdToUrl}");
 
-			var bp1_req = JObject.FromObject (new
-			{
-				lineNumber = 8,
-				columnNumber = 3,
-				url = FileToUrl[$"dotnet://{Settings.DevServer_Assembly}/Hello.cs"],
-			});
+			var fileUrl = $"dotnet://{Settings.DevServer_Assembly}/Hello.cs";
+			var request = new InsertBreakpointRequest {
+				LineNumber = 8,
+				ColumnNumber = 3,
+				Url = FileToUrl [fileUrl]
+			};
 
-			var bp1_res = await SendCommand ("Debugger.setBreakpointByUrl", bp1_req);
-			Assert.True (bp1_res.IsOk);
-			Assert.EndsWith ("Hello.cs", bp1_res.Value ["breakpointId"].ToString());
-			Assert.Equal (1, bp1_res.Value["locations"]?.Value<JArray> ()?.Count);
+			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request);
+			Assert.EndsWith ("Hello.cs", result.BreakpointId);
+			Assert.Single (result.Locations);
 
-			var loc = bp1_res.Value["locations"]?.Value<JArray> ()[0];
+			var loc = result.Locations [0];
 
-			Assert.NotNull (loc["scriptId"]);
-			Assert.Equal ($"dotnet://{Settings.DevServer_Assembly}/Hello.cs", ScriptsIdToUrl[loc["scriptId"]?.Value<string> ()]);
-			Assert.Equal (8, loc["lineNumber"]);
-			Assert.Equal (3, loc["columnNumber"]);
+			Assert.NotNull (loc.ScriptId);
+			Assert.Equal (fileUrl, ScriptsIdToUrl [loc.ScriptId]);
+			Assert.Equal (8, loc.LineNumber);
+			Assert.Equal (3, loc.ColumnNumber);
 		}
 
 		[Fact]
@@ -52,19 +52,16 @@ namespace SimpleTest
 		{
 			Debug.WriteLine ($"SERVER READY: {ScriptsIdToUrl}");
 
-			var bp1_req = JObject.FromObject (new
-			{
-				start = JObject.FromObject (new
-				{
-					scriptId = FileToId[$"dotnet://{Settings.DevServer_Assembly}/Hello.cs"],
-					lineNumber = 0
-				})
-			});
+			var request = new GetPossibleBreakpointsRequest {
+				Start = new Location {
+					ScriptId = FileToId [$"dotnet://{Settings.DevServer_Assembly}/Hello.cs"],
+					LineNumber = 0,
+					ColumnNumber = 0
+				}
+			};
 
-			var bp1_res = await SendCommand ("Debugger.getPossibleBreakpoints", bp1_req);
-			Assert.True (bp1_res.IsOk);
-
-			Debug.WriteLine ($"RESPONSE: {bp1_res}");
+			var response = await SendCommand<GetPossibleBreakpointsResponse> ("Debugger.getPossibleBreakpoints", request);
+			Assert.True (response.Locations.Length > 1);
 		}
 	}
 }

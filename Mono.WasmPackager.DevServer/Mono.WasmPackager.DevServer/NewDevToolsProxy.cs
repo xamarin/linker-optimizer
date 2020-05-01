@@ -152,14 +152,7 @@ namespace Mono.WasmPackager.DevServer
 
 		protected internal void LogProtocol (string method, string msg, object args)
 		{
-			switch (method) {
-			case "Runtime.consoleAPICalled":
-				Debug.WriteLine ($"{msg}: {method}");
-				break;
-			default:
-				Debug.WriteLine ($"{msg}: {method} {args}");
-				break;
-			}
+			LoggingHelper.LogProtocol (this, method, msg, args);
 		}
 
 		protected internal void Log (string priority, string msg)

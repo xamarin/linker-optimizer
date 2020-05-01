@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace WebAssembly.Net.Debugging {
 
-	public struct SessionId {
+	internal struct SessionId {
 		public readonly string sessionId;
 
 		public SessionId (string sessionId)
@@ -19,17 +19,26 @@ namespace WebAssembly.Net.Debugging {
 			this.sessionId = sessionId;
 		}
 
+		// hashset treats 0 as unset
 		public override int GetHashCode ()
-			=> sessionId?.GetHashCode () ?? 0;
+			=> sessionId?.GetHashCode () ?? -1;
 
 		public override bool Equals (object obj)
-			=> (obj is SessionId) ? ((SessionId)obj).sessionId == sessionId : false;
+			=> (obj is SessionId) ? ((SessionId) obj).sessionId == sessionId : false;
+
+		public static bool operator == (SessionId a, SessionId b)
+			=> a.sessionId == b.sessionId;
+
+		public static bool operator != (SessionId a, SessionId b)
+			=> a.sessionId != b.sessionId;
+
+		public static SessionId Null { get; } = new SessionId ();
 
 		public override string ToString ()
 			=> $"session-{sessionId}";
 	}
 
-	public struct MessageId {
+	internal struct MessageId {
 		public readonly string sessionId;
 		public readonly int id;
 
@@ -49,10 +58,46 @@ namespace WebAssembly.Net.Debugging {
 			=> (sessionId?.GetHashCode () ?? 0) ^ id.GetHashCode ();
 
 		public override bool Equals (object obj)
-			=> (obj is MessageId) ? ((MessageId)obj).sessionId == sessionId && ((MessageId)obj).id == id : false;
+			=> (obj is MessageId) ? ((MessageId) obj).sessionId == sessionId && ((MessageId) obj).id == id : false;
 	}
 
-	public struct Result {
+	internal class DotnetObjectId {
+		public string Scheme { get; }
+		public string Value { get; }
+
+		public static bool TryParse (JToken jToken, out DotnetObjectId objectId)
+			=> TryParse (jToken?.Value<string>(), out objectId);
+
+		public static bool TryParse (string id, out DotnetObjectId objectId)
+		{
+			objectId = null;
+			if (id == null)
+				return false;
+
+			if (!id.StartsWith ("dotnet:"))
+				return false;
+
+			var parts = id.Split (":", 3);
+
+			if (parts.Length < 3)
+				return false;
+
+			objectId = new DotnetObjectId (parts[1], parts[2]);
+
+			return true;
+		}
+
+		public DotnetObjectId (string scheme, string value)
+		{
+			Scheme = scheme;
+			Value = value;
+		}
+
+		public override string ToString ()
+			=> $"dotnet:{Scheme}:{Value}";
+	}
+
+	internal struct Result {
 		public JObject Value { get; private set; }
 		public JObject Error { get; private set; }
 
@@ -62,9 +107,9 @@ namespace WebAssembly.Net.Debugging {
 		Result (JObject result, JObject error)
 		{
 			if (result != null && error != null)
-				throw new ArgumentException ($"Both {nameof (result)} and {nameof (error)} arguments cannot be non-null.");
+				throw new ArgumentException ($"Both {nameof(result)} and {nameof(error)} arguments cannot be non-null.");
 
-			bool resultHasError = String.Compare ((result? ["result"] as JObject)? ["subtype"]?.Value<string> (), "error") == 0;
+			bool resultHasError = String.Compare ((result? ["result"] as JObject)? ["subtype"]?. Value<string> (), "error") == 0;
 			if (result != null && resultHasError) {
 				this.Value = null;
 				this.Error = result;
@@ -84,19 +129,18 @@ namespace WebAssembly.Net.Debugging {
 			=> new Result (ok, null);
 
 		public static Result OkFromObject (object ok)
-			=> Ok (JObject.FromObject (ok));
-
-		public static Result Err (string message)
-							  => Err (JObject.FromObject (new { message }));
+			=> Ok (JObject.FromObject(ok));
 
 		public static Result Err (JObject err)
 			=> new Result (null, err);
 
+		public static Result Err (string msg)
+			=> new Result (null, JObject.FromObject (new { message = msg }));
+
 		public static Result Exception (Exception e)
 			=> new Result (null, JObject.FromObject (new { message = e.Message }));
 
-		public JObject ToJObject (MessageId target)
-		{
+		public JObject ToJObject (MessageId target) {
 			if (IsOk) {
 				return JObject.FromObject (new {
 					target.id,
@@ -143,23 +187,26 @@ namespace WebAssembly.Net.Debugging {
 		public static MonoCommands ClearAllBreakpoints ()
 			=> new MonoCommands ("MONO.mono_wasm_clear_all_breakpoints()");
 
-		public static MonoCommands GetObjectProperties (int objectId, bool expandValueTypes)
-			=> new MonoCommands ($"MONO.mono_wasm_get_object_properties({objectId}, { (expandValueTypes ? "true" : "false") })");
+		public static MonoCommands GetDetails (DotnetObjectId objectId, JToken args = null)
+			=> new MonoCommands ($"MONO.mono_wasm_get_details ('{objectId}', {(args ?? "{}")})");
 
-		public static MonoCommands GetArrayValues (int objectId)
-			=> new MonoCommands ($"MONO.mono_wasm_get_array_values({objectId})");
-
-		public static MonoCommands GetArrayValueExpanded (int objectId, int idx)
-			=> new MonoCommands ($"MONO.mono_wasm_get_array_value_expanded({objectId}, {idx})");
-
-		public static MonoCommands GetScopeVariables (int scopeId, params int [] vars)
+		public static MonoCommands GetScopeVariables (int scopeId, params int[] vars)
 			=> new MonoCommands ($"MONO.mono_wasm_get_variables({scopeId}, [ {string.Join (",", vars)} ])");
 
-		public static MonoCommands SetBreakpoint (string assemblyName, int methodToken, int ilOffset)
+		public static MonoCommands SetBreakpoint (string assemblyName, uint methodToken, int ilOffset)
 			=> new MonoCommands ($"MONO.mono_wasm_set_breakpoint (\"{assemblyName}\", {methodToken}, {ilOffset})");
 
 		public static MonoCommands RemoveBreakpoint (int breakpointId)
 			=> new MonoCommands ($"MONO.mono_wasm_remove_breakpoint({breakpointId})");
+
+		public static MonoCommands ReleaseObject (DotnetObjectId objectId)
+			=> new MonoCommands ($"MONO.mono_wasm_release_object('{objectId}')");
+
+		public static MonoCommands CallFunctionOn (JToken args)
+			=> new MonoCommands ($"MONO.mono_wasm_call_function_on ({args.ToString ()})");
+
+		public static MonoCommands SetPauseOnExceptions (bool pauseOnCaughtExceptions)
+			=> new MonoCommands ($"MONO.mono_wasm_set_pause_on_exceptions ({ (pauseOnCaughtExceptions ? "true" : "false") })");
 	}
 
 	internal enum MonoErrorCodes {
@@ -220,7 +267,7 @@ namespace WebAssembly.Net.Debugging {
 
 	internal class ExecutionContext {
 		public string DebuggerId { get; set; }
-		public Dictionary<string, BreakpointRequest> BreakpointRequests { get; } = new Dictionary<string, BreakpointRequest> ();
+		public Dictionary<string,BreakpointRequest> BreakpointRequests { get; } = new Dictionary<string,BreakpointRequest> ();
 
 		public TaskCompletionSource<DebugStore> ready = null;
 		public bool IsRuntimeReady => ready != null && ready.Task.IsCompleted;
@@ -233,8 +280,6 @@ namespace WebAssembly.Net.Debugging {
 		internal DebugStore store;
 		public TaskCompletionSource<DebugStore> Source { get; } = new TaskCompletionSource<DebugStore> ();
 
-		int nextValueTypeId = 0;
-		public Dictionary<string, JToken> ValueTypesCache = new Dictionary<string, JToken> ();
 		public Dictionary<string, JToken> LocalsCache = new Dictionary<string, JToken> ();
 
 		public DebugStore Store {
@@ -249,12 +294,8 @@ namespace WebAssembly.Net.Debugging {
 		public void ClearState ()
 		{
 			CallStack = null;
-			ValueTypesCache.Clear ();
 			LocalsCache.Clear ();
-			nextValueTypeId = 0;
 		}
-
-		public int NextValueTypeId () => Interlocked.Increment (ref nextValueTypeId);
 
 	}
 }

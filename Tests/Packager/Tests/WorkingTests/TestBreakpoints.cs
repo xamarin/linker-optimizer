@@ -12,7 +12,7 @@ using Mono.WasmPackager.TestSuite;
 using Mono.WasmPackager.TestSuite.Messaging.Debugger;
 using Mono.WasmPackager.DevServer;
 
-namespace SimpleTest
+namespace WorkingTests
 {
 	public class TestBreakpoints : PuppeteerTestBase
 	{
@@ -106,20 +106,6 @@ namespace SimpleTest
 				foreach (var frame in notification.CallFrames) {
 					Assert.NotNull (frame.Location);
 				}
-			}).ConfigureAwait (false);
-		}
-
-		[Fact]
-		public async Task TestSecondFrame ()
-		{
-			Assert.Equal (TestConstants.TextReady, await GetInnerHtml ("#output"));
-
-			var id = await InsertBreakpoint (TestConstants.MessageBreakpoint);
-
-			await AwaitBreakpointHitAndResume (notification => {
-				AssertBreakpointHit (id, notification);
-				var second = notification.CallFrames [1];
-				Debug.WriteLine ($"SECOND FRAME: {second}");
 			}).ConfigureAwait (false);
 		}
 	}

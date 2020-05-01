@@ -47,7 +47,6 @@ namespace Mono.WasmPackager.DevServer
 				if (socket.State == WebSocketState.CloseReceived || socket.State == WebSocketState.Aborted)
 					return false;
 				var result = await socket.ReceiveAsync (new ArraySegment<byte> (buff), CancellationToken.None);
-				Log ($"READ: {socket} {result.Count} {result.MessageType}");
 				if (result.MessageType == WebSocketMessageType.Close) {
 					await OnEvent (new ConnectionEventArgs { Close = true }).ConfigureAwait (false);
 					return false;
@@ -61,10 +60,6 @@ namespace Mono.WasmPackager.DevServer
 				complete = true;
 
 				var message = JObject.Parse (Encoding.UTF8.GetString (mem.GetBuffer (), 0, (int)mem.Length));
-				if (message ["id"] == null)
-					DumpProtocol ($"EVENT: {(message ["method"])}");
-				else
-					DumpProtocol ($"RESPONSE: {(message ["id"])}");
 
 				var args = Decode (message);
 				if (args != null)
@@ -110,26 +105,25 @@ namespace Mono.WasmPackager.DevServer
 
 		internal override async Task<JObject> SendAsync (SessionId sessionId, string method, object args = null, bool waitForCallback = true)
 		{
-			DumpProtocol ($"SEND COMMAND: {method}");
+			LogProtocol (method, "SEND COMMAND");
 			var command = new Command (sessionId.sessionId ?? SessionId, method, args, waitForCallback);
 			command.Encoded = Encode (command);
 			await sendQueue.EnqueueAsync (command).ConfigureAwait (false);
-			DumpProtocol ($"SEND COMMAND #1: {method} {waitForCallback}");
 			if (!waitForCallback)
 				return null;
 			var result = await command.Completion.Task.ConfigureAwait (false);
-			DumpProtocol ($"SEND COMMAND DONE: {method} {result}");
+			LogProtocol (method, "SEND COMMAND DONE", result);
 			return result;
 		}
 
 		void Log (string msg)
 		{
-			Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
+			// Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
 		}
 
-		protected virtual void DumpProtocol (string msg)
+		protected internal void LogProtocol (string method, string msg, object args = null)
 		{
-			Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
+			// LoggingHelper.LogProtocol (this, method, msg, args);
 		}
 
 		public override async Task Close (bool wait, CancellationToken cancellationToken)
@@ -148,7 +142,7 @@ namespace Mono.WasmPackager.DevServer
 			var bytes = Encoding.UTF8.GetBytes (str);
 
 			await socket.SendAsync (new ArraySegment<byte> (bytes), WebSocketMessageType.Text, true, token).ConfigureAwait (false);
-			DumpProtocol ($"SEND: {command.Method}");
+			LogProtocol (command.Method, "SEND");
 		}
 
 		protected abstract JObject Encode (Command command);

@@ -20,35 +20,44 @@ namespace Mono.WasmPackager.DevServer
 	{
 		const string DEFAULT_ROOT = "/Users/Workspace/test-optimizer/Tests/Packager/SimpleWeb/app";
 
-		static void Main (string[] args)
+		static void Main (string [] args)
 		{
 			string root = DEFAULT_ROOT;
 			string framework = null;
+			int proxyPort = 9300;
+			int webPort = 8000;
 			bool debug = false;
 
 			int pos = 0;
 			while (pos < args.Length) {
-				var key = args[pos++];
+				var key = args [pos++];
 				switch (key) {
-					case "--web-root":
-						root = args[pos++];
-						break;
-					case "--framework":
-						framework = args[pos++];
-						break;
-					case "--debug":
-						debug = true;
-						break;
-					default:
-						throw new NotSupportedException ($"Unknown command-line argument: '{key}'.");
+				case "--web-root":
+					root = args [pos++];
+					break;
+				case "--framework":
+					framework = args [pos++];
+					break;
+				case "--debug":
+					debug = true;
+					break;
+				case "--proxy-port":
+					proxyPort = int.Parse (args [pos++]);
+					break;
+				case "--web-port":
+					webPort = int.Parse (args [pos++]);
+					break;
+				default:
+					throw new NotSupportedException ($"Unknown command-line argument: '{key}'.");
 				}
 			}
 
-			var options = new ServerOptions
-			{
+			var options = new ServerOptions {
 				WebRoot = root,
 				EnableDebugging = debug,
-				FrameworkDirectory = framework
+				FrameworkDirectory = framework,
+				DebugServerPort = proxyPort,
+				FileServerPort = webPort
 			};
 
 			options.FileServerOptions.EnableDirectoryBrowsing = true;
@@ -67,8 +76,7 @@ namespace Mono.WasmPackager.DevServer
 				Debug.WriteLine ($"UNHANDLED EXCEPTION: {e.ExceptionObject}");
 			};
 
-			var options = new ServerOptions
-			{
+			var options = new ServerOptions {
 				WebRoot = root,
 				EnableDebugging = true,
 				EnableTestHarness = true,
@@ -90,15 +98,13 @@ namespace Mono.WasmPackager.DevServer
 				.UseContentRoot (options.WebRoot)
 				.UseWebRoot (options.WebRoot)
 				.UseIISIntegration ()
-				.ConfigureLogging (logging =>
-				{
+				.ConfigureLogging (logging => {
 					if (options.VerboseLogging) {
 						logging.AddDebug ();
 						logging.AddConsole ();
 					}
 				})
-				.ConfigureServices (services =>
-				{
+				.ConfigureServices (services => {
 					services.AddSingleton (typeof (IStartup), this);
 				});
 
@@ -137,10 +143,9 @@ namespace Mono.WasmPackager.DevServer
 
 			var proxy = app.ApplicationServices.GetRequiredService<DebugProxy> ();
 
-			app.UseEndpoints (endpoints =>
-			{
+			app.UseEndpoints (endpoints => {
 				proxy.ConfigureRoutes ((pattern, action) =>
-					endpoints.MapGet (pattern, action).RequireHost ("*:9300"));
+					endpoints.MapGet (pattern, action).RequireHost ($"*:{ServerOptions.DebugServerPort}"));
 				if (ServerOptions.EnableTestHarness) {
 					var harness = app.ApplicationServices.GetRequiredService<TestHarnessStartup> ();
 					harness.Configure (endpoints);

@@ -6,6 +6,8 @@
     <OutputType>exe</OutputType>
     <IsPackable>true</IsPackable>
     <UseDebugProxyPackage>false</UseDebugProxyPackage>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <DefineConstants>INSIDE_WASMPACKAGER_DEVSERVER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +24,7 @@
   <ItemGroup Condition="'$(UseDebugProxyPackage)' != 'true'">
     <PackageReference Include="Mono.Cecil" Version="0.11.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.5.0" />
     <Compile Include="Mono.WebAssembly.DebuggerProxy/**.cs" />
     <PackageReference Include="PuppeteerSharp" Version="2.0.0" />
   </ItemGroup>

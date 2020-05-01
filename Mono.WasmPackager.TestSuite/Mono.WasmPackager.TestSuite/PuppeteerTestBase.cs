@@ -1,28 +1,24 @@
 using System;
+using System.Reflection;
 using System.Threading;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
 using Xunit;
 
-using Mono.WasmPackager.TestSuite;
-using Mono.WasmPackager.DevServer;
-
-namespace SimpleTest
+namespace Mono.WasmPackager.TestSuite
 {
+	using Messaging.Debugger;
+
 	public abstract class PuppeteerTestBase : InspectorTestBase
 	{
-		// Keep in sync with the javascript side
-		protected const string MessageText = "MESSAGE BUTTON CLICKED";
-		protected const string MessageText2 = "MESSAGE BUTTON CLICKED - BACK FROM MANAGED";
-		protected const string TextReady = "READY";
-		protected const string TextMessage = "MESSAGE";
-		protected const string ThrowMessage = "THROW";
-
-		protected const int DefaultTimeout = 15;
+		protected PuppeteerTestBase (Assembly caller = null)
+			: base (caller ?? Assembly.GetCallingAssembly ())
+		{
+		}
 
 		protected Task<string> WaitForConsole (string message, bool regex = false)
 		{
@@ -133,43 +129,62 @@ namespace SimpleTest
 
 		protected async Task GetPossibleBreakpoints (string file)
 		{
-			var bp1_req = JObject.FromObject (new {
-				start = JObject.FromObject (new {
-					scriptId = FileToId [$"dotnet://{Settings.DevServer_Assembly}/{file}"],
-					lineNumber = 0,
-					columnNumber = 0
-				})
-			});
+			var request = new GetPossibleBreakpointsRequest {
+				Start = new Location {
+					ScriptId = FileToId [$"dotnet://{Settings.DevServer_Assembly}/{file}"],
+					LineNumber = 0,
+					ColumnNumber = 0
+				}
+			};
 
-			var bp1_res = await SendCommand ("Debugger.getPossibleBreakpoints", bp1_req);
-			Assert.True (bp1_res.IsOk);
+			var response = await SendCommand<GetPossibleBreakpointsResponse> ("Debugger.getPossibleBreakpoints", request);
+			Assert.True (response.Locations.Length > 1);
 		}
+
+		protected Task<string> InsertBreakpoint (SourceLocation location) => InsertBreakpoint (location.File, location.Line);
 
 		protected async Task<string> InsertBreakpoint (string file, int line)
 		{
-			var request = JObject.FromObject (new
-			{
-				lineNumber = line,
-				url = FileToUrl[$"dotnet://{Settings.DevServer_Assembly}/{file}"],
-			});
+			var fileUrl = $"dotnet://{Settings.DevServer_Assembly}/{file}";
+			var request = new InsertBreakpointRequest {
+				LineNumber = line,
+				Url = FileToUrl [fileUrl]
+			};
 
-			var result = await SendCommand ("Debugger.setBreakpointByUrl", request);
-			Assert.True (result.IsOk);
-			var breakpointId = (string)result.Value ["breakpointId"];
-			Assert.EndsWith (file, breakpointId);
-			Assert.Equal (1, result.Value["locations"]?.Value<JArray> ()?.Count);
-			return breakpointId;
+			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request);
+			Assert.EndsWith (file, result.BreakpointId);
+			Assert.Single (result.Locations);
+			Assert.Equal (line, result.Locations [0].LineNumber);
+			Assert.Equal (FileToId [fileUrl], result.Locations [0].ScriptId);
+			return result.BreakpointId;
 		}
 
 		protected async Task RemoveBreakpoint (string breakpointId)
 		{
-			var request = JObject.FromObject (new
-			{
-				breakpointId = breakpointId
-			});
+			var request = new RemoveBreakpointRequest { BreakpointId = breakpointId };
+			await SendCommand<RemoveBreakpointResponse> ("Debugger.removeBreakpoint", request);
+		}
 
-			var result = await SendCommand ("Debugger.removeBreakpoint", request);
-			Assert.True (result.IsOk);
+		protected void AssertBreakpointFrame (SourceLocation location, CallFrame frame)
+		{
+			var scriptId = FileToId [$"dotnet://{Settings.DevServer_Assembly}/{location.File}"];
+
+			Assert.Equal (location.FunctionName, frame.FunctionName);
+			Assert.EndsWith (location.File, frame.Url);
+			Assert.NotNull (frame.Location);
+			Assert.Equal (scriptId, frame.Location.ScriptId);
+			Assert.Equal (location.Line, frame.Location.LineNumber);
+			if (location.Column != null)
+				Assert.Equal (location.Column.Value, frame.Location.ColumnNumber);
+			Assert.True (frame.ScopeChain.Length > 0);
+			var scope = frame.ScopeChain [0];
+			Assert.Equal (location.FunctionName, scope.Name);
+			Assert.Equal (ScopeType.Local, scope.Type);
+			if (location.ScopeStart != null)
+				Assert.Equal (location.ScopeStart.Value, scope.StartLocation.LineNumber);
+			if (location.ScopeEnd != null)
+				Assert.Equal (location.ScopeEnd.Value, scope.EndLocation.LineNumber);
+			Assert.NotNull (scope.Object);
 		}
 	}
 }

@@ -13,6 +13,10 @@
 			"path": "Tests/Packager/Tests/SimpleTest/WebSample"
 		},
 		{
+			"name": "WorkingTests/WebSample",
+			"path": "Tests/Packager/Tests/WorkingTests/WebSample"
+		},
+		{
 			"name": "Samples/SimpleHello",
 			"path": "Tests/Packager/Samples/SimpleHello"
 		},

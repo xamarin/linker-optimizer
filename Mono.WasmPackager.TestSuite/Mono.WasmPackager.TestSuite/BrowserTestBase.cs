@@ -10,6 +10,7 @@ using System.Diagnostics;
 
 using WebAssembly.Net.Debugging;
 using Mono.WasmPackager.DevServer;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
 using Xunit;
@@ -197,9 +198,31 @@ namespace Mono.WasmPackager.TestSuite
 				await eventListeners [args.Message] (args.Arguments, token);
 		}
 
-		public Task<Result> SendCommand (string message, JObject args)
+		public async Task<T> SendCommand<T> (string message, object args)
 		{
-			return client.SendCommand (message, args, cts.Token);
+			var jobj = JObject.FromObject (args, JsonHelper.DefaultJsonSerializer);
+
+			var response = await client.SendCommand (message, jobj, cts.Token).ConfigureAwait (false);
+
+			var result = response ["result"] as JObject;
+			var error = response ["error"] as JObject;
+
+			if (result != null && error != null)
+				throw new ArgumentException ($"Both {nameof (result)} and {nameof (error)} arguments cannot be non-null.");
+
+			JObject value;
+			bool resultHasError = String.Compare ((result? ["result"] as JObject)? ["subtype"]?.Value<string> (), "error") == 0;
+			if (result != null && resultHasError) {
+				value = null;
+				error = result;
+			} else {
+				value = result;
+			}
+
+			if (error != null)
+				throw new CommandErrorException (message, error);
+
+			return value.ToObject<T> (true);
 		}
 	}
 }

@@ -7,6 +7,8 @@
 			// Keep in sync with the managed side
 			const messageText = "MESSAGE BUTTON CLICKED"
 			const messageText2 = "MESSAGE BUTTON CLICKED - BACK FROM MANAGED"
+			const caughtExceptionText = "CAUGHT EXCEPTION BUTTON CLICKED"
+			const caughtExceptionText2 = "CAUGHT EXCEPTION BUTTON CLICKED - BACK FROM MANAGED"
 			const textReady = "READY"
 			const textMessage = "MESSAGE"
 			const throwMessage = "THROW"
@@ -18,6 +20,7 @@
 					BINDING.call_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Main", []);
 					this.message = BINDING.bind_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Message", []);
 					this.throw = BINDING.bind_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Hello:Throw", []);
+					this.caught = BINDING.bind_static_method("[SimpleTest.WebSample] SimpleTest.WebSample.Exceptions:Caught", []);
 					this.output.innerText = textReady
 				},
 				onClickMessage: function () {
@@ -27,10 +30,19 @@
 					this.output.innerText = textMessage
 				},
 				onClickThrow: function () {
-					console.log("THROW BUTTON CLICKED")
 					this.output.innerText = throwMessage;
+					try {
+						throw new Error("Hello!")
+					} catch (error) {
+						console.log(`TEST ERROR: ${error}`)
+					}
 					this.throw()
-					console.log("SHOULD NEVER GET HERE")
+				},
+				onClickCaught: function () {
+					console.log(caughtExceptionText)
+					this.caught()
+					console.log(caughtExceptionText2)
+					this.output.innerText = textMessage
 				},
 			};
 		</script>
@@ -38,6 +50,7 @@
 		<div id="output">INIT</div>
 		<button type="button" onclick="App.onClickMessage()" id="message">Message</button>
 		<button type="button" onclick="App.onClickThrow()" id="throw">Throw</button>
+		<button type="button" onclick="App.onClickCaught()" id="caught">Caught Exception</button>
 		<script type="text/javascript" src="mono-config.js"></script>
 		<script type="text/javascript" src="runtime.js"></script>
 		<script defer type="text/javascript" src="dotnet.js"></script>

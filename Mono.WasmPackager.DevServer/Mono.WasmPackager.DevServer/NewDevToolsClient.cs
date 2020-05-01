@@ -34,10 +34,9 @@ namespace Mono.WasmPackager.DevServer
 			connection.Dispose ();
 		}
 
-		public async Task<Result> SendCommand (string method, JObject args, CancellationToken token)
+		public Task<JObject> SendCommand (string method, JObject args, CancellationToken token)
 		{
-			var result = await connection.SendAsync (default (SessionId), method, args);
-			return DevToolsHelper.ResultFromJObject (result);
+			return connection.SendAsync (default (SessionId), method, args);
 		}
 	}
 }
