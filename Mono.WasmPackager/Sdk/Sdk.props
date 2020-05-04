@@ -2,7 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MonoWebAssemblySdkVersion>0.2.3-martin-20200501.1</MonoWebAssemblySdkVersion>
+    <MonoWebAssemblySdkVersion>0.2.3-martin-20200501.2</MonoWebAssemblySdkVersion>
     <MonoWebAssemblyEmscriptenVersion>0.2.3-martin-20200501.1</MonoWebAssemblyEmscriptenVersion>
 
     <_LinkerOptimizer_Standalone>false</_LinkerOptimizer_Standalone>
