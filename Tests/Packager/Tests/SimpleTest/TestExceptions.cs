@@ -34,11 +34,23 @@ namespace SimpleTest
 			Debug.WriteLine ($"PAUSED: {notification}");
 
 			Assert.Empty (notification.HitBreakpoints);
-			Assert.Equal (StoppedReason.Other, notification.Reason);
+			Assert.Equal (StoppedReason.Exception, notification.Reason);
 			Assert.True (notification.CallFrames.Length >= 2);
 
-			AssertBreakpointFrame (TestConstants.ThrowMethod, notification.CallFrames[0]);
-			AssertBreakpointFrame (TestConstants.ThrownLocation, notification.CallFrames[1]);
+			AssertBreakpointFrame (TestSettings.Locations.Throw, notification.CallFrames[0]);
+			AssertBreakpointFrame (TestSettings.Locations.CallingThrow, notification.CallFrames[1]);
+
+			Assert.NotNull (notification.Data);
+			var exceptionData = notification.Data.ToObject<PausedExceptionData> ();
+			Assert.NotNull (exceptionData);
+
+			Assert.Equal ("object", exceptionData.Type);
+			Assert.Equal ("error", exceptionData.Subtype);
+			Assert.Equal (TestConstants.MyExceptionClassName, exceptionData.ClassName);
+			// The message needs to end with a newline or it won't be displayed.
+			Assert.Equal (TestConstants.MyExceptionMessage + "\n", exceptionData.Description);
+			Assert.StartsWith ("dotnet:exception:", exceptionData.ObjectId);
+			Assert.False (exceptionData.Uncaught);
 
 			Debug.WriteLine ("DONE");
 		}

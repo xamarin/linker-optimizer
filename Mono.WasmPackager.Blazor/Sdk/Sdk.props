@@ -6,15 +6,18 @@
     <WasmPackager_UseBlazorMono>false</WasmPackager_UseBlazorMono>
     <_WasmPackager_EnableAot>false</_WasmPackager_EnableAot>
     <_WasmPackager_SkipSdkImport>true</_WasmPackager_SkipSdkImport>
-    <WasmPackager_BlazorVersion>3.0.0-preview9.19465.2</WasmPackager_BlazorVersion>
-    <WasmPackager_BlazorMonoVersion>3.0.0-preview9.19462.2</WasmPackager_BlazorMonoVersion>
-    <WasmPackager_AspNetVersion>3.0.0</WasmPackager_AspNetVersion>
-
-    <_LinkerOptimizer_Blazor>true</_LinkerOptimizer_Blazor>
+    <_WasmPackager_IsBlazor>true</_WasmPackager_IsBlazor>
   </PropertyGroup>
 
-  <ItemGroup>
+  <PropertyGroup Condition="false">
+    <WasmPackager_BlazorVersion>3.2.0-rc1.20223.4</WasmPackager_BlazorVersion>
+    <WasmPackager_BlazorMonoVersion>3.2.0-rc1.20223.4</WasmPackager_BlazorMonoVersion>
+    <WasmPackager_AspNetVersion>3.0.0</WasmPackager_AspNetVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="false">
     <__WasmPackager_Blazor_Packages Include="microsoft.aspnetcore.blazor;microsoft.aspnetcore.blazor.httpclient" />
+    <__WasmPackager_Blazor_Packages Include="microsoft.aspnetcore.components.webassembly;microsoft.aspnetcore.components.webassembly.build" />
     <__WasmPackager_AspNet_Packages Include="microsoft.jsinterop;microsoft.extensions.logging.abstractions;mono.webassembly.interop;microsoft.aspnetcore.components;microsoft.extensions.dependencyinjection;microsoft.extensions.dependencyinjection.abstractions;microsoft.aspnetcore.components.web;microsoft.aspnetcore.components.forms;microsoft.extensions.options;microsoft.extensions.primitives" />
     <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Blazor_Packages->'$(WasmPackager_NugetPackageRoot)/%(Identity)/$(WasmPackager_BlazorVersion)/lib/netstandard2.0')" />
     <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_AspNet_Packages->'$(WasmPackager_NugetPackageRoot)/%(Identity)/$(WasmPackager_AspNetVersion)/lib/netstandard2.0')" />
@@ -25,5 +28,26 @@
   <Import Sdk="Microsoft.NET.Sdk.Web" Project="Sdk.props" />
   <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.props" />
   <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.props" />
+
+  <!-- These are set in Microsoft.AspNetCore.Blazor.Mono.props, so we need to override them here. -->
+  <PropertyGroup>
+    <_OriginalBlazorMonoRuntimeBasePath>$(BlazorMonoRuntimeBasePath)</_OriginalBlazorMonoRuntimeBasePath>
+    <BlazorMonoRuntimeBasePath>$(WasmPackager_MonoBclPath)/</BlazorMonoRuntimeBasePath>
+    <MonoLinkerPath>/X/tools/illink/illink.dll</MonoLinkerPath>
+    <MonoBaseClassLibraryPath>$(WasmPackager_MonoBclPath)/</MonoBaseClassLibraryPath>
+    <MonoBaseClassLibraryFacadesPath>$(WasmPackager_MonoBclPath)/Facades/</MonoBaseClassLibraryFacadesPath>
+    <MonoWasmRuntimePath>$(WasmPackager_MonoRuntimePath)</MonoWasmRuntimePath>
+  </PropertyGroup>
+
+  <!-- These are set in Microsoft.AspNetCore.Components.WebAssembly.Runtime.props -->
+  <PropertyGroup>
+    <_OriginalComponentsWebAssemblyRuntimeBasePath>$(ComponentsWebAssemblyRuntimeBasePath)</_OriginalComponentsWebAssemblyRuntimeBasePath>
+    <ComponentsWebAssemblyRuntimeBasePath>$(MSBuildThisFileDirectory)../../</ComponentsWebAssemblyRuntimeBasePath>
+    <ComponentsWebAssemblyLinkerPath>$(MonoLinkerPath)</ComponentsWebAssemblyLinkerPath>
+    <ComponentsWebAssemblyBaseClassLibraryPath>$(MonoBaseClassLibraryPath)</ComponentsWebAssemblyBaseClassLibraryPath>
+    <ComponentsWebAssemblyBaseClassLibraryFacadesPath>$(MonoBaseClassLibraryFacadesPath)</ComponentsWebAssemblyBaseClassLibraryFacadesPath>
+    <ComponentsWebAssemblyFrameworkPath>$(MonoWebAssemblyBindingsRoot)</ComponentsWebAssemblyFrameworkPath>
+    <ComponentsWebAssemblyRuntimePath>$(WasmPackager_MonoRuntimePath)/release/</ComponentsWebAssemblyRuntimePath>
+  </PropertyGroup>
 
 </Project>

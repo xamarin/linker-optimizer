@@ -4,7 +4,9 @@ namespace Mono.WasmPackager.TestSuite
 	{
 		string TestSuite_SampleProject { get; }
 		string DevServer_RootDir { get; }
+		string DevServer_FrameworkDir { get; }
 		string DevServer_Arguments { get; }
 		string DevServer_Assembly { get; }
+		string LocalChromiumDir { get; }
 	}
 }

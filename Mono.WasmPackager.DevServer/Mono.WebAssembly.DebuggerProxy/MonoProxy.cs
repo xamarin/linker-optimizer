@@ -216,7 +216,8 @@ namespace WebAssembly.Net.Debugging {
 
 					switch (objectId.Scheme) {
 					case "scope":
-						return await OnEvaluateOnCallFrame (id,
+						return await OnEvaluateOnCallFrame (
+								id, context,
 								int.Parse (objectId.Value),
 								args? ["expression"]?.Value<string> (), token);
 					default:
@@ -441,13 +442,13 @@ namespace WebAssembly.Net.Debugging {
 
 		async Task<IDictionary<string, JObject>> GetJavaScriptVariables (SessionId id, JObject frame, CancellationToken token)
 		{
-			Log ("info", $"EXCEPTION FRAME!");
+			// We are stopped on a managed -> javascript call - like for instance mono_wasm_fire_exc().
+			Log ("verbose", $"getting javascript variables");
 			var scopeChain = frame ["scopeChain"]?.Values<JObject> ();
 			if (scopeChain == null || scopeChain.Count () == 0) {
 				Log ("info", $"Frame is missing scopeChain");
 				return null;
 			}
-			
 			var scopeObj = scopeChain.First () ["object"]?.Value<JObject> ();
 			if (scopeObj == null) {
 				Log ("info", $"Frame is missing scope object");
@@ -521,12 +522,19 @@ namespace WebAssembly.Net.Debugging {
 
 		async Task<JObject> HandleExceptionFrame (SessionId id, JObject frame, CancellationToken token)
 		{
+			// We are stopped in mono_wasm_fire_exc(), which is called from the managed side with
+			// the arguments: a boolean describing whether the exception is unhandled and the
+			// exception object's object id.
+			//
+			// GetJavaScriptVariables() is a general-purpose method to get the variables from a
+			// call frame.
 			var variables = await GetJavaScriptVariables (id, frame, token);
 			if (variables == null) {
 				Log ("info", $"failed to get JS variables");
 				return null;
 			}
 
+			// Okay, we should have two variables, let's do some sanity checking.
 			if (!variables.TryGetValue ("exception", out var exception)) {
 				Log ("info", $"variables do not contain exception object");
 				return null;
@@ -544,17 +552,27 @@ namespace WebAssembly.Net.Debugging {
 
 			if (exceptionObj == null || unhandledValue == null)
 				return null;
-			
 			if (!int.TryParse (unhandledValue, out var unhandledInt)) {
 				Log ("verbose", $"failed to parse unhandled variable: {unhandledValue}");
 				return null;
 			}
+
+			// Okay, we got the exception's object id from the mono_wasm_fire_exc() call frame.
+			// Tis object id can be used with both "dotnet:exception:id" as well as
+			// "dotnet:object:id".  In fact, the former will include the latter for the actual
+			// exception instance.
 
 			var objectId = new DotnetObjectId ("exception", exceptionObj);
 
 			var res = await SendMonoCommand (id, MonoCommands.GetDetails (objectId), token);
 			var scope_values = res.Value? ["result"]? ["value"]?.Values<JObject> ().ToArray ();
 			Log ("verbose", $"got scope values: {scope_values}");
+
+			// To display the exception message in the top-right corner directly underneath the
+			// "Paused on exception" message, we need to include a special "data" field with the
+			// "Debugger.paused" notification.
+
+			// This will also take care of adding the exception object to the locals window.
 
 			string className = null, description = null;
 			foreach (var value in scope_values) {
@@ -625,13 +643,14 @@ namespace WebAssembly.Net.Debugging {
 				var function_name = frame ["functionName"]?.Value<string> ();
 				var url = frame ["url"]?.Value<string> ();
 				if (function_name == "mono_wasm_fire_exc" || function_name == "_mono_wasm_fire_exc") {
-					Log ("info", $"EXCEPTION FRAME!");
+					Log ("info", $"exception frame");
 					exception_data = await HandleExceptionFrame (sessionId, frame, token);
-					Log ("info", $"EXCEPTION FRAME DONE");
+					Log ("info", $"exception frame done");
 				}
 				if (IsFireBreakpointFunction (function_name)) {
 					GetMonoFrames (context, store, callFrames, frames);
 				} else if (string.IsNullOrEmpty (url) || url.EndsWith (".wasm")) {
+					// Workaround for https://github.com/mono/mono/issues/19674.
 					Log ("info", $"frame with empty or wasm url: {url}");
 				} else if (!(function_name.StartsWith ("wasm-function", StringComparison.Ordinal)
 					|| url.StartsWith ("wasm://wasm/", StringComparison.Ordinal))) {
@@ -769,13 +788,9 @@ namespace WebAssembly.Net.Debugging {
 			return null;
 		}
 
-		async Task<bool> OnEvaluateOnCallFrame (MessageId msg_id, int scope_id, string expression, CancellationToken token)
+		async Task<bool> OnEvaluateOnCallFrame (MessageId msg_id, ExecutionContext context, int scope_id, string expression, CancellationToken token)
 		{
 			try {
-				var context = GetContext (msg_id);
-				if (context.CallStack == null)
-					return false;
-
 				var varValue = await TryGetVariableValue (msg_id, scope_id, expression, false, token);
 
 				if (varValue != null) {

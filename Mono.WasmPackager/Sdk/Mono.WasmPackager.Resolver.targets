@@ -34,12 +34,10 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.Linker.CilStrip" Version="1.0.0" />
+    <PackageReference Include="Mono.WebAssembly.Bindings" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Framework" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime.Aot" Version="$(MonoWebAssemblySdkVersion)" />
-    <PackageReference Include="WebAssembly.Bindings" Version="$(MonoWebAssemblySdkVersion)" />
-    <PackageReference Include="System.Net.Http.WebAssemblyHttpHandler" Version="$(MonoWebAssemblySdkVersion)" />
-    <PackageReference Include="WebAssembly.Net.WebSockets" Version="$(MonoWebAssemblySdkVersion)" />
   </ItemGroup>
 
   <!-- Derived and private settings -->
@@ -199,11 +197,16 @@
 
     <Message Importance="High" Text="WasmPackager - resolving assemblies with root $(WasmPackager_MonoBclPath)" />
     <Message Importance="Normal" Text="  RootAssemblies: %(_WasmPackager_RootAssemblies.Identity)" />
+    <Message Importance="Normal" Text="  FrameworkDirectories: %(WasmPackager_FrameworkDirectories.Identity)" />
+    <Message Importance="Normal" Text="  MonoWebAssemblyFrameworkRoot: $(MonoWebAssemblyFrameworkRoot)" />
+    <Message Importance="Normal" Text="  MonoWebAssemblyBindingsRoot: $(MonoWebAssemblyBindingsRoot)" />
 
     <WasmResolverTask
         MonoBclPath="$(WasmPackager_MonoBclPath)"
         RootAssemblies="@(_WasmPackager_RootAssemblies)"
         FrameworkDirectories="@(WasmPackager_FrameworkDirectories)"
+        MonoWasmFrameworkPath="$(MonoWebAssemblyFrameworkRoot)"
+        MonoWasmBindingsPath="$(MonoWebAssemblyBindingsRoot)"
         EnableAot="$(_WasmPackager_EnableAot)"
         AddBinding="$(WasmPackager_AddBinding)"
         EnableDebug="$(WasmPackager_EnableDebug)">

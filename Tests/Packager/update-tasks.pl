@@ -3,8 +3,8 @@ use strict;
 use File::Basename;
 
 my @CONSOLE_DIRS = qw[Samples/SimpleDebug Samples/SimpleHello Samples/SimpleInterpreter Samples/SimpleMixed Samples/DontLink];
-my @WEB_DIRS = qw[Samples/SimpleWeb Samples/SimpleWeb2 Samples/WebBindings Tests/SimpleTest/WebSample];
-my @TEST_DIRS = qw[Tests/SimpleTest/SimpleTest.Test.csproj];
+my @WEB_DIRS = qw[Samples/SimpleWeb Samples/SimpleWeb2 Samples/WebBindings Tests/SimpleTest/WebSample Tests/BlazorTests/BlazorSample];
+my @TEST_DIRS = qw[Tests/SimpleTest/SimpleTest.Test.csproj Tests/WorkingTests/WorkingTests.Test.csproj Tests/BlazorTests/BlazorTests.Test.csproj];
 my @BLAZOR_DIRS = qw[Samples/SimpleBlazor];
 
 sub update($$$)

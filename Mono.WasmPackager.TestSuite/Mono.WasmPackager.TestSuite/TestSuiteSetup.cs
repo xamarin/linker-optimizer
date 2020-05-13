@@ -22,11 +22,13 @@ namespace Mono.WasmPackager.TestSuite
 		static BrowserFetcher browserFetcher;
 		static RevisionInfo revisionInfo;
 
-		public static Task Initialize ()
+		public static Task Initialize (ITestSuiteSettings settings)
 		{
 			return LazyInitializer.EnsureInitialized (ref initTask, async () =>
 			{
-				var localPath = GetLocalChromiumDirectory ();
+				var localPath = settings?.LocalChromiumDir;
+				if (localPath == null)
+					localPath = GetLocalChromiumDirectory ();
 				if (localPath == null)
 					throw new InvalidOperationException ("Failed to get local chromium path.");
 				var options = new BrowserFetcherOptions { Path = localPath };
@@ -62,9 +64,9 @@ namespace Mono.WasmPackager.TestSuite
 
 		internal static string ChromiumPath => revisionInfo.ExecutablePath;
 
-		public static async Task<string> GetChromiumPath ()
+		public static async Task<string> GetChromiumPath (ITestSuiteSettings settings)
 		{
-			await Initialize ().ConfigureAwait (false);
+			await Initialize (settings).ConfigureAwait (false);
 			return ChromiumPath;
 		}
 	}

@@ -12,6 +12,12 @@
       $(LinkerOptimizerConfigurationDependsOn);
       _LinkerOptimizerBlazor_PrepareConfiguration;
     </LinkerOptimizerConfigurationDependsOn>
+    <PrepareBlazorOutputs>
+      _LinkerOptimizerBlazor_PrepareConfiguration;
+      _LinkerOptimizer_PrepareConfiguration;
+      _LinkerOptimizer_ComputeDependencies;
+      $(PrepareBlazorOutputs)
+    </PrepareBlazorOutputs>
   </PropertyGroup>
 
   <Target

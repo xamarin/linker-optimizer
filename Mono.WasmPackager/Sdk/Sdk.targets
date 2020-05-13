@@ -16,6 +16,8 @@
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'" />
 
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.TestSuite.targets"  Condition="'$(WasmPackager_EnableTestSuite)' == 'true'" />
+
   <PropertyGroup>
     <_WasmPackager_OldResolveAssemblyReferencesDependsOn>
       $(ResolveAssemblyReferencesDependsOn);
@@ -54,6 +56,8 @@
     <ItemGroup>
       <Reference Remove="System.Drawing" />
       <Reference Remove="System.Drawing.Primitives" />
+      <!-- Conditionally disable _CopyFilesMarkedCopyLocal -->
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'$(_WasmPackager_IsBlazor)' != 'true'" />
     </ItemGroup>
   </Target>
 
@@ -62,8 +66,5 @@
     <RunWorkingDirectory>app</RunWorkingDirectory>
     <RunArguments>runtime.js $(WasmPackager_RunArguments) --run $(MSBuildProjectName)</RunArguments>
   </PropertyGroup>
-
-  <!-- override to skip -->
-  <Target Name="_CopyFilesMarkedCopyLocal" />
 
 </Project>

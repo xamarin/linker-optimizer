@@ -207,9 +207,23 @@ namespace WebAssembly.Net.Debugging {
 
 			case "Runtime.getProperties": {
 					if (!DotnetObjectId.TryParse (args? ["objectId"], out var objectId))
-						objectId = null;
+						break;
 
 					return Async (id, method, args, context, token => RuntimeGetProperties (id, objectId, args, token));
+				}
+
+			case "Debugger.evaluateOnCallFrame": {
+					if (!DotnetObjectId.TryParse (args? ["callFrameId"], out var objectId))
+						break;
+
+					switch (objectId.Scheme) {
+					case "scope":
+						return Async (id, method, args, context, token => OnEvaluateOnCallFrame (
+								id, context,
+								int.Parse (objectId.Value),
+								args? ["expression"]?.Value<string> (), token));
+					}
+					break;
 				}
 
 			case "Debugger.setPauseOnExceptions": {

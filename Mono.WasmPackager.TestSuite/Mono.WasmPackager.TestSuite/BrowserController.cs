@@ -21,7 +21,7 @@ namespace Mono.WasmPackager.TestSuite
 
 		public static async Task Connect (string url)
 		{
-			var chromiumPath = await TestSuiteSetup.GetChromiumPath ();
+			var chromiumPath = await TestSuiteSetup.GetChromiumPath (null);
 
 			var options = new LaunchOptions ()
 			{

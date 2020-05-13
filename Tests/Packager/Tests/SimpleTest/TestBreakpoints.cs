@@ -16,7 +16,9 @@ namespace SimpleTest
 {
 	public class TestBreakpoints : PuppeteerTestBase
 	{
-		async Task AwaitBreakpointHitAndResume (Action<PausedNotification> hitAction = null)
+		public static readonly SourceLocation Breakpoint = TestSettings.Locations.Message;
+
+		async Task AwaitBreakpointHitAndResume (SourceLocation location, Action<PausedNotification> hitAction = null)
 		{
 			var pause = WaitFor (PAUSE);
 			var click = ClickAndWaitForMessage ("#message", TestConstants.MessageText);
@@ -26,7 +28,7 @@ namespace SimpleTest
 			Assert.NotNull (hit);
 			Assert.Single (hit);
 
-			Assert.EndsWith (TestConstants.HelloFile, hit [0].ToString ());
+			Assert.EndsWith (location.File, hit [0].ToString ());
 
 			if (hitAction != null) {
 				var notificationObj = result.ToObject<PausedNotification> (true);
@@ -44,9 +46,9 @@ namespace SimpleTest
 		{
 			Assert.Equal (TestConstants.TextReady, await GetInnerHtml ("#output"));
 
-			await InsertBreakpoint (TestConstants.MessageBreakpoint);
+			await InsertBreakpoint (Breakpoint);
 
-			await AwaitBreakpointHitAndResume ().ConfigureAwait (false);
+			await AwaitBreakpointHitAndResume (Breakpoint).ConfigureAwait (false);
 		}
 
 		[Fact]
@@ -54,7 +56,7 @@ namespace SimpleTest
 		{
 			Assert.Equal (TestConstants.TextReady, await GetInnerHtml ("#output"));
 
-			var id = await InsertBreakpoint (TestConstants.MessageBreakpoint);
+			var id = await InsertBreakpoint (Breakpoint);
 			await RemoveBreakpoint (id);
 
 			await ClickAndWaitForMessage ("#message", TestConstants.MessageText);
@@ -65,21 +67,12 @@ namespace SimpleTest
 		{
 			Assert.Equal (TestConstants.TextReady, await GetInnerHtml ("#output"));
 
-			var id = await InsertBreakpoint (TestConstants.MessageBreakpoint);
+			var id = await InsertBreakpoint (Breakpoint);
 			await RemoveBreakpoint (id);
-			var id2 = await InsertBreakpoint (TestConstants.MessageBreakpoint);
+			var id2 = await InsertBreakpoint (Breakpoint);
 			Assert.Equal (id, id2);
 
-			await AwaitBreakpointHitAndResume ().ConfigureAwait (false);
-		}
-
-		void AssertBreakpointHit (string id, PausedNotification notification)
-		{
-			Assert.Single (notification.HitBreakpoints);
-			Assert.Equal (id, notification.HitBreakpoints [0]);
-			Assert.Equal (StoppedReason.Other, notification.Reason);
-			Assert.True (notification.CallFrames.Length > 0);
-			AssertBreakpointFrame (TestConstants.MessageBreakpoint, notification.CallFrames [0]);
+			await AwaitBreakpointHitAndResume (Breakpoint).ConfigureAwait (false);
 		}
 
 		[Fact]
@@ -87,9 +80,9 @@ namespace SimpleTest
 		{
 			Assert.Equal (TestConstants.TextReady, await GetInnerHtml ("#output"));
 
-			var id = await InsertBreakpoint (TestConstants.MessageBreakpoint);
+			var id = await InsertBreakpoint (Breakpoint);
 
-			await AwaitBreakpointHitAndResume (notification => {
+			await AwaitBreakpointHitAndResume (Breakpoint, notification => {
 				AssertBreakpointHit (id, notification);
 			}).ConfigureAwait (false);
 		}
@@ -99,9 +92,9 @@ namespace SimpleTest
 		{
 			Assert.Equal (TestConstants.TextReady, await GetInnerHtml ("#output"));
 
-			var id = await InsertBreakpoint (TestConstants.MessageBreakpoint);
+			var id = await InsertBreakpoint (Breakpoint);
 
-			await AwaitBreakpointHitAndResume (notification => {
+			await AwaitBreakpointHitAndResume (Breakpoint, notification => {
 				AssertBreakpointHit (id, notification);
 				foreach (var frame in notification.CallFrames) {
 					Assert.NotNull (frame.Location);
@@ -114,9 +107,9 @@ namespace SimpleTest
 		{
 			Assert.Equal (TestConstants.TextReady, await GetInnerHtml ("#output"));
 
-			var id = await InsertBreakpoint (TestConstants.MessageBreakpoint);
+			var id = await InsertBreakpoint (Breakpoint);
 
-			await AwaitBreakpointHitAndResume (notification => {
+			await AwaitBreakpointHitAndResume (Breakpoint, notification => {
 				AssertBreakpointHit (id, notification);
 				var second = notification.CallFrames [1];
 				Debug.WriteLine ($"SECOND FRAME: {second}");

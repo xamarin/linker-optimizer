@@ -15,9 +15,12 @@ namespace Mono.WasmPackager.TestSuite
 
 	public abstract class PuppeteerTestBase : InspectorTestBase
 	{
+		readonly Dictionary<string, SourceLocation> breakpoints;
+	
 		protected PuppeteerTestBase (Assembly caller = null)
 			: base (caller ?? Assembly.GetCallingAssembly ())
 		{
+			breakpoints = new Dictionary<string, SourceLocation> ();
 		}
 
 		protected Task<string> WaitForConsole (string message, bool regex = false)
@@ -141,26 +144,32 @@ namespace Mono.WasmPackager.TestSuite
 			Assert.True (response.Locations.Length > 1);
 		}
 
-		protected Task<string> InsertBreakpoint (SourceLocation location) => InsertBreakpoint (location.File, location.Line);
+		protected async Task<string> InsertBreakpoint (SourceLocation location)
+		{
+			var id = await InsertBreakpoint (location.File, location.Line).ConfigureAwait (false);
+			breakpoints.Add (id, location);
+			return id;
+		}
 
-		protected async Task<string> InsertBreakpoint (string file, int line)
+		async Task<string> InsertBreakpoint (string file, int line)
 		{
 			var fileUrl = $"dotnet://{Settings.DevServer_Assembly}/{file}";
 			var request = new InsertBreakpointRequest {
-				LineNumber = line,
+				LineNumber = line - 1,
 				Url = FileToUrl [fileUrl]
 			};
 
 			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request);
 			Assert.EndsWith (file, result.BreakpointId);
 			Assert.Single (result.Locations);
-			Assert.Equal (line, result.Locations [0].LineNumber);
+			Assert.Equal (line - 1, result.Locations [0].LineNumber);
 			Assert.Equal (FileToId [fileUrl], result.Locations [0].ScriptId);
 			return result.BreakpointId;
 		}
 
 		protected async Task RemoveBreakpoint (string breakpointId)
 		{
+			breakpoints.Remove (breakpointId);
 			var request = new RemoveBreakpointRequest { BreakpointId = breakpointId };
 			await SendCommand<RemoveBreakpointResponse> ("Debugger.removeBreakpoint", request);
 		}
@@ -173,18 +182,28 @@ namespace Mono.WasmPackager.TestSuite
 			Assert.EndsWith (location.File, frame.Url);
 			Assert.NotNull (frame.Location);
 			Assert.Equal (scriptId, frame.Location.ScriptId);
-			Assert.Equal (location.Line, frame.Location.LineNumber);
+			Assert.Equal (location.Line, frame.Location.LineNumber + 1);
 			if (location.Column != null)
-				Assert.Equal (location.Column.Value, frame.Location.ColumnNumber);
+				Assert.Equal (location.Column.Value, frame.Location.ColumnNumber + 1);
 			Assert.True (frame.ScopeChain.Length > 0);
 			var scope = frame.ScopeChain [0];
 			Assert.Equal (location.FunctionName, scope.Name);
 			Assert.Equal (ScopeType.Local, scope.Type);
 			if (location.ScopeStart != null)
-				Assert.Equal (location.ScopeStart.Value, scope.StartLocation.LineNumber);
+				Assert.Equal (location.ScopeStart.Value, scope.StartLocation.LineNumber + 1);
 			if (location.ScopeEnd != null)
-				Assert.Equal (location.ScopeEnd.Value, scope.EndLocation.LineNumber);
+				Assert.Equal (location.ScopeEnd.Value, scope.EndLocation.LineNumber + 1);
 			Assert.NotNull (scope.Object);
+		}
+
+		protected void AssertBreakpointHit (string id, PausedNotification notification)
+		{
+			Assert.Single (notification.HitBreakpoints);
+			Assert.Equal (id, notification.HitBreakpoints [0]);
+			Assert.Equal (StoppedReason.Other, notification.Reason);
+			Assert.True (notification.CallFrames.Length > 0);
+
+			AssertBreakpointFrame (breakpoints[id], notification.CallFrames [0]);
 		}
 	}
 }

@@ -195,6 +195,7 @@ namespace Microsoft.Build.Shared
         /// (that would require rewriting the algorithm) but since it seems unlikely that we ever do, this should
         /// be good enough to avoid complicating the algorithm at this point.
         /// </summary>
-        private static readonly char[] s_charsToEscape = { '%', '*', '?', '@', '$', '(', ')', ';', '\'' };
+        // MARTIN 05/12/2020: added the double-quote '"' to the list.
+        private static readonly char[] s_charsToEscape = { '%', '*', '?', '@', '$', '(', ')', ';', '\'', '"' };
     }
 }

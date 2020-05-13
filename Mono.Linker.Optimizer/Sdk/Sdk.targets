@@ -5,6 +5,4 @@
 
   <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.Optimizer.Standalone.targets"  Condition="'$(_LinkerOptimizer_Standalone)' == 'true'" />
 
-  <Import Project="$(MSBuildThisFileDirectory)\Mono.Linker.Optimizer.Blazor.targets"  Condition="'$(_LinkerOptimizer_Blazor)' == 'true'" />
-
 </Project>

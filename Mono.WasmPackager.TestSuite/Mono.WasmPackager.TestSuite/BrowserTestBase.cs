@@ -56,7 +56,7 @@ namespace Mono.WasmPackager.TestSuite
 
 			cts = new CancellationTokenSource ();
 
-			var chromiumPath = await TestSuiteSetup.GetChromiumPath ();
+			var chromiumPath = await TestSuiteSetup.GetChromiumPath (Settings);
 
 			var options = new LaunchOptions () {
 				Headless = Headless,

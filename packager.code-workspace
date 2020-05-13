@@ -17,6 +17,14 @@
 			"path": "Tests/Packager/Tests/WorkingTests/WebSample"
 		},
 		{
+			"name": "BlazorTests",
+			"path": "Tests/Packager/Tests/BlazorTests"
+		},
+		{
+			"name": "BlazorTests/BlazorSample",
+			"path": "Tests/Packager/Tests/BlazorTests/BlazorSample"
+		},
+		{
 			"name": "Samples/SimpleHello",
 			"path": "Tests/Packager/Samples/SimpleHello"
 		},
@@ -51,14 +59,6 @@
 		{
 			"name": "Samples/WebBindings",
 			"path": "Tests/Packager/Samples/WebBindings"
-		},
-		{
-			"name": "Samples/PristineBlazor",
-			"path": "Tests/Packager/Samples/PristineBlazor"
-		},
-		{
-			"name": "Samples/SimpleBlazor",
-			"path": "Tests/Packager/Samples/SimpleBlazor"
 		},
 		{
 			"name": "DebugBuild",

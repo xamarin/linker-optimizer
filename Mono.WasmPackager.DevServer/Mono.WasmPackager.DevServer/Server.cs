@@ -67,7 +67,7 @@ namespace Mono.WasmPackager.DevServer
 			server.Host.Run ();
 		}
 
-		public static Server CreateTestHarness (string root)
+		public static Server CreateTestHarness (string root, string frameworkDir)
 		{
 			if (string.IsNullOrEmpty (root))
 				throw new ArgumentNullException (nameof (root));
@@ -79,6 +79,7 @@ namespace Mono.WasmPackager.DevServer
 			var options = new ServerOptions {
 				WebRoot = root,
 				EnableDebugging = true,
+				FrameworkDirectory = frameworkDir,
 				EnableTestHarness = true,
 				VerboseLogging = false
 			};

@@ -2,8 +2,8 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MonoWebAssemblySdkVersion>0.2.3-martin-20200501.2</MonoWebAssemblySdkVersion>
-    <MonoWebAssemblyEmscriptenVersion>0.2.3-martin-20200501.1</MonoWebAssemblyEmscriptenVersion>
+    <MonoWebAssemblySdkVersion>0.2.3-martin-20200513.1</MonoWebAssemblySdkVersion>
+    <MonoWebAssemblyEmscriptenVersion>0.2.3-martin-20200513.1</MonoWebAssemblyEmscriptenVersion>
 
     <_LinkerOptimizer_Standalone>false</_LinkerOptimizer_Standalone>
 
@@ -29,13 +29,15 @@
     <When Condition="'$(WasmPackager_UseBlazorMono)' == 'true'">
       <PropertyGroup>
         <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</MonoWebAssemblyFrameworkRoot>
+        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</MonoWebAssemblyBindingsRoot>
         <WasmPackager_MonoBclPath>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</WasmPackager_MonoBclPath>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
-        <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.framework\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyFrameworkRoot>
-        <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)\wasm-assemblies</WasmPackager_MonoBclPath>
+        <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.framework\$(MonoWebAssemblySdkVersion)\wasm-assemblies\</MonoWebAssemblyFrameworkRoot>
+        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.bindings\$(MonoWebAssemblySdkVersion)\wasm-bindings\</MonoWebAssemblyBindingsRoot>
+        <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)</WasmPackager_MonoBclPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -50,11 +52,7 @@
     <WasmPackager_MonoRuntimeAotDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
   </PropertyGroup>
 
-  <ItemGroup>
-    <WasmPackager_FrameworkDirectories Include="@(__WasmPackager_Bindings->'$(WasmPackager_NugetPackageRoot)/%(Package)/$(MonoWebAssemblySdkVersion)/lib/netstandard2.0')" />
-  </ItemGroup>
-
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'">
     <!--
       FrameworkPathOverride needs to be set prior to including Sdk.props.
       We set TargetFrameworkPath in our Sdk.targets because anything we set

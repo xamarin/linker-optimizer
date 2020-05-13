@@ -18,7 +18,13 @@ namespace Mono.WasmPackager
 			get; set;
 		}
 
+		[Required]
 		public string MonoWasmFrameworkPath {
+			get; set;
+		}
+
+		[Required]
+		public string MonoWasmBindingsPath {
 			get; set;
 		}
 
@@ -170,6 +176,14 @@ namespace Mono.WasmPackager
 			return ResolveWithExtension (MonoWasmFrameworkPath, asm_name);
 		}
 
+		string ResolveBindings (string asm_name)
+		{
+			var res = ResolveWithExtension (MonoWasmBindingsPath, asm_name);
+			if (res != null)
+				return res;
+			throw new Exception ($"Failed to resolve binding {asm_name}.");
+		}
+
 		string ResolveBcl (string asm_name)
 		{
 			foreach (var prefix in bcl_prefixes) {
@@ -225,8 +239,8 @@ namespace Mono.WasmPackager
 			root_search_paths.ForEach (resolver.AddSearchDirectory);
 			resolver.AddSearchDirectory (MonoBclFacadesPath);
 			resolver.AddSearchDirectory (MonoBclPath);
-			if (!string.IsNullOrEmpty (MonoWasmFrameworkPath))
-				resolver.AddSearchDirectory (MonoWasmFrameworkPath);
+			resolver.AddSearchDirectory (MonoWasmFrameworkPath);
+			resolver.AddSearchDirectory (MonoWasmBindingsPath);
 			if (FrameworkDirectories != null) {
 				foreach (var dir in FrameworkDirectories)
 					resolver.AddSearchDirectory (dir);
@@ -298,11 +312,11 @@ namespace Mono.WasmPackager
 			}
 
 			if (AddBinding) {
-				var bindings = ResolveFramework (BINDINGS_ASM_NAME + ".dll");
+				var bindings = ResolveBindings (BINDINGS_ASM_NAME + ".dll");
 				Import (bindings, AssemblyKind.Framework);
-				var http = ResolveFramework (HTTP_ASM_NAME + ".dll");
+				var http = ResolveBindings (HTTP_ASM_NAME + ".dll");
 				Import (http, AssemblyKind.Framework);
-				var websockets = ResolveFramework (WEBSOCKETS_ASM_NAME + ".dll");
+				var websockets = ResolveBindings (WEBSOCKETS_ASM_NAME + ".dll");
 				Import (websockets, AssemblyKind.Framework);
 			}
 

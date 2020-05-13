@@ -40,7 +40,7 @@ namespace Mono.WasmPackager.TestSuite
 				throw new InvalidOperationException ("Unable to resolve test settings.");
 
 			Debug.WriteLine ($"DebuggerTestBase: {Settings.DevServer_RootDir}");
-			Server = Server.CreateTestHarness (Settings.DevServer_RootDir);
+			Server = Server.CreateTestHarness (Settings.DevServer_RootDir, Settings.DevServer_FrameworkDir);
 			serverTask = Server.Host.StartAsync ();
 		}
 

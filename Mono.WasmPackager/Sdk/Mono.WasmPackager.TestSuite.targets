@@ -1,0 +1,28 @@
+<Project>
+
+  <UsingTask TaskName="Mono.WasmPackager.ScanSourceFiles" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
+
+  <PropertyGroup>
+    <_WasmPackager_DevServer_FilterSources_DependsOn>
+    $(_WasmPackager_DevServer_FilterSources_DependsOn);
+    _WasmPackager_TestSuite_ScanSources;
+    </_WasmPackager_DevServer_FilterSources_DependsOn>
+    <_WasmPackager_SourceLocations_File>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/obj/$(MSBuildProjectName).SourceLocations.g.cs'))</_WasmPackager_SourceLocations_File>
+  </PropertyGroup>
+
+  <Target Name="_WasmPackager_TestSuite_ScanSources">
+    <Message Importance="High" Text="_WasmPackager_TestSuite_ScanSources" />
+
+    <ScanSourceFiles SourceFiles="@(Compile)" Output="$(_WasmPackager_SourceLocations_File)" />
+
+    <Message Importance="High" Text="source locations file: $(_WasmPackager_SourceLocations_File)" />
+
+    <ItemGroup>
+      <WasmPackager_DevServer_Settings Include="TestSuite_SourceLocations">
+        <Value>$(_WasmPackager_SourceLocations_File)</Value>
+      </WasmPackager_DevServer_Settings>
+    </ItemGroup>
+
+  </Target>
+
+</Project>

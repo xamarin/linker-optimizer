@@ -1,0 +1,16 @@
+<Project Sdk="Mono.WasmPackager.Blazor/1.0.0">
+
+  <PropertyGroup>
+    <WasmPackager_ExecMode>Interp</WasmPackager_ExecMode>
+    <WasmPackager_AddBinding>true</WasmPackager_AddBinding>
+    <WasmPackager_EnableDebug>true</WasmPackager_EnableDebug>
+    <WasmPackager_EnableTestSuite>true</WasmPackager_EnableTestSuite>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RazorLangVersion>3.0</RazorLangVersion>
+    <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
+  </PropertyGroup>
+
+</Project>

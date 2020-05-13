@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>  
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <UsingTask TaskName="Mono.WasmPackager.GenerateTestSettings" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
+
   <PropertyGroup>
     <RunCommand>dotnet</RunCommand>
     <RunArguments>$(MSBuildThisFileDirectory)../tools/Mono.WasmPackager.DevServer.dll $(WasmPackager_DevServer_Arguments)</RunArguments>
     <RunWorkingDirectory>$(WasmPackager_DevServer_RootDir)</RunWorkingDirectory>
-    <OutputType>Library</OutputType>
+    <OutputType Condition="'$(_WasmPackager_IsBlazor)' != 'true'">Library</OutputType>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -13,9 +15,7 @@
       $(PrepareForBuildDependsOn);
       _WasmPackager_DevServer_FilterSources;
     </PrepareForBuildDependsOn>
-    <_WasmPackager_DevServer_Settings>
-      $([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/obj/$(MSBuildProjectName).TestSettings.g.cs'))
-    </_WasmPackager_DevServer_Settings>
+    <_WasmPackager_DevServer_Settings>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/obj/$(MSBuildProjectName).TestSettings.g.cs'))</_WasmPackager_DevServer_Settings>
   </PropertyGroup>
 
   <Target Name="_WasmPackager_DevServer_FilterSources"
@@ -26,43 +26,35 @@
     <Message Importance="Normal" Text="  settings: %(WasmPackager_DevServer_Settings.Identity) = %(Value)" />
     <Message Importance="Normal" Text="  assembly: $(TargetFileName)" />
 
-    <ItemGroup>
-      <WasmPackager_DevServer_Settings Include="DevServer_Assembly" Condition="'$(_WasmPackager_IsTestSuite)' != 'true'">
-        <Value>$(TargetFileName)</Value>
-      </WasmPackager_DevServer_Settings>
-      <Compile Include="$(_WasmPackager_DevServer_Settings)" />
-      <_WasmPackager_DevServer_Settings_Lines Include="      public string %(WasmPackager_DevServer_Settings.Identity) { get%3B } = &quot;%(Value)&quot;%3B" />
-    </ItemGroup>
-
     <PropertyGroup>
-      <__WasmPackager_DevServer_Settings_Interfaces Condition="'@(_WasmPackager_DevServer_Settings_Interfaces)' != ''">
-      : @(_WasmPackager_DevServer_Settings_Interfaces, ',')
-      </__WasmPackager_DevServer_Settings_Interfaces>
-      <__WasmPackager_DevServer_Settings_Contents>
-// AUTO-GENERATED FILE - DO NOT MODIFY!
-namespace Mono.WasmPackager.DevServer
-{
-    partial class TestSettings$(__WasmPackager_DevServer_Settings_Interfaces)
-    {
-@(_WasmPackager_DevServer_Settings_Lines)
-    }
-}
-      </__WasmPackager_DevServer_Settings_Contents>
+      <_WasmPackager_IsTestSuite Condition="'$(_WasmPackager_IsTestSuite)' == ''">false</_WasmPackager_IsTestSuite>
     </PropertyGroup>
 
-    <WriteLinesToFile
-        Lines="$(__WasmPackager_DevServer_Settings_Contents)"
-        File="$(_WasmPackager_DevServer_Settings)"
-        Overwrite="True"
-        WriteOnlyWhenDifferent="True" />
+    <GenerateTestSettings
+        IsTestSuite="$(_WasmPackager_IsTestSuite)"
+        DevServer_RootDir="$(WasmPackager_DevServer_RootDir)"
+        DevServer_FrameworkDir="$(WasmPackager_DevServer_FrameworkDir)"
+        DevServer_Arguments="$(WasmPackager_DevServer_Arguments)"
+        DevServer_Assembly="$(TargetFileName)"
+        LocalChromiumDir="$(WasmPackager_LocalChromiumDir)"
+        ExtraSettings="@(WasmPackager_DevServer_Settings)"
+        TestSettings_Interfaces="@(_WasmPackager_DevServer_Settings_Interfaces)"
+        Output="$(_WasmPackager_DevServer_Settings)"
+    />
+
+    <ItemGroup>
+      <Compile Include="$(_WasmPackager_DevServer_Settings)" />
+    </ItemGroup>
 
     <Message Importance="High" Text="settings file: $(_WasmPackager_DevServer_Settings)" />
 
   </Target>
 
   <Target Name="WasmPackager_DevServer_Build"
-      Outputs="$(_WasmPackager_DevServer_Settings)">
-    <Message Importance="High" Text="WasmPackager_DevServer_Build: $(IntermediateOutputPath) - $(_WasmPackager_DevServer_Settings)" />
+      Outputs="$(_WasmPackager_DevServer_Settings);$(_WasmPackager_SourceLocations_File)">
+    <Message Importance="High" Text="WasmPackager_DevServer_Build: $(IntermediateOutputPath) - $(_WasmPackager_DevServer_Settings) - $(_WasmPackager_SourceLocations_File)" />
+
+    <Message Importance="High" Text="WasmPackager_DevServer_Build #1: $(WasmPackager_EnableTestSuite)" />
   </Target>
 
 </Project>

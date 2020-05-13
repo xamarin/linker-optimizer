@@ -1,0 +1,11 @@
+<Project Sdk="Mono.WasmPackager.TestSuite/1.0.0">
+
+  <PropertyGroup>
+    <SampleProject>BlazorSample</SampleProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

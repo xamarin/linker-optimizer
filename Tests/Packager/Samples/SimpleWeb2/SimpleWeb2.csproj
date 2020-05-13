@@ -4,6 +4,7 @@
     <WasmPackager_ExecMode>Interp</WasmPackager_ExecMode>
     <WasmPackager_AddBinding>true</WasmPackager_AddBinding>
     <WasmPackager_EnableDebug>true</WasmPackager_EnableDebug>
+    <WasmPackager_EnableTestSuite>true</WasmPackager_EnableTestSuite>
   </PropertyGroup>
 
 </Project>
