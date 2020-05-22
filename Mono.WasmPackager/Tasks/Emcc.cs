@@ -17,7 +17,6 @@ namespace Mono.WasmPackager.Emscripten
 			get; set;
 		}
 
-		[Required]
 		public string Input {
 			get; set;
 		}
@@ -38,16 +37,26 @@ namespace Mono.WasmPackager.Emscripten
 			get; set;
 		}
 
+		public bool Quiet {
+			get; set;
+		}
+
 		public override bool Execute ()
 		{
 			Log.LogMessage (MessageImportance.High, $"EMCC: {Input} - {Output} - {Flags}");
+			Log.LogMessage (MessageImportance.Normal, $"  EmsdkEnv: {EmsdkEnv}");
 
 			var environment = SourceEnvironment.ParseEnvironmentVariables (Log, EmsdkEnv, false);
 
-			var psi = new ProcessStartInfo (Path.Combine (SdkDir, "upstream", "emscripten", "emcc"));
+			var emsdkPath = Path.Combine (SdkDir, "upstream", "emscripten", "emcc");
+			Log.LogMessage (MessageImportance.High, $"  Emcc: {emsdkPath}");
+
+			var psi = new ProcessStartInfo (emsdkPath);
 			psi.UseShellExecute = false;
-			foreach (var var in environment)
+			foreach (var var in environment) {
+				Log.LogMessage (MessageImportance.Normal, $"  ENV: {var.Key} = {var.Value}");
 				psi.EnvironmentVariables[var.Key] = var.Value;
+			}
 
 			if (!string.IsNullOrEmpty (CacheDir)) {
 				Log.LogMessage (MessageImportance.Normal, $"  Cache Dir: {CacheDir}");
@@ -62,14 +71,21 @@ namespace Mono.WasmPackager.Emscripten
 				Output = Path.ChangeExtension (Input, ".o");
 
 			var arguments = new List<string> ();
-			arguments.Add (Input);
+			if (!string.IsNullOrEmpty (Input)) {
+				arguments.Add (Input);
+				arguments.Add ($"-o {Output}");
+			}
+
 			arguments.Add (Flags);
-			arguments.Add ($"-o {Output}");
 			arguments.Add ("--verbose");
 
 			psi.Arguments = string.Join (" ", arguments);
 
 			Log.LogMessage (MessageImportance.High, $"Invoking emcc with arguments: {psi.Arguments}");
+
+			if (Quiet) {
+				psi.RedirectStandardOutput = true;
+			}
 
 			var proc = Process.Start (psi);
 			proc.WaitForExit ();

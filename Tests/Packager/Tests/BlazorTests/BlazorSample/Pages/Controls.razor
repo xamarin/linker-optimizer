@@ -1,0 +1,23 @@
+@page "/controls"
+
+<h1>Controls</h1>
+
+<p id="testsuite-selector-controls">TESTSUITE-TEXT-CONTROLS</p>
+
+<button class="btn btn-primary" id="testsuite-button-breakpoint" @onclick="Breakpoint">Breakpoint</button>
+
+<button class="btn btn-primary" id="testsuite-button-exception" @onclick="Exception">Exception</button>
+
+@code {
+    void Breakpoint ()
+    {
+        // @@BREAKPOINT: ControlsBreakpoint
+        System.Diagnostics.Debug.WriteLine ("TESTSUITE-TEXT-BREAKPOINT-BUTTON");
+    }
+
+    void Exception ()
+    {
+        // @@BREAKPOINT: ControlsException
+        throw new InvalidTimeZoneException ("TESTSUITE-TEXT-EXCEPTION");
+    }
+}

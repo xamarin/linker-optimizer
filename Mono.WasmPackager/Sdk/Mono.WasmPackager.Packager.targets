@@ -30,6 +30,9 @@
     <_WasmPackager_Require_AppBundle_Inputs>
       $(_WasmPackager_Require_PostLink);
       $(_WasmPackager_Require_Generator);
+    </_WasmPackager_Require_AppBundle_Inputs>
+    <_WasmPackager_Require_AppBundle_Inputs Condition="'$(_WasmPackager_EnableEmcc)' == 'true'">
+      $(_WasmPackager_Require_AppBundle_Inputs);
       WasmPackager_LinkEmcc;
     </_WasmPackager_Require_AppBundle_Inputs>
     <_WasmPackager_Require_AppBundle>

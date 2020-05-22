@@ -38,6 +38,10 @@
       <TargetFrameworkDirectory>$(WasmPackager_MonoBclPath)</TargetFrameworkDirectory>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(_WasmPackager_IsNetCore)' == 'true'">
+      <TargetFrameworkDirectory>$(WasmPackager_MonoBclPath);$(MonoWebAssemblyRuntimeRoot)</TargetFrameworkDirectory>
+    </PropertyGroup>
+
     <ItemGroup Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'">
       <DesignTimeFacadeDirectoryRoots Include="$(TargetFrameworkDirectory)" />
       <DesignTimeFacadeDirectories Include="%(DesignTimeFacadeDirectoryRoots.Identity)Facades\" Condition="Exists('%(DesignTimeFacadeDirectoryRoots.Identity)Facades\')" />
@@ -51,7 +55,7 @@
   <Target
       Name="_WasmPackager_FilterAssemblyReferences"
       DependsOnTargets="$(_WasmPackager_OldResolveAssemblyReferencesDependsOn)">
-    <Message Text="_WasmPackager_FilterAssemblyReferences: @(Reference)" />
+    <Message Text="_WasmPackager_FilterAssemblyReferences: %(Reference.Identity)" />
 
     <ItemGroup>
       <Reference Remove="System.Drawing" />
@@ -59,6 +63,15 @@
       <!-- Conditionally disable _CopyFilesMarkedCopyLocal -->
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'$(_WasmPackager_IsBlazor)' != 'true'" />
     </ItemGroup>
+
+    <ItemGroup Condition="'$(_WasmPackager_IsNetCore)' == 'xtrue'">
+      <Reference Remove="@(Reference)" />
+      <Reference Include="$(MonoWebAssemblyFrameworkRoot)/*.dll" />
+      <Reference Include="$(MonoWebAssemblyRuntimeRoot)/System.Private.CoreLib.dll" />
+    </ItemGroup>
+
+    <Message Text="_WasmPackager_FilterAssemblyReferences #1: %(Reference.Identity)" />
+
   </Target>
 
   <PropertyGroup>

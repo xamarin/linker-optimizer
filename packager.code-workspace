@@ -61,6 +61,10 @@
 			"path": "Tests/Packager/Samples/WebBindings"
 		},
 		{
+			"name": "NetCore/SimpleHello",
+			"path": "Tests/Packager/NetCore/SimpleHello"
+		},
+		{
 			"name": "DebugBuild",
 			"path": "Tests/DebugBuild"
 		},
@@ -71,6 +75,10 @@
 		{
 			"name": "Mono.WasmPackager",
 			"path": "Mono.WasmPackager"
+		},
+		{
+			"name": "Mono.WasmPackager.NetCore",
+			"path": "Mono.WasmPackager.NetCore"
 		},
 		{
 			"name": "Mono.WasmPackager.Web",

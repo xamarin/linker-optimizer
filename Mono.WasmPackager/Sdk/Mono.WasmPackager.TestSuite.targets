@@ -7,15 +7,25 @@
     $(_WasmPackager_DevServer_FilterSources_DependsOn);
     _WasmPackager_TestSuite_ScanSources;
     </_WasmPackager_DevServer_FilterSources_DependsOn>
+    <_WasmPackager_DevServer_ScanSources_DependsOn Condition="'$(_WasmPackager_IsBlazor)' == 'true'">
+    $(_WasmPackager_DevServer_ScanSources_DependsOn);
+    RazorGenerateComponentDeclaration;
+    </_WasmPackager_DevServer_ScanSources_DependsOn>
     <_WasmPackager_SourceLocations_File>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/obj/$(MSBuildProjectName).SourceLocations.g.cs'))</_WasmPackager_SourceLocations_File>
   </PropertyGroup>
 
-  <Target Name="_WasmPackager_TestSuite_ScanSources">
+  <Target Name="_WasmPackager_TestSuite_ScanSources" DependsOnTargets="$(_WasmPackager_DevServer_ScanSources_DependsOn)">
     <Message Importance="High" Text="_WasmPackager_TestSuite_ScanSources" />
 
-    <ScanSourceFiles SourceFiles="@(Compile)" Output="$(_WasmPackager_SourceLocations_File)" />
+    <ItemGroup>
+      <__WasmPackager_ScanSourceFiles Include="@(Compile);@(RazorComponentWithTargetPath)" />
+      <__WasmPackager_ScanSourceFiles Remove="**/*.g.cs" />
+    </ItemGroup>
 
-    <Message Importance="High" Text="source locations file: $(_WasmPackager_SourceLocations_File)" />
+    <Message Importance="Normal" Text="  source locations file: $(_WasmPackager_SourceLocations_File)" />
+    <Message Importance="Normal" Text="  source file: %(__WasmPackager_ScanSourceFiles.Identity)" />
+
+    <ScanSourceFiles SourceFiles="@(__WasmPackager_ScanSourceFiles)" Output="$(_WasmPackager_SourceLocations_File)" />
 
     <ItemGroup>
       <WasmPackager_DevServer_Settings Include="TestSuite_SourceLocations">

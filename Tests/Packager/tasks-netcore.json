@@ -1,0 +1,187 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "debug-build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../DebugBuild",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "package-optimizer",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "@ROOT@/Mono.Linker.Optimizer",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "package-cilstrip",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "@ROOT@/Mono.Linker.CilStrip",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "package-packager",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "@ROOT@/Mono.WasmPackager",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-optimizer",
+                "package-cilstrip"
+            ]
+        },
+        {
+            "label": "package-netcore",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "@ROOT@/Mono.WasmPackager.NetCore",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-packager"
+            ]
+        },
+        {
+            "label": "clean-optimizer",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "@ROOT@/Mono.Linker.Optimizer",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "clean-cilstrip",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "@ROOT@/Mono.Linker.CilStrip",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "clean-packager",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "@ROOT@/Mono.WasmPackager",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "clean-netcore",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "@ROOT@/Mono.WasmPackager.NetCore",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/@PROJECT@.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary",
+                "/verbosity:normal"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-netcore"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "/nologo",
+                "${workspaceFolder}/@PROJECT@.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "clean-optimizer",
+                "clean-cilstrip",
+                "clean-packager",
+                "clean-web"
+            ]
+        },
+        {
+            "label": "run",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--no-build"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

@@ -11,10 +11,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PrepareForBuildDependsOn>
-      $(PrepareForBuildDependsOn);
+    <CoreCompileDependsOn>
+      $(CoreCompileDependsOn);
       _WasmPackager_DevServer_FilterSources;
-    </PrepareForBuildDependsOn>
+    </CoreCompileDependsOn>
     <_WasmPackager_DevServer_Settings>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/obj/$(MSBuildProjectName).TestSettings.g.cs'))</_WasmPackager_DevServer_Settings>
   </PropertyGroup>
 

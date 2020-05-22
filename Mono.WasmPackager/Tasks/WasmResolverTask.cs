@@ -23,6 +23,10 @@ namespace Mono.WasmPackager
 			get; set;
 		}
 
+		public string MonoWasmRuntimePath {
+			get; set;
+		}
+
 		[Required]
 		public string MonoWasmBindingsPath {
 			get; set;
@@ -240,6 +244,7 @@ namespace Mono.WasmPackager
 			resolver.AddSearchDirectory (MonoBclFacadesPath);
 			resolver.AddSearchDirectory (MonoBclPath);
 			resolver.AddSearchDirectory (MonoWasmFrameworkPath);
+			resolver.AddSearchDirectory (MonoWasmRuntimePath);
 			resolver.AddSearchDirectory (MonoWasmBindingsPath);
 			if (FrameworkDirectories != null) {
 				foreach (var dir in FrameworkDirectories)
@@ -296,7 +301,6 @@ namespace Mono.WasmPackager
 
 			bcl_prefixes = new List<string> ();
 			if (is_netcore) {
-				throw new NotImplementedException ();
 				/* corelib */
 				bcl_prefixes.Add (Path.Combine (MonoBclPath, "netcore"));
 				/* .net runtime */

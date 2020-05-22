@@ -27,6 +27,7 @@ namespace Mono.WasmPackager.TestSuite
 			return LazyInitializer.EnsureInitialized (ref initTask, async () =>
 			{
 				var localPath = settings?.LocalChromiumDir;
+				Debug.WriteLine ($"Initialize Chromium: {localPath}");
 				if (localPath == null)
 					localPath = GetLocalChromiumDirectory ();
 				if (localPath == null)
@@ -41,6 +42,7 @@ namespace Mono.WasmPackager.TestSuite
 		{
 			var asm = Assembly.GetExecutingAssembly ();
 			var root = asm.Location;
+			Debug.WriteLine ($"GetLocalChromiumDirectory: {root}");
 			root = Path.GetDirectoryName (root);
 			if (Path.GetFileName (root) != "netcoreapp3.0")
 				return null;

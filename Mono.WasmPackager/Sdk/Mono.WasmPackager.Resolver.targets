@@ -42,12 +42,14 @@
 
   <!-- Derived and private settings -->
   <PropertyGroup Condition="'$(WasmPackager_EnablePackager)' == 'true'">
-    <_WasmPackager_NetCoreAppDir>/MARTIN/FIXME/netcore/shared/Microsoft.NETCore.App/3.0</_WasmPackager_NetCoreAppDir>
+    <_WasmPackager_EnableEmcc Condition="'$(_WasmPackager_IsNetCore)' == 'true'">false</_WasmPackager_EnableEmcc>
+    <_WasmPackager_EnableEmcc Condition="'$(_WasmPackager_EnableEmcc)' == ''">true</_WasmPackager_EnableEmcc>
 
+    <_WasmPackager_EnableAot Condition="'$(_WasmPackager_IsNetCore)' == 'true'">false</_WasmPackager_EnableAot>
     <_WasmPackager_EnableAot Condition="'$(_WasmPackager_EnableAot)' != 'false' AND ('$(WasmPackager_ExecMode)' == 'Aot' OR '$(WasmPackager_ExecMode)' == 'AotInterp')">true</_WasmPackager_EnableAot>
 
     <_WasmPackager_EnableDedup Condition="'$(WasmPackager_EnableLinker)' == 'true' OR '$(_WasmPackager_EnableAot)' == 'true'">true</_WasmPackager_EnableDedup>
-    <_WasmPackager_EnableDedup Condition="'$(_WasmPackager_EnableDedup)' != 'true'">false</_WasmPackager_EnableDedup>
+    <_WasmPackager_EnableDedup Condition="'$(_WasmPackager_EnableDedup)' != 'true' OR '$(_WasmPackager_IsNetCore)' == 'true'">false</_WasmPackager_EnableDedup>
 
     <!-- Copy from the public property and turn it off when it's not supported. -->
     <_WasmPackager_CilStrip>$(WasmPackager_CilStrip)</_WasmPackager_CilStrip>
@@ -57,8 +59,10 @@
     <_WasmPackager_MonoConfig>$(WasmPackager_BuildDir)/mono-config.js</_WasmPackager_MonoConfig>
     <_WasmPackager_DriverGen>$(WasmPackager_BuildDir)/driver-gen.c</_WasmPackager_DriverGen>
 
-    <_WasmPackager_EnableZLib>true</_WasmPackager_EnableZLib>
+    <_WasmPackager_EnableZLib Condition="'$(_WasmPackager_IsNetCore)' != 'true'">true</_WasmPackager_EnableZLib>
+  </PropertyGroup>
 
+  <PropertyGroup Condition="'$(_WasmPackager_EnableEmcc)' == 'true'">
     <WasmPackager_Emcc_Flags>-Oz -g -s DISABLE_EXCEPTION_CATCHING=0 -s ASSERTIONS=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s BINARYEN=1 -s TOTAL_MEMORY=134217728 -s ALIASING_FUNCTION_POINTERS=0 -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'setValue', 'getValue', 'UTF8ToString']" -s "EXPORTED_FUNCTIONS=['___cxa_is_pointer_type', '___cxa_can_catch']" -s "DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['setThrew', 'memset']"</WasmPackager_Emcc_Flags>
     <WasmPackager_Emcc_Flags Condition="('$(_WasmPackager_EnableAot)' != 'true') AND ('$(WasmPackager_LinkIcalls)' == 'true')">$(WasmPackager_Emcc_Flags) --llvm-lto 1</WasmPackager_Emcc_Flags>
 
@@ -75,16 +79,23 @@
 
   <!-- Resolve some conditional properties -->
   <Target Name="_WasmPackager_ResolveProperties" Outputs="$(_WasmPackager_ConfigCache)">
+
+    <Error Text="The 'EMSDK_PATH' environment variable must be set." Condition="'$(_WasmPackager_EnableEmcc)' == 'true' AND '$(EMSDK_PATH)' == ''" />
+
     <PropertyGroup>
-      <_WasmPackager_PInvokeTable Condition="'@(WasmPackager_PInvokeLibraries)' != ''">$(WasmPackager_BuildDir)/pinvoke-table.h</_WasmPackager_PInvokeTable>
-      <_WasmPackager_IcallTable Condition="'$(WasmPackager_LinkIcalls)' == 'true'">$(WasmPackager_BuildDir)/icall-table.h</_WasmPackager_IcallTable>
       <_WasmPackager_LinkerInput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-in</_WasmPackager_LinkerInput_Dir>
       <_WasmPackager_LinkerOutput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-out</_WasmPackager_LinkerOutput_Dir>
       <_WasmPackager_LinkerOutput_Dir Condition="'$(WasmPackager_EnableLinker)' != 'true'">$(WasmPackager_BuildDir)</_WasmPackager_LinkerOutput_Dir>
       <_WasmPackager_AotInput_Dir>$(_WasmPackager_LinkerOutput_Dir)</_WasmPackager_AotInput_Dir>
       <_WasmPackager_CilStripOutput_Dir Condition="'$(_WasmPackager_CilStrip)' == 'true'">$(WasmPackager_BuildDir)/ilstrip-out</_WasmPackager_CilStripOutput_Dir>
       <_WasmPackager_AotDummy Condition="'$(_WasmPackager_EnableDedup)' == 'true'">$(_WasmPackager_AotInput_Dir)/aot-dummy.dll</_WasmPackager_AotDummy>
+    </PropertyGroup>
 
+    <PropertyGroup Condition="'$(_WasmPackager_EnableEmcc)' == 'true'">
+      <_WasmPackager_PInvokeTable Condition="'@(WasmPackager_PInvokeLibraries)' != ''">$(WasmPackager_BuildDir)/pinvoke-table.h</_WasmPackager_PInvokeTable>
+      <_WasmPackager_IcallTable Condition="'$(WasmPackager_LinkIcalls)' == 'true'">$(WasmPackager_BuildDir)/icall-table.h</_WasmPackager_IcallTable>
+
+      <WasmPackager_Emscripten_SdkDir>$(EMSDK_PATH)</WasmPackager_Emscripten_SdkDir>
       <WasmPackager_Emcc_Flags Condition="'$(_WasmPackager_PInvokeTable)' != ''">$(WasmPackager_Emcc_Flags) -DGEN_PINVOKE</WasmPackager_Emcc_Flags>
 
       <__WasmPackager_Driver_Emcc_Flags Condition="'$(WasmPackager_ExecMode)' == 'Aot'">$(__WasmPackager_Driver_Emcc_Flags) -DENABLE_AOT=1</__WasmPackager_Driver_Emcc_Flags>
@@ -94,8 +105,20 @@
     <ItemGroup>
       <_WasmPackager_RootAssemblies Include="@(IntermediateAssembly)" />
 
-      <_WasmPackager_SdkSources Include="pinvoke-tables-default.h" />
+      <_WasmPackager_SdkSources Include="pinvoke-tables-default.h" Condition="'$(_WasmPackager_IsNetCore)' != 'true'"/>
 
+      <_WasmPackager_AppBundle_Files Include="runtime.js">
+        <Source>$(WasmPackager_MonoRuntimePath)/src/$(WasmPackager_RuntimeTemplate)</Source>
+      </_WasmPackager_AppBundle_Files>
+      <_WasmPackager_AppBundle_Files Include="mono-config.js" />
+
+      <_WasmPackager_AppBundle_Files_DotNet Include="dotnet.wasm;dotnet.js" />
+      <_WasmPackager_AppBundle_Files Include="@(_WasmPackager_AppBundle_Files_DotNet)">
+        <Source Condition="'$(_WasmPackager_EnableEmcc' != 'true'">$(WasmPackager_MonoRuntimePath)/debug/%(Identity)</Source>
+      </_WasmPackager_AppBundle_Files>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(_WasmPackager_EnableEmcc)' == 'true'">
       <_WasmPackager_SdkSources Include="driver.c">
         <Emcc_Flags>-DDRIVER_GEN=1 $(__WasmPackager_Driver_Emcc_Flags)</Emcc_Flags>
         <Emcc_Deps>$(_WasmPackager_IcallTable);$(_WasmPackager_PInvokeTable)</Emcc_Deps>
@@ -107,11 +130,6 @@
 
       <_WasmPackager_SdkSources Include="corebindings.c" Condition="'$(WasmPackager_AddBinding)' == 'true'" />
 
-      <_WasmPackager_AppBundle_Files Include="runtime.js">
-        <Source>$(WasmPackager_MonoRuntimePath)/src/$(WasmPackager_RuntimeTemplate)</Source>
-      </_WasmPackager_AppBundle_Files>
-      <_WasmPackager_AppBundle_Files Include="dotnet.js;dotnet.wasm;mono-config.js" />
-
       <_WasmPackager_AotBaseArgs Include="llvmonly;asmonly;no-opt;static;direct-icalls;deterministic" />
       <_WasmPackager_AotBaseArgs Include="llvm-path=$(WasmPackager_Emscripten_SdkDir)/upstream/bin" />
 
@@ -121,9 +139,15 @@
       <_WasmPackager_AotArgs Include="dedup-skip" Condition="'$(_WasmPackager_EnableDedup)' == 'true'" />
       <_WasmPackager_AotArgs Include="@(_WasmPackager_AotBaseArgs)" />
 
+      <_WasmPackager_Js_Libs Include="library_mono.js;dotnet_support.js" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(_WasmPackager_IsNetCore)' == 'true'">
+      <_WasmPackager_Runtime_Libs Include="libmonosgen-2.0.a;libSystem.Native.a" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(_WasmPackager_IsNetCore)' != 'true'">
       <_WasmPackager_Runtime_Libs Include="libmonosgen-2.0.a;libmono-native.a" />
       <_WasmPackager_Runtime_Libs Include="@(WasmPackager_Profilers->'libmono-profiler-%(Identity)-static.a')"/>
-      <_WasmPackager_Js_Libs Include="library_mono.js;dotnet_support.js" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(WasmPackager_AddBinding)' == 'true'">
@@ -196,17 +220,29 @@
     </ItemGroup>
 
     <Message Importance="High" Text="WasmPackager - resolving assemblies with root $(WasmPackager_MonoBclPath)" />
+    <Message Importance="Normal" Text="  MonoBclPath: $(WasmPackager_MonoBclPath)" />
     <Message Importance="Normal" Text="  RootAssemblies: %(_WasmPackager_RootAssemblies.Identity)" />
     <Message Importance="Normal" Text="  FrameworkDirectories: %(WasmPackager_FrameworkDirectories.Identity)" />
-    <Message Importance="Normal" Text="  MonoWebAssemblyFrameworkRoot: $(MonoWebAssemblyFrameworkRoot)" />
-    <Message Importance="Normal" Text="  MonoWebAssemblyBindingsRoot: $(MonoWebAssemblyBindingsRoot)" />
+    <Message Importance="Normal" Text="  MonoWasmFrameworkPath: $(MonoWebAssemblyFrameworkRoot)" />
+    <Message Importance="Normal" Text="  MonoWasmBindingsPath: $(MonoWebAssemblyBindingsRoot)" />
+
+    <PropertyGroup Condition="'$(_WasmPackager_IsNetCore)' == 'true'">
+      <__WasmPackager_Resolver_Framework>netcoreapp5.0</__WasmPackager_Resolver_Framework>
+      <__WasmPackager_Resolver_NetCoreDir>$(MonoWebAssemblyFrameworkRoot)</__WasmPackager_Resolver_NetCoreDir>
+    </PropertyGroup>
+
+    <Message Importance="Normal" Text="  Framework: $(__WasmPackager_Resolver_Framework)" Condition="'$(__WasmPackager_Resolver_Framework)' != ''" />
+    <Message Importance="Normal" Text="  NetCoreAppDir: $(__WasmPackager_Resolver_NetCoreDir)" Condition="'$(__WasmPackager_Resolver_NetCoreDir)' != ''" />
 
     <WasmResolverTask
         MonoBclPath="$(WasmPackager_MonoBclPath)"
         RootAssemblies="@(_WasmPackager_RootAssemblies)"
         FrameworkDirectories="@(WasmPackager_FrameworkDirectories)"
         MonoWasmFrameworkPath="$(MonoWebAssemblyFrameworkRoot)"
+        MonoWasmRuntimePath="$(MonoWebAssemblyRuntimeRoot)"
         MonoWasmBindingsPath="$(MonoWebAssemblyBindingsRoot)"
+        Framework="$(__WasmPackager_Resolver_Framework)"
+        NetCoreAppDir="$(__WasmPackager_Resolver_NetCoreDir)"
         EnableAot="$(_WasmPackager_EnableAot)"
         AddBinding="$(WasmPackager_AddBinding)"
         EnableDebug="$(WasmPackager_EnableDebug)">

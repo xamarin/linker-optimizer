@@ -1,0 +1,7 @@
+<Project Sdk="Mono.WasmPackager.NetCore/1.0.0">
+
+  <PropertyGroup>
+    <WasmPackager_NetCoreWeb>true</WasmPackager_NetCoreWeb>
+  </PropertyGroup>
+
+</Project>

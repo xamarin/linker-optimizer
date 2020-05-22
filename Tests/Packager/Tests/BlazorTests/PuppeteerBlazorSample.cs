@@ -26,6 +26,10 @@ namespace BlazorTests
 			get; private set;
 		}
 
+		protected ElementHandle ControlsSelector {
+			get; private set;
+		}
+
 		protected ElementHandle FetchSelector {
 			get; private set;
 		}
@@ -49,6 +53,9 @@ namespace BlazorTests
 
 			CounterSelector = await Page.QuerySelectorAsync (TestConstants.CounterButton);
 			Assert.NotNull (CounterSelector);
+
+			ControlsSelector = await Page.QuerySelectorAsync (TestConstants.ControlsButton);
+			Assert.NotNull (ControlsSelector);
 
 			FetchSelector = await Page.QuerySelectorAsync (TestConstants.FetchButton);
 		}

@@ -6,6 +6,9 @@
     <ArtifactsDirectory>$(RepoRoot)/artifacts</ArtifactsDirectory>
     <LocalPackagesDirectory>$(RepoRoot)/Tests/Packager/.packages</LocalPackagesDirectory>
     <LocalTestPackagesDirectory>$(RepoRoot)/Tests/Packager/.test-packages</LocalTestPackagesDirectory>
+    <!-- We now expect emsdk to be checked out and setup next to this checkout. -->
+    <EMSDK_PATH Condition="'$(EMSDK_PATH)' == ''">$([System.IO.Path]::GetFullPath('$(RepoRoot)/../emsdk'))</EMSDK_PATH>
+
   </PropertyGroup>
 
   <PropertyGroup>

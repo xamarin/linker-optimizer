@@ -10,6 +10,7 @@ namespace BlazorTests
 
 		public const string HomeButton = "#testsuite-button-home";
 		public const string CounterButton = "#testsuite-button-counter";
+		public const string ControlsButton = "#testsuite-button-controls";
 		public const string FetchButton = "#testsuite-button-fetch";
 
 		public const string BodySelector = "#testsuite-selector-content";
@@ -19,5 +20,8 @@ namespace BlazorTests
 
 		public const string WelcomeSelector = "#testsuite-selector-welcome";
 		public const string WelcomeText = "TESTSUITE-TEXT-WELCOME";
+
+		public const string ControlsSelector = "#testsuite-selector-controls";
+		public const string ControlsText = "TESTSUITE-TEXT-CONTROLS";
 	}
 }

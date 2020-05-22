@@ -36,5 +36,42 @@ namespace BlazorTests
 
 			Debug.WriteLine ("DONE!");
 		}
+
+		[Fact]
+		public async Task StartAndClickControls ()
+		{
+			await StartBlazorApp ().ConfigureAwait (false);
+
+			var bodySelector = await Page.QuerySelectorAsync (TestConstants.BodySelector);
+			Assert.NotNull (bodySelector);
+
+			await AssertSelectorVisible (TestConstants.BodySelector);
+
+			await AssertSelectorVisible (TestConstants.NothingHereSelector, TestConstants.NothingHereText);
+			await AssertSelectorNotVisible (TestConstants.WelcomeSelector);
+
+			await ControlsSelector.ClickAsync ();
+
+			await AssertSelectorVisible (TestConstants.ControlsSelector, TestConstants.ControlsText);
+			await AssertSelectorNotVisible (TestConstants.NothingHereSelector);
+
+			Debug.WriteLine ("DONE!");
+		}
+
+		[Fact]
+		public async Task InsertControlsBreakpoint ()
+		{
+			await StartBlazorApp ().ConfigureAwait (false);
+
+			var bp = await InsertBreakpoint (TestSettings.Locations.ControlsBreakpoint);
+			Debug.WriteLine ($"BREAKPOINT: {bp}");
+
+			await ControlsSelector.ClickAsync ();
+
+			await AssertSelectorVisible (TestConstants.ControlsSelector, TestConstants.ControlsText);
+			await AssertSelectorNotVisible (TestConstants.NothingHereSelector);
+
+			Debug.WriteLine ("DONE!");
+		}
 	}
 }
