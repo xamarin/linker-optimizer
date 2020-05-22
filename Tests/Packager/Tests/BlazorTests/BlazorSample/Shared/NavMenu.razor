@@ -1,5 +1,5 @@
 ﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">BlazorSample</a>
+    <a class="navbar-brand" id="testsuite-selector-navbar-title" href="">TESTSUITE-TEXT-NAVBAR-TITLE</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -9,12 +9,12 @@
     <ul class="nav flex-column">
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
+                <span class="oi oi-home" aria-hidden="true" id="testsuite-button-home"></span> Home
             </NavLink>
         </li>
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
+                <span class="oi oi-plus" aria-hidden="true" id="testsuite-button-counter"></span> Counter
             </NavLink>
         </li>
         <li class="nav-item px-3">

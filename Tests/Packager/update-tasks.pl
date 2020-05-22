@@ -1,17 +1,31 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -w
 use strict;
 use File::Basename;
 
 my @CONSOLE_DIRS = qw[Samples/SimpleDebug Samples/SimpleHello Samples/SimpleInterpreter Samples/SimpleMixed Samples/DontLink];
-my @WEB_DIRS = qw[Samples/SimpleWeb Samples/SimpleWeb2 Samples/WebBindings Tests/SimpleTest/WebSample Tests/BlazorTests/BlazorSample];
-my @TEST_DIRS = qw[Tests/SimpleTest/SimpleTest.Test.csproj Tests/WorkingTests/WorkingTests.Test.csproj Tests/BlazorTests/BlazorTests.Test.csproj];
+my @WEB_DIRS = qw[Samples/SimpleWeb Samples/SimpleWeb2 Samples/WebBindings];
+my @TEST_DIRS = qw[Tests/SimpleTest Tests/WorkingTests Tests/BlazorTests];
 my @BLAZOR_DIRS = qw[Samples/SimpleBlazor];
 
-sub update($$$)
-{
-	my ($dir, $template, $output) = @_;
+my @WEB_TEST_DIRS = qw[Tests/SimpleTest/WebSample Tests/WorkingTests/WebSample];
+my @BLAZOR_TEST_DIRS = qw[Tests/BlazorTests/BlazorSample];
 
-	my ($project, $directories, $suffix) = fileparse($dir, qw[.csproj]);
+
+sub update($$$;$)
+{
+	my ($dir, $template, $output, $testsample) = @_;
+
+	my @projects = glob "$dir/*.csproj";
+	print "PROJECTS: $#projects - |$projects[0]|\n";
+	die "Could not find project file in $dir" unless $#projects >= 0;
+	die "More than one project file in $dir" unless $#projects == 0;
+
+	my $projectPath = $projects[0];
+
+	my ($project, $directories, $suffix) = fileparse($projectPath, qw[.csproj]);
+	print "PROJECT PATH: |$projectPath| - |$project|$directories|$suffix|\n";
+
+	$directories =~ s,/$,,;
 
 	$dir = $directories if ($suffix eq '.csproj');
 
@@ -20,8 +34,10 @@ sub update($$$)
 
 	print "TEST: $dir - $template - $output - $#dirs - $project\n";
 
+	my $packagesFolder = $testsample ? ".test-packages" : ".packages";
+
 	my $root = "\${workspaceFolder}" . "/.." x $up;
-	my $packagesDir = "\${workspaceFolder}" . "/.." x ($up - 2) . "/.packages";
+	my $packagesDir = "\${workspaceFolder}" . "/.." x ($up - 2) . "/${packagesFolder}";
 	print "ROOT: |$root|$packagesDir|\n";
 
 	my $vscodeDir = "$dir/.vscode";
@@ -54,18 +70,30 @@ for my $dir (@CONSOLE_DIRS)
 
 for my $dir (@WEB_DIRS)
 {
-	update($dir,"tasks-web.json", "tasks.json");
-	update($dir,"launch-web.json", "launch.json");
+	update($dir, "tasks-web.json", "tasks.json");
+	update($dir, "launch-web.json", "launch.json");
 }
 
 for my $dir (@BLAZOR_DIRS)
 {
-	update($dir,"tasks-web.json", "tasks.json");
-	update($dir,"launch-blazor.json", "launch.json");
+	update($dir, "tasks-web.json", "tasks.json");
+	update($dir, "launch-blazor.json", "launch.json");
 }
 
 for my $dir (@TEST_DIRS)
 {
-	update($dir,"tasks-test.json", "tasks.json");
-	update($dir,"launch-test.json", "launch.json");
+	update($dir, "tasks-test.json", "tasks.json");
+	update($dir, "launch-test.json", "launch.json");
+}
+
+for my $dir (@WEB_TEST_DIRS)
+{
+	update($dir, "tasks-web.json", "tasks.json", 1);
+	update($dir, "launch-web.json", "launch.json", 1);
+}
+
+for my $dir (@BLAZOR_TEST_DIRS)
+{
+	update($dir, "tasks-web.json", "tasks.json", 1);
+	update($dir, "launch-blazor.json", "launch.json", 1);
 }

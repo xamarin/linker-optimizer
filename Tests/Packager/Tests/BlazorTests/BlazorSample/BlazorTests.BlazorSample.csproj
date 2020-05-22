@@ -5,6 +5,7 @@
     <WasmPackager_AddBinding>true</WasmPackager_AddBinding>
     <WasmPackager_EnableDebug>true</WasmPackager_EnableDebug>
     <WasmPackager_EnableTestSuite>true</WasmPackager_EnableTestSuite>
+    <WasmPackager_UserPdbOnly>true</WasmPackager_UserPdbOnly>
   </PropertyGroup>
 
   <PropertyGroup>

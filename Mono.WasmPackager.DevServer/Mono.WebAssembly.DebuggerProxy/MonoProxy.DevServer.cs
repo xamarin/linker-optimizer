@@ -182,7 +182,10 @@ namespace WebAssembly.Net.Debugging {
 				}
 
 			case "Debugger.setBreakpointByUrl": {
-					return Async (id, method, args, context, OnSetBreakpointByUrl);
+					return Async (id, method, args, context, async token => {
+						await OnSetBreakpointByUrl (id, method, args, context, token);
+						return true;
+					});
 				}
 
 			case "Debugger.removeBreakpoint": {

@@ -32,8 +32,8 @@ namespace WebAssembly.Net.Debugging {
 		public override string ToString ()
 			=> $"BreakpointRequest Assembly: {Assembly} File: {File} Line: {Line} Column: {Column}";
 
-		public object AsSetBreakpointByUrlResponse ()
-			=> new { breakpointId = Id, locations = Locations.Select(l => l.Location.AsLocation ()) };
+		public object AsSetBreakpointByUrlResponse (IEnumerable<object> jsloc)
+			=> new { breakpointId = Id, locations = Locations.Select(l => l.Location.AsLocation ()).Concat (jsloc) };
 
 		public BreakpointRequest () {
 		}
@@ -169,6 +169,28 @@ namespace WebAssembly.Net.Debugging {
 				return null;
 
 			return new SourceLocation (id, line.Value, column ?? 0);
+		}
+
+
+		internal class LocationComparer : EqualityComparer<SourceLocation>
+		{
+			public override bool Equals (SourceLocation l1, SourceLocation l2)
+			{
+				if (l1 == null && l2 == null)
+						return true;
+				else if (l1 == null || l2 == null)
+						return false;
+
+				return (l1.Line == l2.Line &&
+						l1.Column == l2.Column &&
+						l1.Id == l2.Id);
+			}
+
+			public override int GetHashCode (SourceLocation loc)
+			{
+				int hCode = loc.Line ^ loc.Column;
+				return loc.Id.GetHashCode () ^ hCode.GetHashCode ();
+			}
 		}
 
 		internal object AsLocation ()
@@ -364,10 +386,11 @@ namespace WebAssembly.Net.Debugging {
 				// set ReadSymbols = true unconditionally in case there
 				// is an embedded pdb then handle ArgumentException
 				// and assume that if pdb == null that is the cause
-				rp.ReadSymbols = true;
-				rp.SymbolReaderProvider = new PdbReaderProvider ();
-				if (pdb != null)
+				if (pdb != null) {
 					rp.SymbolStream = new MemoryStream (pdb);
+					rp.ReadSymbols = true;
+					rp.SymbolReaderProvider = new PdbReaderProvider ();
+				}
 				rp.ReadingMode = ReadingMode.Immediate;
 				rp.InMemory = true;
 

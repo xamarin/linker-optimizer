@@ -14,14 +14,27 @@ using Mono.WasmPackager.DevServer;
 
 namespace BlazorTests
 {
-	public class MartinTest : PuppeteerTestBase
+	public class MartinTest : PuppeteerBlazorSample
 	{
-		protected override bool Headless => false;
-
 		[Fact]
-		public void Start ()
+		public async Task StartAndClickHome ()
 		{
-			Debug.WriteLine ("MARTIN TEST!");
+			await StartBlazorApp ().ConfigureAwait (false);
+
+			var bodySelector = await Page.QuerySelectorAsync (TestConstants.BodySelector);
+			Assert.NotNull (bodySelector);
+
+			await AssertSelectorVisible (TestConstants.BodySelector);
+
+			await AssertSelectorVisible (TestConstants.NothingHereSelector, TestConstants.NothingHereText);
+			await AssertSelectorNotVisible (TestConstants.WelcomeSelector);
+
+			await HomeSelector.ClickAsync ();
+
+			await AssertSelectorVisible (TestConstants.WelcomeSelector, TestConstants.WelcomeText);
+			await AssertSelectorNotVisible (TestConstants.NothingHereSelector);
+
+			Debug.WriteLine ("DONE!");
 		}
 	}
 }

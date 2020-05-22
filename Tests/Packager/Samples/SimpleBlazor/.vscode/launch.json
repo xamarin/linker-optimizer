@@ -15,8 +15,7 @@
                 "--web-root",
                 "${workspaceFolder}/wwwroot",
                 "--framework",
-                "${workspaceFolder}/bin/Debug/netstandard2.0/dist/_framework",
-                "--blazor"
+                "${workspaceFolder}/bin/Debug/netstandard2.1/wwwroot/_framework"
             ],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,

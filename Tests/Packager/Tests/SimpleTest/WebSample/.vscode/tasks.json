@@ -195,7 +195,7 @@
             "args": [
                 "build",
                 "/nologo",
-                "${workspaceFolder}/WebSample.csproj",
+                "${workspaceFolder}/SimpleTest.WebSample.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
                 "/verbosity:normal"
@@ -217,7 +217,7 @@
             "args": [
                 "clean",
                 "/nologo",
-                "${workspaceFolder}/WebSample.csproj",
+                "${workspaceFolder}/SimpleTest.WebSample.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],

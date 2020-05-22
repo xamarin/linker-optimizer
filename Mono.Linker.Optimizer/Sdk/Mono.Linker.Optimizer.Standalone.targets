@@ -23,20 +23,8 @@
   <Target Name="_LinkerOptimizer_PrepareStandaloneConfiguration">
     <Message Importance="High" Text="LinkerOptimizer" />
 
-    <!--
-    <GetFirstItem Input="@(_WasmPackager_Assemblies)">
-      <Output TaskParameter="Output" ItemName="__WasmPackager_FirstInput" />
-    </GetFirstItem>
-    -->
-
     <ItemGroup>
       <LinkerOptimizerInputAssembly Include="@(IntermediateAssembly)" />
-      <!--
-      <LinkerOptimizerDependencyInput Include="%(_WasmPackager_Assemblies.LinkerInput)" Condition="'%(_WasmPackager_Assemblies.SkipLink)' != 'true'" />
-      <LinkerOptimizerDependencyInput Remove="%(__WasmPackager_FirstInput.LinkerInput)" />
-      <LinkerOptimizerBaseClassLibraryPath Include="$(WasmPackager_MonoBclPath);$(WasmPackager_MonoBclPath)/Facades" />
-      <LinkerOptimizerBaseClassLibraryPath Include="@(WasmPackager_FrameworkDirectories)" />
-      -->
       <LinkerOptimizerBaseClassLibraryPath Include="/usr/local/share/dotnet/sdk/NuGetFallbackFolder/netstandard.library/2.0.3/build/netstandard2.0/ref/" />
       <LinkerOptimizerExtraDependencies Include="$(LinkerOptimizerInputPath)/*.deps.json" />
       <LinkerOptimizerExtraDependencies Include="$(LinkerOptimizerInputPath)/*.runtimeconfig.*" />

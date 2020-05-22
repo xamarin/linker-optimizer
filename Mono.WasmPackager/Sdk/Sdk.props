@@ -14,15 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <__WasmPackager_Bindings Include="WebAssembly.Bindings">
-      <Package>webassembly.bindings</Package>
-    </__WasmPackager_Bindings>
-    <__WasmPackager_Bindings Include="System.Net.Http.WebAssemblyHttpHandler">
-      <Package>system.net.http.webassemblyhttphandler</Package>
-    </__WasmPackager_Bindings>
-    <__WasmPackager_Bindings Include="WebAssembly.Net.WebSockets">
-      <Package>webassembly.net.websockets</Package>
-    </__WasmPackager_Bindings>
+    <__WasmPackager_Bindings Include="WebAssembly.Bindings;System.Net.Http.WebAssemblyHttpHandler;WebAssembly.Net.WebSockets" />
   </ItemGroup>
 
   <Choose>
@@ -36,7 +28,7 @@
     <Otherwise>
       <PropertyGroup>
         <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.framework\$(MonoWebAssemblySdkVersion)\wasm-assemblies\</MonoWebAssemblyFrameworkRoot>
-        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.bindings\$(MonoWebAssemblySdkVersion)\wasm-bindings\</MonoWebAssemblyBindingsRoot>
+        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.bindings\$(MonoWebAssemblySdkVersion)\lib\netstandard2.0\</MonoWebAssemblyBindingsRoot>
         <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)</WasmPackager_MonoBclPath>
       </PropertyGroup>
     </Otherwise>

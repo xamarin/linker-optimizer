@@ -107,7 +107,7 @@ namespace Mono.WasmPackager.TestSuite
 				Debug.WriteLine ("waiting for the runtime to be ready");
 
 				while (true) {
-					var delay = Task.Delay (2500);
+					var delay = Task.Delay (TimeSpan.FromSeconds (15));
 					var task = await Task.WhenAny (delay, init_cmds [4]);
 					if (task != delay)
 						break;

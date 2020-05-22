@@ -6,7 +6,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "WebSample",
+            "name": "WorkingTests.WebSample",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/../../../.test-packages/mono.wasmpackager.devserver/1.0.0/tools/Mono.WasmPackager.DevServer.dll",
@@ -20,7 +20,7 @@
             "console": "internalConsole"
         },
         {
-            "name": "WebSample Optimizer",
+            "name": "WorkingTests.WebSample Optimizer",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/../../../../../Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",

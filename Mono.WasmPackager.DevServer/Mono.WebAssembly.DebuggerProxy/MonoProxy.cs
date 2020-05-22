@@ -182,8 +182,7 @@ namespace WebAssembly.Net.Debugging {
 				}
 
 			case "Debugger.setBreakpointByUrl": {
-					var result = await OnSetBreakpointByUrl (id, method, args, context, token);
-					await SendResponse (id, result, token);
+					await OnSetBreakpointByUrl (id, method, args, context, token);
 					return true;
 				}
 
@@ -432,6 +431,8 @@ namespace WebAssembly.Net.Debugging {
 
 			foreach (var mono_frame in the_mono_frames) {
 				var call_frame = GetMonoFrame (store, mono_frame, ++frame_id, out var frame);
+				if (call_frame == null)
+					continue;
 				frames.Add (frame);
 
 				callFrames.Add (call_frame);
@@ -898,7 +899,7 @@ namespace WebAssembly.Net.Debugging {
 
 					foreach (var req in context.BreakpointRequests.Values) {
 						if (req.TryResolve (source)) {
-							await SetBreakpoint (sessionId, context.store, req, token);
+							await SetBreakpoint (sessionId, context.store, req, true, token);
 						}
 					}
 				}
@@ -955,7 +956,7 @@ namespace WebAssembly.Net.Debugging {
 			return Result.Ok (new JObject { });
 		}
 
-		async Task SetBreakpoint (SessionId sessionId, DebugStore store, BreakpointRequest req, CancellationToken token)
+		async Task SetBreakpoint (SessionId sessionId, DebugStore store, BreakpointRequest req, bool sendResolvedEvent, CancellationToken token)
 		{
 			var context = GetContext (sessionId);
 			if (req.Locations.Any ()) {
@@ -963,17 +964,21 @@ namespace WebAssembly.Net.Debugging {
 				return;
 			}
 
-			var locations = store.FindBreakpointLocations (req).ToList ();
+			var comparer = new SourceLocation.LocationComparer ();
+			// if column is specified the frontend wants the exact matches
+			// and will clear the bp if it isn't close enoug
+			var locations = store.FindBreakpointLocations (req)
+				.Distinct (comparer)
+				.Where (l => l.Line == req.Line && (req.Column == 0 || l.Column == req.Column))
+				.OrderBy (l => l.Column)
+				.GroupBy (l => l.Id);
+
 			logger.LogDebug ("BP request for '{req}' runtime ready {context.RuntimeReady}", req, GetContext (sessionId).IsRuntimeReady);
 
 			var breakpoints = new List<Breakpoint> ();
 
-			// if column is specified the frontend wants the exact matches
-			// and will clear the bp if it isn't close enough
-			if (req.Column != 0)
-				locations = locations.Where (l => l.Column == req.Column).ToList ();
-
-			foreach (var loc in locations) {
+			foreach (var sourceId in locations) {
+				var loc = sourceId.First ();
 				var bp = await SetMonoBreakpoint (sessionId, req.Id, loc, token);
 
 				// If we didn't successfully enable the breakpoint
@@ -988,29 +993,48 @@ namespace WebAssembly.Net.Debugging {
 					location = loc.AsLocation ()
 				};
 
-				await SendEvent (sessionId, "Debugger.breakpointResolved", JObject.FromObject (resolvedLocation), token);
+				if (sendResolvedEvent)
+					await SendEvent (sessionId, "Debugger.breakpointResolved", JObject.FromObject (resolvedLocation), token);
 			}
 
 			req.Locations.AddRange (breakpoints);
 		}
 
-		async Task<Result> OnSetBreakpointByUrl (MessageId id, string method, JObject args, ExecutionContext context, CancellationToken token)
+		async Task OnSetBreakpointByUrl (MessageId id, string method, JObject args, ExecutionContext context, CancellationToken token)
 		{
 			var resp = await SendCommand (id, method, args, token);
-			if (!resp.IsOk)
-			return resp;
+			if (!resp.IsOk) {
+				await SendResponse (id, resp, token);
+				return;
+			}
 
-			var bpid = resp.Value ["breakpointId"]?.ToString ();
+			var bpid = resp.Value["breakpointId"]?.ToString ();
+			var locations = resp.Value["locations"]?.Values<object>();
 			var request = BreakpointRequest.Parse (bpid, args);
-			context.BreakpointRequests [bpid] = request;
+
+			// is the store done loading?
+			var loaded = context.Source.Task.IsCompleted;
+			if (!loaded) {
+				// Send and empty response immediately if not
+				// and register the breakpoint for resolution
+				context.BreakpointRequests [bpid] = request;
+				await SendResponse (id, resp, token);
+			}
+
 			if (await IsRuntimeAlreadyReadyAlready (id, token)) {
 				var store = await RuntimeReady (id, token);
 
 				Log ("verbose", $"BP req {args}");
-				await SetBreakpoint (id, store, request, token);
-				}
+				await SetBreakpoint (id, store, request, !loaded, token);
+			}
 
-			return Result.OkFromObject (request.AsSetBreakpointByUrlResponse ());
+			if (loaded) {
+				// we were already loaded so we should send a response
+				// with the locations included and register the request
+				context.BreakpointRequests [bpid] = request;
+				var result = Result.OkFromObject (request.AsSetBreakpointByUrlResponse (locations));
+				await SendResponse (id, result, token);
+			}
 		}
 
 		async Task<Result> OnGetPossibleBreakpoints (MessageId id, string method, JObject args, ExecutionContext context, CancellationToken token)

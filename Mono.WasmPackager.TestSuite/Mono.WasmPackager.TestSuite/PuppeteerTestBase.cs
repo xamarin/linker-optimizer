@@ -106,7 +106,7 @@ namespace Mono.WasmPackager.TestSuite
 
 		protected async Task<string> ClickAndWaitForMessage (string selector, string message, bool regex = false)
 		{
-			var button = await Page.QuerySelectorAsync (selector);
+			var button = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);;
 			var wait = WaitForConsole (message, regex);
 			var click = button.ClickAsync ();
 			await Task.WhenAll (wait, click).ConfigureAwait (false);
@@ -115,7 +115,7 @@ namespace Mono.WasmPackager.TestSuite
 
 		protected async Task<string> ClickAndWaitForException (string selector, string exception, string message = null)
 		{
-			var button = await Page.QuerySelectorAsync (selector);
+			var button = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);;
 			var wait = WaitForException (exception, message);
 			var click = button.ClickAsync ();
 			await Task.WhenAll (wait, click).ConfigureAwait (false);
@@ -124,10 +124,18 @@ namespace Mono.WasmPackager.TestSuite
 
 		protected async Task<string> GetInnerHtml (string selector)
 		{
-			var handle = await Page.QuerySelectorAsync (selector);
-			var property = await handle.GetPropertyAsync ("innerHTML");
+			var handle = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);;
+			var property = await handle.GetPropertyAsync ("innerHTML").ConfigureAwait (false);;
 			var value = property.RemoteObject.Value;
 			return value.Value<string> ();
+		}
+
+		protected async Task AssertInnerHtml (string selector, string expected)
+		{
+			var handle = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);
+			Assert.NotNull (handle);
+			var inner = await handle.GetInnerHtml ().ConfigureAwait (false);
+			Assert.Equal (expected, inner);
 		}
 
 		protected async Task GetPossibleBreakpoints (string file)
@@ -140,7 +148,7 @@ namespace Mono.WasmPackager.TestSuite
 				}
 			};
 
-			var response = await SendCommand<GetPossibleBreakpointsResponse> ("Debugger.getPossibleBreakpoints", request);
+			var response = await SendCommand<GetPossibleBreakpointsResponse> ("Debugger.getPossibleBreakpoints", request).ConfigureAwait (false);;
 			Assert.True (response.Locations.Length > 1);
 		}
 
@@ -159,7 +167,7 @@ namespace Mono.WasmPackager.TestSuite
 				Url = FileToUrl [fileUrl]
 			};
 
-			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request);
+			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request).ConfigureAwait (false);;
 			Assert.EndsWith (file, result.BreakpointId);
 			Assert.Single (result.Locations);
 			Assert.Equal (line - 1, result.Locations [0].LineNumber);
@@ -171,7 +179,7 @@ namespace Mono.WasmPackager.TestSuite
 		{
 			breakpoints.Remove (breakpointId);
 			var request = new RemoveBreakpointRequest { BreakpointId = breakpointId };
-			await SendCommand<RemoveBreakpointResponse> ("Debugger.removeBreakpoint", request);
+			await SendCommand<RemoveBreakpointResponse> ("Debugger.removeBreakpoint", request).ConfigureAwait (false);;
 		}
 
 		protected void AssertBreakpointFrame (SourceLocation location, CallFrame frame)

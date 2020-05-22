@@ -10,9 +10,9 @@ namespace WorkingTests.WebSample
 		}
 
 		public static void Message ()
-		{
-			Console.WriteLine ("Write Message");
-		}
+		{ // @@BEGIN-SCOPE
+			/* @@BREAKPOINT: Message */ Console.WriteLine ("Write Message");
+		} // @@END-SCOPE
 
 		public static void Throw ()
 		{

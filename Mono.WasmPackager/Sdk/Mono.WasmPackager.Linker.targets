@@ -44,7 +44,7 @@
       <LinkerOptimizerDependencyInput Include="%(_WasmPackager_Assemblies.LinkerInput)" Condition="'%(_WasmPackager_Assemblies.SkipLink)' != 'true'" />
       <LinkerOptimizerDependencyInput Remove="%(__WasmPackager_FirstInput.LinkerInput)" />
       <LinkerOptimizerBaseClassLibraryPath Include="$(WasmPackager_MonoBclPath);$(WasmPackager_MonoBclPath)/Facades" />
-      <LinkerOptimizerBaseClassLibraryPath Include="@(WasmPackager_FrameworkDirectories)" />
+      <LinkerOptimizerBaseClassLibraryPath Include="$(MonoWebAssemblyFrameworkRoot);$(MonoWebAssemblyBindingsRoot);@(WasmPackager_FrameworkDirectories)" />
     </ItemGroup>
 
     <Message Importance="High" Text="WasmPackager - prepare optimizer config" />
