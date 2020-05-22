@@ -1,11 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>  
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <WasmPackager_NetCore Condition="'$(WasmPackager_NetCore)' == '' AND '$(TargetFramework)' == 'netcoreapp5.0'">true</WasmPackager_NetCore>
+    <WasmPackager_NetCore Condition="'$(WasmPackager_NetCore)' == ''">false</WasmPackager_NetCore>
+  </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Settings.targets" />
 
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Paths.targets" />
+
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Resolver.targets" />
 
-  <Import Sdk="Mono.Linker.CilStrip" Version="1.0.0" Project="Sdk.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.CilStrip.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
 
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Emscripten.targets" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
 
@@ -14,65 +21,9 @@
 
   <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.targets" Condition="'$(WasmPackager_EnableLinker)' == 'true'" />
 
-  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'" />
+  <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Framework.targets" Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'" />
 
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.TestSuite.targets"  Condition="'$(WasmPackager_EnableTestSuite)' == 'true'" />
-
-  <PropertyGroup>
-    <_WasmPackager_OldResolveAssemblyReferencesDependsOn>
-      $(ResolveAssemblyReferencesDependsOn);
-    </_WasmPackager_OldResolveAssemblyReferencesDependsOn>
-    <ResolveAssemblyReferencesDependsOn>
-      $(ResolveAssemblyReferencesDependsOn);
-      _WasmPackager_FilterAssemblyReferences;
-    </ResolveAssemblyReferencesDependsOn>
-  </PropertyGroup>
-
-  <Target
-      Name="GetReferenceAssemblyPaths"
-      DependsOnTargets="$(GetReferenceAssemblyPathsDependsOn);GetFrameworkPaths">
-
-    <Message Importance="High" Text="GetReferenceAssemblyPaths: WPMBP=$(WasmPackager_MonoBclPath) FPO=$(FrameworkPathOverride) TFD=$(TargetFrameworkDirectory)" />
-
-    <PropertyGroup>
-      <TargetFrameworkDirectory>$(WasmPackager_MonoBclPath)</TargetFrameworkDirectory>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(_WasmPackager_IsNetCore)' == 'true'">
-      <TargetFrameworkDirectory>$(WasmPackager_MonoBclPath);$(MonoWebAssemblyRuntimeRoot)</TargetFrameworkDirectory>
-    </PropertyGroup>
-
-    <ItemGroup Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'">
-      <DesignTimeFacadeDirectoryRoots Include="$(TargetFrameworkDirectory)" />
-      <DesignTimeFacadeDirectories Include="%(DesignTimeFacadeDirectoryRoots.Identity)Facades\" Condition="Exists('%(DesignTimeFacadeDirectoryRoots.Identity)Facades\')" />
-    </ItemGroup>
-
-    <PropertyGroup Condition="'@(DesignTimeFacadeDirectories)' != ''">
-      <TargetFrameworkDirectory>$(TargetFrameworkDirectory);@(DesignTimeFacadeDirectories)</TargetFrameworkDirectory>
-    </PropertyGroup>
-  </Target>
-
-  <Target
-      Name="_WasmPackager_FilterAssemblyReferences"
-      DependsOnTargets="$(_WasmPackager_OldResolveAssemblyReferencesDependsOn)">
-    <Message Text="_WasmPackager_FilterAssemblyReferences: %(Reference.Identity)" />
-
-    <ItemGroup>
-      <Reference Remove="System.Drawing" />
-      <Reference Remove="System.Drawing.Primitives" />
-      <!-- Conditionally disable _CopyFilesMarkedCopyLocal -->
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'$(_WasmPackager_IsBlazor)' != 'true'" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(_WasmPackager_IsNetCore)' == 'xtrue'">
-      <Reference Remove="@(Reference)" />
-      <Reference Include="$(MonoWebAssemblyFrameworkRoot)/*.dll" />
-      <Reference Include="$(MonoWebAssemblyRuntimeRoot)/System.Private.CoreLib.dll" />
-    </ItemGroup>
-
-    <Message Text="_WasmPackager_FilterAssemblyReferences #1: %(Reference.Identity)" />
-
-  </Target>
 
   <PropertyGroup>
     <RunCommand>$(JsvuDir)/sm</RunCommand>

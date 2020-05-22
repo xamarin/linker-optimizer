@@ -6,6 +6,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <LangVersion>8.0</LangVersion>
+    <NoWarn>0618,IDE0018,IDE0019,IDE0031,IDE0044,IDE0051,IDE0052,IDE0059,IDE0060,IDE0063,IDE0066,IDE0074,IDE0075</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition=" $(Configuration.EndsWith('Debug')) ">
@@ -18,9 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\external\linker\external\cecil\Mono.Cecil.csproj" />
-    <ProjectReference Include="..\..\external\linker\external\cecil\symbols\mdb\Mono.Cecil.Mdb.csproj" />
-    <ProjectReference Include="..\..\external\linker\external\cecil\symbols\pdb\Mono.Cecil.Pdb.csproj" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.2" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.0" />
     <PackageReference Include="System.Text.Json" Version="4.7.1" />
   </ItemGroup>
@@ -29,6 +28,7 @@
     <Compile Include="..\..\external\linker\src\linker\Linker\*.cs" />
     <Compile Include="..\..\external\linker\src\linker\Linker.DataFlow\*.cs" />
     <Compile Include="..\..\external\linker\src\linker\Linker.Steps\*.cs" />
+    <Compile Include="..\..\external\linker\src\linker\System.Diagnostics.CodeAnalysis\*.cs" />
   </ItemGroup>
 
 </Project>

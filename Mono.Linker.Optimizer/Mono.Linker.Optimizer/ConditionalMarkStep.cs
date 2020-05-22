@@ -40,8 +40,8 @@ namespace Mono.Linker.Optimizer
 			get;
 		}
 
-		Queue<MethodDefinition> _conditional_methods;
-		Dictionary<MethodDefinition, BasicBlockScanner> _block_scanner_by_method;
+		readonly Queue<MethodDefinition> _conditional_methods;
+		readonly Dictionary<MethodDefinition, BasicBlockScanner> _block_scanner_by_method;
 
 		public bool ProcessingConditionals {
 			get;

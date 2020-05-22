@@ -1,4 +1,5 @@
-<Project>
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- Default Settings and Configuration -->
 
@@ -6,8 +7,15 @@
   <PropertyGroup>
     <WasmPackager_RuntimeTemplate Condition="'$(WasmPackager_RuntimeTemplate)' == ''">runtime-tests.js</WasmPackager_RuntimeTemplate>
     <WasmPackager_EnableDebug Condition="'$(WasmPackager_EnableDebug)' == ''">false</WasmPackager_EnableDebug>
-    <WasmPackager_EmsdkCacheDir Condition="'$(WasmPackager_EmsdkCacheDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/.emscripten-cache'))</WasmPackager_EmsdkCacheDir>
-    <WasmPackager_EmsdkConfigFile Condition="'$(WasmPackager_EmsdkConfigFile)' == ''">$(WasmPackager_EmsdkCacheDir)/.emscripten</WasmPackager_EmsdkConfigFile>
+  </PropertyGroup>
+
+  <!-- Packager settings -->
+  <PropertyGroup>
+    <WasmPackager_EnablePackager Condition="'$(WasmPackager_EnablePackager)' == ''">true</WasmPackager_EnablePackager>
+    <WasmPackager_LinkIcalls Condition="'$(WasmPackager_LinkIcalls)' == ''">false</WasmPackager_LinkIcalls>
+    <WasmPackager_EnableLinker Condition="'$(WasmPackager_EnableLinker)' == ''">true</WasmPackager_EnableLinker>
+    <WasmPackager_CilStrip Condition="'$(WasmPackager_CilStrip)' == ''">true</WasmPackager_CilStrip>
+    <WasmPackager_ExecMode Condition="'$(WasmPackager_ExecMode)' == ''">Aot</WasmPackager_ExecMode>
   </PropertyGroup>
 
   <!-- FIXME -->

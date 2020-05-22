@@ -62,16 +62,12 @@ namespace Mono.Linker.Optimizer.Configuration
 			if (action != null && Action != null && action.Value != Action)
 				return false;
 
-			switch (Match) {
-			case MatchKind.FullName:
-				return type.FullName == Name;
-			case MatchKind.Substring:
-				return type.FullName.Contains (Name);
-			case MatchKind.Namespace:
-				return type.Namespace.StartsWith (Name, StringComparison.InvariantCulture);
-			default:
-				return type.Name == Name;
-			}
+			return Match switch {
+				MatchKind.FullName => type.FullName == Name,
+				MatchKind.Substring => type.FullName.Contains (Name),
+				MatchKind.Namespace => type.Namespace.StartsWith (Name, StringComparison.InvariantCulture),
+				_ => type.Name == Name
+			};
 		}
 
 		public Type (Type parent, string name, string fullName, MatchKind match, TypeAction? action = null)

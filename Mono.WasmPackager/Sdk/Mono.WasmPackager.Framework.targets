@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Do not set FrameworkPathOverride or TargetFramework here. -->
+
+  <Import Project="$(MonoWebAssemblySdkPath)/Microsoft.NET.Sdk/Sdk/Sdk.props" Condition="'$(WasmPackager_NetCore)' == 'true'" />
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" Condition="'$(WasmPackager_NetCore)' != 'true'" />
+
+  <!--
+    This needs to be kept prior to the "Microsoft.Net.Sdk" import.
+    Do not set TargetFrameworkDirectory in here as it would be overwritten.
+  -->
+
+  <PropertyGroup>
+    <FrameworkPathOverride>$(WasmPackager_MonoBclPath)</FrameworkPathOverride>
+    <TargetFramework Condition="'$(WasmPackager_NetCore)' == 'true'">netcoreapp5.0</TargetFramework>
+    <TargetFramework Condition="'$(WasmPackager_NetCore)' != 'true'">net47</TargetFramework>
+  </PropertyGroup>
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+
+  <PropertyGroup>
+    <_WasmPackager_OldResolveAssemblyReferencesDependsOn>
+      $(ResolveAssemblyReferencesDependsOn);
+    </_WasmPackager_OldResolveAssemblyReferencesDependsOn>
+    <ResolveAssemblyReferencesDependsOn>
+      $(ResolveAssemblyReferencesDependsOn);
+      _WasmPackager_FilterAssemblyReferences;
+    </ResolveAssemblyReferencesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="__WasmPackager_FixNetCoreAppMaximumVersion" BeforeTargets="_CheckForUnsupportedNETCoreVersion">
+    <PropertyGroup>
+      <NETCoreAppMaximumVersion>5.0</NETCoreAppMaximumVersion>
+    </PropertyGroup>
+  </Target>
+
+  <Target
+      Name="GetReferenceAssemblyPaths"
+      DependsOnTargets="$(GetReferenceAssemblyPathsDependsOn);GetFrameworkPaths">
+
+    <Message Importance="High" Text="GetReferenceAssemblyPaths: TargetFramework=$(TargetFramework) NetCore=$(WasmPackager_NetCore)" />
+    <Message Importance="Normal" Text="  BCL: $(WasmPackager_MonoBclPath)" />
+    <Message Importance="Normal" Text="  FPO: $(FrameworkPathOverride)" Condition="'$(FrameworkPathOverride)' != ''" />
+    <Message Importance="Normal" Text="  TFD: $(TargetFrameworkDirectory)" Condition="'$(TargetFrameworkDirectory)' != ''" />
+
+    <PropertyGroup>
+      <TargetFrameworkDirectory>$(WasmPackager_MonoBclPath)</TargetFrameworkDirectory>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(WasmPackager_NetCore)' == 'true'">
+      <TargetFrameworkDirectory>$(TargetFrameworkDirectory);$(MonoWebAssemblyRuntimeRoot)</TargetFrameworkDirectory>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'">
+      <DesignTimeFacadeDirectoryRoots Include="$(TargetFrameworkDirectory)" />
+      <DesignTimeFacadeDirectories Include="%(DesignTimeFacadeDirectoryRoots.Identity)Facades\" Condition="Exists('%(DesignTimeFacadeDirectoryRoots.Identity)Facades\')" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(DesignTimeFacadeDirectories)' != ''">
+      <TargetFrameworkDirectory>$(TargetFrameworkDirectory);@(DesignTimeFacadeDirectories)</TargetFrameworkDirectory>
+    </PropertyGroup>
+  </Target>
+
+  <Target
+      Name="_WasmPackager_FilterAssemblyReferences"
+      DependsOnTargets="$(_WasmPackager_OldResolveAssemblyReferencesDependsOn)">
+    <Message Importance="Low" Text="_WasmPackager_FilterAssemblyReferences: %(Reference.Identity)" />
+
+    <ItemGroup>
+      <Reference Remove="System.Drawing" />
+      <Reference Remove="System.Drawing.Primitives" />
+      <!-- Conditionally disable _CopyFilesMarkedCopyLocal -->
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'$(_WasmPackager_IsBlazor)' != 'true'" />
+    </ItemGroup>
+
+    <Message Importance="Low" Text="_WasmPackager_FilterAssemblyReferences #1: %(Reference.Identity)" />
+  </Target>
+
+  <PropertyGroup>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
+    <SkipCopyingSymbolsToOutputDirectory>true</SkipCopyingSymbolsToOutputDirectory>
+  </PropertyGroup>
+
+</Project>

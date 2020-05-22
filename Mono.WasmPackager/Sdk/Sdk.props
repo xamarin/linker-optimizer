@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <MonoWebAssemblySdkVersion>0.2.3-martin-20200513.1</MonoWebAssemblySdkVersion>
-    <MonoWebAssemblyEmscriptenVersion>0.2.3-martin-20200513.1</MonoWebAssemblyEmscriptenVersion>
+    <DotNetRuntimeVersion>5.0.100-preview.5.20251.2</DotNetRuntimeVersion>
 
     <_LinkerOptimizer_Standalone>false</_LinkerOptimizer_Standalone>
 
@@ -11,83 +11,18 @@
     <WasmPackager_NugetPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\..\..'))</WasmPackager_NugetPackageRoot>
 
     <JsvuDir>$([System.IO.Path]::GetFullPath('$(HOME)/.jsvu'))</JsvuDir>
-  </PropertyGroup>
 
-  <ItemGroup>
-    <__WasmPackager_Bindings Include="WebAssembly.Bindings;System.Net.Http.WebAssemblyHttpHandler;WebAssembly.Net.WebSockets" />
-  </ItemGroup>
+    <_WasmPackager_RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\..\..\..\..\..'))</_WasmPackager_RepoRoot>
 
-  <Choose>
-    <When Condition="'$(WasmPackager_UseBlazorMono)' == 'true'">
-      <PropertyGroup>
-        <MonoWebAssemblyRuntimeRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.runtime\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyRuntimeRoot>
-        <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</MonoWebAssemblyFrameworkRoot>
-        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</MonoWebAssemblyBindingsRoot>
-        <WasmPackager_MonoRuntimePath>$(MonoWebAssemblyRuntimeRoot)\mono-wasm-runtime</WasmPackager_MonoRuntimePath>
-        <WasmPackager_MonoBclPath>X:$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</WasmPackager_MonoBclPath>
-        <WasmPackager_MonoLibDir>X:$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\lib</WasmPackager_MonoLibDir>
-      </PropertyGroup>
-    </When>
-    <When Condition="'$(_WasmPackager_IsNetCore)' == 'true'">
-      <PropertyGroup>
-        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.bindings\$(MonoWebAssemblySdkVersion)\lib\netstandard2.0\</MonoWebAssemblyBindingsRoot>
-        <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)</WasmPackager_MonoBclPath>
-        <WasmPackager_MonoIncludeDir>$(MonoWebAssemblyRuntimeRoot)\include\mono-2.0</WasmPackager_MonoIncludeDir>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup>
-        <MonoWebAssemblyRuntimeRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.runtime\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyRuntimeRoot>
-        <MonoWebAssemblyRuntimeAotRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.runtime.aot\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyRuntimeAotRoot>
-        <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.framework\$(MonoWebAssemblySdkVersion)\wasm-assemblies\</MonoWebAssemblyFrameworkRoot>
-        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.bindings\$(MonoWebAssemblySdkVersion)\lib\netstandard2.0\</MonoWebAssemblyBindingsRoot>
-        <WasmPackager_MonoRuntimePath>$(MonoWebAssemblyRuntimeRoot)\mono-wasm-runtime</WasmPackager_MonoRuntimePath>
-        <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)</WasmPackager_MonoBclPath>
-        <WasmPackager_MonoLibDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\lib</WasmPackager_MonoLibDir>
-        <WasmPackager_MonoIncludeDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\include\mono-2.0</WasmPackager_MonoIncludeDir>
-        <WasmPackager_MonoRuntimeAotDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
-
-  <PropertyGroup>
-    <MonoWebAssemblyDebuggerProxyRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.debuggerproxy\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyDebuggerProxyRoot>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'">
-    <!--
-      FrameworkPathOverride needs to be set prior to including Sdk.props.
-      We set TargetFrameworkPath in our Sdk.targets because anything we set
-      here will be overwritten.
-    -->
-    <FrameworkPathOverride>$(WasmPackager_MonoBclPath)</FrameworkPathOverride>
-    <!-- Hard-code this to net47; we override GetReferenceAssemblyPaths to actually point this to wasm -->
-    <TargetFramework Condition="'$(_WasmPackager_IsNetCore)' == 'true'">netcoreapp5.0</TargetFramework>
-    <TargetFramework Condition="'$(_WasmPackager_IsNetCore)' != 'true'">net47</TargetFramework>
-  </PropertyGroup>
-
-  <!-- Packager settings -->
-  <PropertyGroup>
-    <WasmPackager_EnablePackager Condition="'$(WasmPackager_EnablePackager)' == ''">true</WasmPackager_EnablePackager>
-    <WasmPackager_LinkIcalls Condition="'$(WasmPackager_LinkIcalls)' == ''">false</WasmPackager_LinkIcalls>
-    <WasmPackager_EnableLinker Condition="'$(WasmPackager_EnableLinker)' == ''">true</WasmPackager_EnableLinker>
-    <WasmPackager_CilStrip Condition="'$(WasmPackager_CilStrip)' == ''">true</WasmPackager_CilStrip>
-    <WasmPackager_ExecMode Condition="'$(WasmPackager_ExecMode)' == ''">Aot</WasmPackager_ExecMode>
-
-    <WasmPackager_EnableNetCore Condition="'$(WasmPackager_EnableNetCore)' == ''">false</WasmPackager_EnableNetCore>
+    <DotNetRuntimeRoot Condition="Exists('$(_WasmPackager_RepoRoot)/../runtime/docs/project/dotnet-standards.md')">$([System.IO.Path]::GetFullPath('$(_WasmPackager_RepoRoot)/../runtime'))</DotNetRuntimeRoot>
   </PropertyGroup>
 
   <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.props" Condition="'$(WasmPackager_EnableLinker)' == 'true'" />
 
-  <Import Sdk="Mono.Linker.CilStrip" Version="1.0.0" Project="Sdk.props" Condition="'$(WasmPackager_EnablePackager)' == 'true'" />
-
-  <PropertyGroup Condition="'$(_WasmPackager_SkipSdkImport)' != 'true'">
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
-    <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
-    <SkipCopyingSymbolsToOutputDirectory>true</SkipCopyingSymbolsToOutputDirectory>
-  </PropertyGroup>
-
-  <Import Project="$(MonoWebAssemblySdkPath)/Microsoft.NET.Sdk/Sdk/Sdk.props" Condition="'$(_WasmPackager_IsNetCore)' == 'true'" />
-  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" Condition="'$(_WasmPackager_SkipSdkImport)' != 'true' AND '$(_WasmPackager_IsNetCore)' != 'true'" />
+  <!--
+    We do not include Microsoft.NET.Sdk here; both it's Sdk.props and Sdk.targets are included
+    from Mono.WasmPackager.Framework.targets because we want to be able to implicitly set
+    WasmPackager_NetCore based on the project's TargetFramework.
+    -->
 
 </Project>

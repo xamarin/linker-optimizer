@@ -6,7 +6,7 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": "SimpleHello Debug Build",
+            "name": "SimpleHelloRelease Debug Build",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "debug-build",
@@ -19,7 +19,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "SimpleHello Optimizer",
+            "name": "SimpleHelloRelease Optimizer",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/../../../../Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",

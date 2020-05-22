@@ -179,10 +179,6 @@ config = {
       Lines=""
       Overwrite="true" WriteOnlyWhenDifferent="false" />
 
-    <ItemGroup Condition="'$(WasmPackager_EnableNetCore)' != 'true'">
-      <__WasmPackager_AotDummy_References Include="$(WasmPackager_MonoBclPath)/mscorlib.dll" />
-    </ItemGroup>
-
     <Csc Sources="%(__WasmPackager_PostLink_Dummies.Dummy)"
       Deterministic="true"
       TargetType="library"

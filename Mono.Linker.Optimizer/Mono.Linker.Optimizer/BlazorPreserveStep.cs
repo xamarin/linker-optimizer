@@ -130,7 +130,7 @@ namespace Mono.Linker.Optimizer
 
 		void PreserveType (TypeDefinition type)
 		{
-			Annotations.Mark (type);
+			Annotations.Mark (type, DependencyInfo.Unspecified);
 			if (type.IsNested)
 				PreserveType (type.DeclaringType);
 		}

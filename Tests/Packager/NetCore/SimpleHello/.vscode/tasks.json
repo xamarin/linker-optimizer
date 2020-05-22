@@ -1,6 +1,6 @@
 //
 // AUTO-GENERATED FILE - DO NOT MODIFY!
-// This file has been auto-generated from tasks-netcore.json.
+// This file has been auto-generated from tasks-console.json.
 //
 {
     "version": "2.0.0",
@@ -12,7 +12,7 @@
             "args": [
                 "build",
                 "/nologo",
-                "${workspaceFolder}/../../DebugBuild",
+                "${workspaceFolder}/../../../../Tests/DebugBuild",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -32,19 +32,6 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "package-cilstrip",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "pack",
-                "/nologo",
-                "${workspaceFolder}/../../../../Mono.Linker.CilStrip",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
             "label": "package-packager",
             "command": "dotnet",
             "type": "process",
@@ -58,25 +45,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "package-optimizer",
-                "package-cilstrip"
-            ]
-        },
-        {
-            "label": "package-netcore",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "pack",
-                "/nologo",
-                "${workspaceFolder}/../../../../Mono.WasmPackager.NetCore",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary"
-            ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "package-packager"
+                "package-optimizer"
             ]
         },
         {
@@ -87,19 +56,6 @@
                 "clean",
                 "/nologo",
                 "${workspaceFolder}/../../../../Mono.Linker.Optimizer",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "clean-cilstrip",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "clean",
-                "/nologo",
-                "${workspaceFolder}/../../../../Mono.Linker.CilStrip",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -119,26 +75,13 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "clean-netcore",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "clean",
-                "/nologo",
-                "${workspaceFolder}/../../../../Mono.WasmPackager.NetCore",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
             "label": "build",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
                 "/nologo",
-                "${workspaceFolder}/SimpleNetCore.csproj",
+                "${workspaceFolder}/SimpleHello.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
                 "/verbosity:normal"
@@ -146,7 +89,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "package-netcore"
+                "package-packager"
             ],
             "group": {
                 "kind": "build",
@@ -160,7 +103,7 @@
             "args": [
                 "clean",
                 "/nologo",
-                "${workspaceFolder}/SimpleNetCore.csproj",
+                "${workspaceFolder}/SimpleHello.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -168,9 +111,7 @@
             "dependsOrder": "sequence",
             "dependsOn": [
                 "clean-optimizer",
-                "clean-cilstrip",
-                "clean-packager",
-                "clean-web"
+                "clean-packager"
             ]
         },
         {
@@ -179,7 +120,12 @@
             "type": "process",
             "args": [
                 "run",
-                "--no-build"
+                "--no-build",
+                "/nologo",
+                "${workspaceFolder}/SimpleHello.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary",
+                "/verbosity:verbose"
             ],
             "problemMatcher": "$msCompile",
             "group": {

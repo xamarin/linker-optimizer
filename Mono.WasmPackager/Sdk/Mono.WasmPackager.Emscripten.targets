@@ -20,7 +20,15 @@
       Name="_WasmPackager_Emcc_ConstructEnv"
       DependsOnTargets="$(WasmPackager_Emcc_DependsOn)"
       Outputs="$(_WasmPackager_EmsdkEnv)">
-    <Message Importance="High" Text="WasmPackager - generating emsdk env: $(_WasmPackager_EmsdkEnv)" />
+
+    <PropertyGroup>
+      <WasmPackager_EmsdkCacheDir Condition="'$(WasmPackager_EmsdkCacheDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/.emscripten-cache'))</WasmPackager_EmsdkCacheDir>
+      <WasmPackager_EmsdkConfigFile Condition="'$(WasmPackager_EmsdkConfigFile)' == ''">$(WasmPackager_EmsdkCacheDir)/.emscripten</WasmPackager_EmsdkConfigFile>
+    </PropertyGroup>
+
+    <Message Importance="High" Text="_WasmPackager_Emcc_ConstructEnv - generating emsdk env: $(_WasmPackager_EmsdkEnv)" />
+    <Message Importance="High" Text="_WasmPackager_Emcc_ConstructEnv - using emscripten cache: $(WasmPackager_EmsdkCacheDir)" />
+    <Message Importance="High" Text="_WasmPackager_Emcc_ConstructEnv - using emscripten config: $(WasmPackager_EmsdkConfigFile)" />
     <MakeDir Directories="$(WasmPackager_BuildDir)" />
     <MakeDir Directories="$(WasmPackager_EmsdkCacheDir)" />
 

@@ -11,9 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="linker\linker.csproj" />
-    <ProjectReference Include="..\external\linker\external\cecil\Mono.Cecil.csproj" />
-    <ProjectReference Include="..\external\linker\external\cecil\symbols\mdb\Mono.Cecil.Mdb.csproj" />
-    <ProjectReference Include="..\external\linker\external\cecil\symbols\pdb\Mono.Cecil.Pdb.csproj" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.2" />
   </ItemGroup>
 
   <ItemGroup>

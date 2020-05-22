@@ -32,19 +32,6 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "package-cilstrip",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "pack",
-                "/nologo",
-                "${workspaceFolder}/../../../../Mono.Linker.CilStrip",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
             "label": "package-packager",
             "command": "dotnet",
             "type": "process",
@@ -58,8 +45,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "package-optimizer",
-                "package-cilstrip"
+                "package-optimizer"
             ]
         },
         {
@@ -70,19 +56,6 @@
                 "clean",
                 "/nologo",
                 "${workspaceFolder}/../../../../Mono.Linker.Optimizer",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:Summary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "clean-cilstrip",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "clean",
-                "/nologo",
-                "${workspaceFolder}/../../../../Mono.Linker.CilStrip",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -138,7 +111,6 @@
             "dependsOrder": "sequence",
             "dependsOn": [
                 "clean-optimizer",
-                "clean-cilstrip",
                 "clean-packager"
             ]
         },

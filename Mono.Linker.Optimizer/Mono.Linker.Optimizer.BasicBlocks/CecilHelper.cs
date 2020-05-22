@@ -44,30 +44,19 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 		public static int GetFeatureArgument (Instruction instruction)
 		{
-			switch (instruction.OpCode.Code) {
-			case Code.Ldc_I4_0:
-				return 0;
-			case Code.Ldc_I4_1:
-				return 1;
-			case Code.Ldc_I4_2:
-				return 2;
-			case Code.Ldc_I4_3:
-				return 3;
-			case Code.Ldc_I4_4:
-				return 4;
-			case Code.Ldc_I4_5:
-				return 5;
-			case Code.Ldc_I4_6:
-				return 6;
-			case Code.Ldc_I4_7:
-				return 7;
-			case Code.Ldc_I4_8:
-				return 8;
-			case Code.Ldc_I4_S:
-				return (sbyte)instruction.Operand;
-			default:
-				throw new OptimizerAssertionException ($"Invalid opcode `{instruction}` used as `MonoLinkerSupport.IsFeatureSupported()` argument.");
-			}
+			return instruction.OpCode.Code switch {
+				Code.Ldc_I4 => 0,
+				Code.Ldc_I4_1 => 1,
+				Code.Ldc_I4_2 => 2,
+				Code.Ldc_I4_3 => 3,
+				Code.Ldc_I4_4 => 4,
+				Code.Ldc_I4_5 => 5,
+				Code.Ldc_I4_6 => 6,
+				Code.Ldc_I4_7 => 7,
+				Code.Ldc_I4_8 => 8,
+				Code.Ldc_I4_S => (sbyte)instruction.Operand,
+				_ => throw new OptimizerAssertionException ($"Invalid opcode `{instruction}` used as `MonoLinkerSupport.IsFeatureSupported()` argument.")
+			};
 		}
 
 		public static bool IsStoreInstruction (Instruction instruction)
@@ -333,28 +322,18 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 
 		public static Instruction CreateConstantLoad (int value)
 		{
-			switch (value) {
-			case 0:
-				return Instruction.Create (OpCodes.Ldc_I4_0);
-			case 1:
-				return Instruction.Create (OpCodes.Ldc_I4_1);
-			case 2:
-				return Instruction.Create (OpCodes.Ldc_I4_2);
-			case 3:
-				return Instruction.Create (OpCodes.Ldc_I4_3);
-			case 4:
-				return Instruction.Create (OpCodes.Ldc_I4_4);
-			case 5:
-				return Instruction.Create (OpCodes.Ldc_I4_5);
-			case 6:
-				return Instruction.Create (OpCodes.Ldc_I4_6);
-			case 7:
-				return Instruction.Create (OpCodes.Ldc_I4_7);
-			case 8:
-				return Instruction.Create (OpCodes.Ldc_I4_8);
-			default:
-				return Instruction.Create (OpCodes.Ldc_I4, value);
-			}
+			return value switch {
+				0 => Instruction.Create (OpCodes.Ldc_I4_0),
+				1 => Instruction.Create (OpCodes.Ldc_I4_1),
+				2 => Instruction.Create (OpCodes.Ldc_I4_2),
+				3 => Instruction.Create (OpCodes.Ldc_I4_3),
+				4 => Instruction.Create (OpCodes.Ldc_I4_4),
+				5 => Instruction.Create (OpCodes.Ldc_I4_5),
+				6 => Instruction.Create (OpCodes.Ldc_I4_6),
+				7 => Instruction.Create (OpCodes.Ldc_I4_7),
+				8 => Instruction.Create (OpCodes.Ldc_I4_8),
+				_ => Instruction.Create (OpCodes.Ldc_I4, value)
+			};
 		}
 
 		public static bool IsConstantLoad (MethodBody body, out bool value)
@@ -425,14 +404,14 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			if (reference is GenericParameter)
 				return null;
 
-			TypeDefinition type = reference as TypeDefinition;
-			if (type == null)
-				type = reference.Resolve ();
+			if (reference is TypeDefinition type)
+				return type;
 
-			return type;
+			return reference.Resolve ();
 		}
 
 		// Unused template listing all possible opcode types.
+#pragma warning disable IDE0051
 		static void AllOpCodeTypes (Code code)
 		{
 			switch (code) {
@@ -660,5 +639,6 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 				throw new OptimizerAssertionException ();
 			}
 		}
+#pragma warning restore IDE0051
 	}
 }

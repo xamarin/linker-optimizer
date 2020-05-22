@@ -1,0 +1,25 @@
+<Project>
+  <Target Name="_WasmPackager_CilStrip"
+    DependsOnTargets="$(_WasmPackager_Require_PostLink)"
+    Condition="'$(_WasmPackager_CilStrip)' == 'true'"
+    Inputs="@(_WasmPackager_Assemblies->'%(CilStripInput)')"
+    Outputs="@(_WasmPackager_Assemblies->'%(CilStripOutput)')">
+
+    <PropertyGroup>
+      <__WasmPackager_CilStrip_Path>$(MonoWebAssemblyToolsRoot)\wasm_tools\mono-cil-strip.exe</__WasmPackager_CilStrip_Path>
+    </PropertyGroup>
+
+    <Message Importance="High" Text="_WasmPackager_CilStrip - $(_WasmPackager_CilStripOutput_Dir)" />
+
+    <Copy 
+        SourceFiles="@(_WasmPackager_Assemblies->'%(CilStripInput)')"
+        DestinationFiles="@(_WasmPackager_Assemblies->'%(CilStripOutput)')"
+        SkipUnchangedFiles="true" />
+
+    <Exec Command="dotnet &quot;$(__WasmPackager_CilStrip_Path)&quot; %(_WasmPackager_Assemblies.CilStripOutput)" />
+
+    <Message Importance="High" Text="_WasmPackager_CilStrip done" />
+
+  </Target>
+
+</Project>

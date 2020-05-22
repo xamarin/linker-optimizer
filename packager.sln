@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Linker.CilStrip", "Mono.Linker.CilStrip\Mono.Linker.CilStrip.csproj", "{E9BEE607-4A79-44C6-A546-3155005756DB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Linker.Optimizer", "Mono.Linker.Optimizer\Mono.Linker.Optimizer.csproj", "{B711CFC5-6E6C-405C-94D0-B8E98F1815B5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.WasmPackager", "Mono.WasmPackager\Mono.WasmPackager.csproj", "{96B48C19-2550-4748-8787-6E2C00259B3A}"
@@ -30,18 +28,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Debug|x64.Build.0 = Debug|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Debug|x86.Build.0 = Debug|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Release|x64.ActiveCfg = Release|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Release|x64.Build.0 = Release|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Release|x86.ActiveCfg = Release|Any CPU
-		{E9BEE607-4A79-44C6-A546-3155005756DB}.Release|x86.Build.0 = Release|Any CPU
 		{B711CFC5-6E6C-405C-94D0-B8E98F1815B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B711CFC5-6E6C-405C-94D0-B8E98F1815B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B711CFC5-6E6C-405C-94D0-B8E98F1815B5}.Debug|x64.ActiveCfg = Debug|Any CPU

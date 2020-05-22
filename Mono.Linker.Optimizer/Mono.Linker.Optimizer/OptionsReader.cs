@@ -46,10 +46,9 @@ namespace Mono.Linker.Optimizer
 		{
 			var settings = new XmlReaderSettings ();
 			var reader = new OptionsReader (options, filename);
-			using (var xml = XmlReader.Create (filename, settings)) {
-				Console.WriteLine ($"Reading XML description from {filename}.");
-				reader.Read (new XPathDocument (xml));
-			}
+			using var xml = XmlReader.Create (filename, settings);
+			Console.WriteLine ($"Reading XML description from {filename}.");
+			reader.Read (new XPathDocument (xml));
 		}
 
 		OptionsReader (OptimizerOptions options, string filename)
@@ -148,34 +147,6 @@ namespace Mono.Linker.Optimizer
 				return true;
 			value = false;
 			return false;
-		}
-
-		bool GetName (XPathNavigator nav, out string name, out MatchKind match)
-		{
-			name = GetAttribute (nav, "name");
-			var fullname = GetAttribute (nav, "fullname");
-			var substring = GetAttribute (nav, "substring");
-
-			if (fullname != null) {
-				match = MatchKind.FullName;
-				if (name != null || substring != null)
-					return false;
-				name = fullname;
-			} else if (name != null) {
-				match = MatchKind.Name;
-				if (fullname != null || substring != null)
-					return false;
-			} else if (substring != null) {
-				match = MatchKind.Substring;
-				if (name != null || fullname != null)
-					return false;
-				name = substring;
-			} else {
-				match = MatchKind.Name;
-				return false;
-			}
-
-			return true;
 		}
 
 		internal static Exception ThrowError (string message)

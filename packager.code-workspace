@@ -77,10 +77,6 @@
 			"path": "Mono.WasmPackager"
 		},
 		{
-			"name": "Mono.WasmPackager.NetCore",
-			"path": "Mono.WasmPackager.NetCore"
-		},
-		{
 			"name": "Mono.WasmPackager.Web",
 			"path": "Mono.WasmPackager.Web"
 		},
@@ -137,8 +133,6 @@
 			"**/obj": true,
 			"**/.emscripten-target": true,
 			"**/.emscripten-cache": true,
-			"**/Mono.Linker.CilStrip/**": true,
-			"Mono.Linker.CilStrip": true,
 			"external/**/*": true,
 			"external": true
 		},

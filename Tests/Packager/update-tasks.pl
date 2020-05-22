@@ -2,8 +2,7 @@
 use strict;
 use File::Basename;
 
-my @CONSOLE_DIRS = qw[Samples/SimpleDebug Samples/SimpleHello Samples/SimpleInterpreter Samples/SimpleMixed Samples/DontLink];
-my @NETCORE_DIRS = qw[Samples/SimpleNetCore];
+my @CONSOLE_DIRS = qw[Samples/SimpleDebug Samples/SimpleHello Samples/SimpleHelloRelease Samples/SimpleInterpreter Samples/SimpleMixed Samples/DontLink NetCore/SimpleHello];
 my @WEB_DIRS = qw[Samples/SimpleWeb Samples/SimpleWeb2 Samples/WebBindings];
 my @TEST_DIRS = qw[Tests/SimpleTest Tests/WorkingTests Tests/BlazorTests];
 my @BLAZOR_DIRS = qw[Samples/SimpleBlazor];
@@ -97,10 +96,4 @@ for my $dir (@BLAZOR_TEST_DIRS)
 {
 	update($dir, "tasks-web.json", "tasks.json", 1);
 	update($dir, "launch-blazor.json", "launch.json", 1);
-}
-
-for my $dir (@NETCORE_DIRS)
-{
-	update($dir, "tasks-netcore.json", "tasks.json");
-	update($dir, "launch-netcore.json", "launch.json");
 }

@@ -81,7 +81,7 @@
             "args": [
                 "build",
                 "/nologo",
-                "${workspaceFolder}/SimpleMixed.csproj",
+                "${workspaceFolder}/SimpleHelloRelease.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
                 "/verbosity:normal"
@@ -103,7 +103,7 @@
             "args": [
                 "clean",
                 "/nologo",
-                "${workspaceFolder}/SimpleMixed.csproj",
+                "${workspaceFolder}/SimpleHelloRelease.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
@@ -122,7 +122,7 @@
                 "run",
                 "--no-build",
                 "/nologo",
-                "${workspaceFolder}/SimpleMixed.csproj",
+                "${workspaceFolder}/SimpleHelloRelease.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary",
                 "/verbosity:verbose"

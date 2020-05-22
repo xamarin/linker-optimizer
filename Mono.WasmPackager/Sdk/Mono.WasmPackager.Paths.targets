@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <ItemGroup>
+    <__WasmPackager_Bindings Include="WebAssembly.Bindings;System.Net.Http.WebAssemblyHttpHandler;WebAssembly.Net.WebSockets" />
+  </ItemGroup>
+
+  <Choose>
+    <When Condition="'$(WasmPackager_UseBlazorMono)' == 'true'">
+      <PropertyGroup>
+        <MonoWebAssemblyRuntimeRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.runtime\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyRuntimeRoot>
+        <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</MonoWebAssemblyFrameworkRoot>
+        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</MonoWebAssemblyBindingsRoot>
+        <WasmPackager_MonoRuntimePath>$(MonoWebAssemblyRuntimeRoot)\mono-wasm-runtime</WasmPackager_MonoRuntimePath>
+        <WasmPackager_MonoBclPath>X:$(WasmPackager_NugetPackageRoot)\microsoft.aspnetcore.blazor.mono\$(WasmPackager_BlazorMonoVersion)\tools\mono\bcl</WasmPackager_MonoBclPath>
+        <WasmPackager_MonoLibDir>X:$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\lib</WasmPackager_MonoLibDir>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(WasmPackager_NetCore)' == 'true'">
+      <PropertyGroup>
+        <MonoWebAssemblyRuntimeRoot>$(DotNetRuntimeRoot)/artifacts/bin/lib-runtime-packs/net5.0-Browser-Debug-wasm/runtimes/browser-wasm/native</MonoWebAssemblyRuntimeRoot>
+        <MonoWebAssemblyFrameworkRoot>$(DotNetRuntimeRoot)/artifacts/bin/lib-runtime-packs/net5.0-Browser-Debug-wasm/runtimes/browser-wasm/lib/net5.0</MonoWebAssemblyFrameworkRoot>
+        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.bindings\$(MonoWebAssemblySdkVersion)\lib\netstandard2.0\</MonoWebAssemblyBindingsRoot>
+        <WasmPackager_MonoRuntimePath>$(MonoWebAssemblyRuntimeRoot)/wasm</WasmPackager_MonoRuntimePath>
+        <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)</WasmPackager_MonoBclPath>
+        <WasmPackager_MonoLibDir>$(MonoWebAssemblyRuntimeRoot)</WasmPackager_MonoLibDir>
+        <WasmPackager_MonoIncludeDir>$(MonoWebAssemblyRuntimeRoot)\include\mono-2.0</WasmPackager_MonoIncludeDir>
+        <MonoWebAssemblySdkPath>$(DotNetRuntimeRoot)//.dotnet/sdk/$(DotNetRuntimeVersion)/Sdks</MonoWebAssemblySdkPath>
+        <WasmPackager_EnableLinker>false</WasmPackager_EnableLinker>
+        <WasmPackager_ExecMode>Interp</WasmPackager_ExecMode>
+        <OutputType>Exe</OutputType>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <MonoWebAssemblyRuntimeRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.runtime\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyRuntimeRoot>
+        <MonoWebAssemblyRuntimeAotRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.runtime.aot\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyRuntimeAotRoot>
+        <MonoWebAssemblyFrameworkRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.framework\$(MonoWebAssemblySdkVersion)\wasm-assemblies\</MonoWebAssemblyFrameworkRoot>
+        <MonoWebAssemblyBindingsRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.bindings\$(MonoWebAssemblySdkVersion)\lib\netstandard2.0\</MonoWebAssemblyBindingsRoot>
+        <WasmPackager_MonoRuntimePath>$(MonoWebAssemblyRuntimeRoot)\mono-wasm-runtime</WasmPackager_MonoRuntimePath>
+        <WasmPackager_MonoBclPath>$(MonoWebAssemblyFrameworkRoot)</WasmPackager_MonoBclPath>
+        <WasmPackager_MonoLibDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\lib</WasmPackager_MonoLibDir>
+        <WasmPackager_MonoIncludeDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-runtime-release\include\mono-2.0</WasmPackager_MonoIncludeDir>
+        <WasmPackager_MonoRuntimeAotDir>$(MonoWebAssemblyRuntimeAotRoot)\wasm-cross-release</WasmPackager_MonoRuntimeAotDir>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <PropertyGroup>
+    <MonoWebAssemblyDebuggerProxyRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.debuggerproxy\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyDebuggerProxyRoot>
+    <MonoWebAssemblyToolsRoot>$(WasmPackager_NugetPackageRoot)\mono.webassembly.tools\$(MonoWebAssemblySdkVersion)</MonoWebAssemblyToolsRoot>
+  </PropertyGroup>
+
+</Project>

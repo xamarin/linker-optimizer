@@ -60,23 +60,20 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 			Exception = handler;
 		}
 
-		public override int GetHashCode ()
-		{
-			return base.GetHashCode ();
-		}
+		public override int GetHashCode () => base.GetHashCode ();
 
 		public override bool Equals (object obj)
 		{
-			var other = obj as JumpOrigin;
-			if (other == null)
-				return false;
-			if (Target != other.Target)
-				return false;
-			if (Exception != null)
-				return other.Exception == Exception;
-			if (other.Exception != null)
-				return false;
-			return Origin == other.Origin;
+			if (obj is JumpOrigin other) {
+				if (Target != other.Target)
+					return false;
+				if (Exception != null)
+					return other.Exception == Exception;
+				if (other.Exception != null)
+					return false;
+				return Origin == other.Origin;
+			}
+			return false;
 		}
 
 		public override string ToString ()

@@ -62,12 +62,11 @@ namespace Mono.Linker.Optimizer.Configuration
 
 		public static void Write (string filename, Node root)
 		{
-			using (var xml = XmlWriter.Create (filename, DefaultSettings)) {
-				var document = new XDocument ();
-				var writer = new ReportWriter (document);
-				root.Visit (writer);
-				document.WriteTo (xml);
-			}
+			using var xml = XmlWriter.Create (filename, DefaultSettings);
+			var document = new XDocument ();
+			var writer = new ReportWriter (document);
+			root.Visit (writer);
+			document.WriteTo (xml);
 		}
 
 		protected override bool Visit (OptimizerConfiguration node, XElement element)

@@ -81,21 +81,12 @@ namespace Mono.Linker.Optimizer.BasicBlocks
 		 */
 		public void ReplaceWithConstant (ref BasicBlock block, int stackDepth, ConstantValue constant)
 		{
-			Instruction instruction;
-			switch (constant) {
-			case ConstantValue.False:
-				instruction = Instruction.Create (OpCodes.Ldc_I4_0);
-				break;
-			case ConstantValue.True:
-				instruction = Instruction.Create (OpCodes.Ldc_I4_1);
-				break;
-			case ConstantValue.Null:
-				instruction = Instruction.Create (OpCodes.Ldnull);
-				break;
-			default:
-				throw DebugHelpers.AssertFailUnexpected (Method, block, constant);
-
-			}
+			var instruction = constant switch {
+				ConstantValue.False => Instruction.Create (OpCodes.Ldc_I4_0),
+				ConstantValue.True => Instruction.Create (OpCodes.Ldc_I4_1),
+				ConstantValue.Null => Instruction.Create (OpCodes.Ldnull),
+				_ => throw DebugHelpers.AssertFailUnexpected (Method, block, constant)
+			};
 
 			switch (block.BranchType) {
 			case BranchType.None:

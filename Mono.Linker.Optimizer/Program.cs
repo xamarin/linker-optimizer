@@ -140,37 +140,6 @@ namespace Mono.Linker.Optimizer
 			return base.GetDefaultContext (pipeline);
 		}
 
-		static IStep FindStep (Pipeline pipeline, string name)
-		{
-			foreach (IStep step in pipeline.GetSteps ()) {
-				Type t = step.GetType ();
-				if (t.Name == name)
-					return step;
-			}
-
-			return null;
-		}
-
-		static bool ProcessResponseFile (string [] args, out Queue<string> result)
-		{
-			result = new Queue<string> ();
-			foreach (string arg in args) {
-				if (arg.StartsWith ("@", StringComparison.Ordinal)) {
-					try {
-						var responseFileName = arg.Substring (1);
-						var responseFileLines = File.ReadLines (responseFileName);
-						Driver.ParseResponseFileLines (responseFileLines, result);
-					} catch (Exception e) {
-						Console.Error.WriteLine ("Cannot read response file with exception " + e.Message);
-						return false;
-					}
-				} else {
-					result.Enqueue (arg);
-				}
-			}
-			return true;
-		}
-
 		static void ParseArguments (Queue<string> arguments)
 		{
 			while (arguments.Count > 0) {

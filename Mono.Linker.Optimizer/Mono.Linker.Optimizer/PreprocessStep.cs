@@ -150,7 +150,7 @@ namespace Mono.Linker.Optimizer
 
 			case TypeAction.Preserve:
 				Context.Annotations.SetPreserve (type, TypePreserve.All);
-				Context.Annotations.Mark (type);
+				Context.Annotations.Mark (type, DependencyInfo.Unspecified);
 				break;
 			}
 		}
