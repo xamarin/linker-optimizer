@@ -38,6 +38,7 @@
     <PackageReference Include="Mono.WebAssembly.Runtime" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime.Aot" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Tools" Version="$(MonoWebAssemblySdkVersion)" />
+    <PackageReference Include="Mono.WebAssembly.NetCore" Version="$(MonoWebAssemblySdkVersion)" />
   </ItemGroup>
 
   <!-- Derived and private settings -->
@@ -84,8 +85,6 @@
 
     <!-- Sanity checks for NetCore -->
     <Error Text="Cannot use both _WasmPackager_SkipSdkImport and WasmPackager_NetCore" Condition="'$(_WasmPackager_SkipSdkImport)' == 'true' AND '$(WasmPackager_NetCore)' == 'true'" />
-    <Error Text="DotNetRuntimeRoot must be set" Condition="'$(DotNetRuntimeRoot)' == '' AND '$(WasmPackager_NetCore)' == 'true'" />
-    <Error Text="DotNetRuntimeVersion must be set" Condition="'$(DotNetRuntimeVersion)' == '' AND '$(WasmPackager_NetCore)' == 'true'" />
 
     <PropertyGroup>
       <_WasmPackager_LinkerInput_Dir Condition="'$(WasmPackager_EnableLinker)' == 'true'">$(WasmPackager_BuildDir)/linker-in</_WasmPackager_LinkerInput_Dir>
@@ -250,7 +249,8 @@
         NetCoreAppDir="$(__WasmPackager_Resolver_NetCoreDir)"
         EnableAot="$(_WasmPackager_EnableAot)"
         AddBinding="$(WasmPackager_AddBinding)"
-        EnableDebug="$(WasmPackager_EnableDebug)">
+        EnableDebug="$(WasmPackager_EnableDebug)"
+        UserPdbOnly="$(WasmPackager_UserPdbOnly)">
         <Output TaskParameter="Assemblies" ItemName="_WasmPackager_Assemblies" />
         <Output TaskParameter="FileList" ItemName="_WasmPackager_FileList" />
     </WasmResolverTask>

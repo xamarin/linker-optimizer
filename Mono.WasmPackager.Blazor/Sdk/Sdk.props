@@ -9,9 +9,7 @@
     <_WasmPackager_IsBlazor>true</_WasmPackager_IsBlazor>
   </PropertyGroup>
 
-  <Import Sdk="Microsoft.NET.Sdk.Web" Project="Sdk.props" />
-  <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.props" />
-  <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.props" />
+  <Import Sdk="Mono.WasmPackager.Web" Version="1.0.0" Project="Sdk.props" />
 
   <!-- These are set in Microsoft.AspNetCore.Blazor.Mono.props, so we need to override them here. -->
   <PropertyGroup>

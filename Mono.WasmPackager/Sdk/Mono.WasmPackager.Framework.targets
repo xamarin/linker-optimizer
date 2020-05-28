@@ -3,8 +3,7 @@
 
   <!-- Do not set FrameworkPathOverride or TargetFramework here. -->
 
-  <Import Project="$(MonoWebAssemblySdkPath)/Microsoft.NET.Sdk/Sdk/Sdk.props" Condition="'$(WasmPackager_NetCore)' == 'true'" />
-  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" Condition="'$(WasmPackager_NetCore)' != 'true'" />
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
 
   <!--
     This needs to be kept prior to the "Microsoft.Net.Sdk" import.

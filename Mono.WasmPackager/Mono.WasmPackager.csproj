@@ -9,6 +9,8 @@
     <ProjectReference Include="..\external\linker\external\cecil\Mono.Cecil.csproj" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MSBuildFrameworkVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuildFrameworkVersion)" />
+    <!-- This seems to be required by netcore 5.0.100-preview.4.20258.7 -->
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
     <PackageReference Include="System.Json" Version="4.6.0" />
   </ItemGroup>
 

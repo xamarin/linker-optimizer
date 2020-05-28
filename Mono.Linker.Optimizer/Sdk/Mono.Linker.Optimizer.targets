@@ -102,15 +102,12 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(LinkerOptimizerEnabled)' == 'false'">
-      <_LinkerOptimizer_Path>$(MSBuildThisFileDirectory)\..\tools\linker.dll</_LinkerOptimizer_Path>
+      <_LinkerOptimizer_Path>$(WasmPackager_MonoLinkerPath)</_LinkerOptimizer_Path>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(LinkerOptimizerEnabled)' != 'false'">
-      <_LinkerOptimizer_CommandLine Include="--optimizer;%(LinkerOptimizerInputAssembly.FullPath);@(__LinkerOptimizer_Arguments);--;@(__LinkerOptimizer_LinkerArguments)" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(LinkerOptimizerEnabled)' == 'false'">
-      <_LinkerOptimizer_CommandLine Include="$(LinkerOptimizerExtraLinkerArguments);-o &quot;$(BlazorIntermediateLinkerOutputPath)&quot;;@(_BlazorAssemblyDescriptorFiles);@(_LinkerOptimizerAssemblyReferences)" />
+    <ItemGroup>
+      <_LinkerOptimizer_CommandLine Condition="'$(LinkerOptimizerEnabled)' != 'false'" Include="--optimizer;%(LinkerOptimizerInputAssembly.FullPath);@(__LinkerOptimizer_Arguments);--;" />
+      <_LinkerOptimizer_CommandLine Include="$(LinkerOptimizerExtraLinkerArguments);@(__LinkerOptimizer_LinkerArguments);" />
     </ItemGroup>
 
     <Message Text="Linker Optimizer command line: %(_LinkerOptimizer_CommandLine.Identity) " />

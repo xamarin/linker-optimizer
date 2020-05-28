@@ -25,7 +25,7 @@
     <Message Importance="Normal" Text="  source locations file: $(_WasmPackager_SourceLocations_File)" />
     <Message Importance="Normal" Text="  source file: %(__WasmPackager_ScanSourceFiles.Identity)" />
 
-    <ScanSourceFiles SourceFiles="@(__WasmPackager_ScanSourceFiles)" Output="$(_WasmPackager_SourceLocations_File)" />
+    <ScanSourceFiles ProjectDirectory="$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))" SourceFiles="@(__WasmPackager_ScanSourceFiles)" Output="$(_WasmPackager_SourceLocations_File)" />
 
     <ItemGroup>
       <WasmPackager_DevServer_Settings Include="TestSuite_SourceLocations">

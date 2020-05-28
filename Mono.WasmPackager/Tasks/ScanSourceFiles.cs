@@ -11,6 +11,11 @@ namespace Mono.WasmPackager
 	public class ScanSourceFiles : Microsoft.Build.Utilities.Task
 	{
 		[Required]
+		public string ProjectDirectory {
+			get; set;
+		}
+
+		[Required]
 		public ITaskItem [] SourceFiles {
 			get; set;
 		}
@@ -51,6 +56,9 @@ namespace Mono.WasmPackager
 		bool ScanFile (string file)
 		{
 			Log.LogMessage (MessageImportance.Normal, $"  scanning source file: {file}");
+
+			if (!Path.IsPathRooted (file))
+				file = Path.Combine (ProjectDirectory, file);
 
 			var ok = true;
 			int lineNumber = 0;

@@ -2,8 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MonoWebAssemblySdkVersion>0.2.3-martin-20200513.1</MonoWebAssemblySdkVersion>
-    <DotNetRuntimeVersion>5.0.100-preview.5.20251.2</DotNetRuntimeVersion>
+    <MonoWebAssemblySdkVersion>0.2.3-martin-20200528.1</MonoWebAssemblySdkVersion>
 
     <_LinkerOptimizer_Standalone>false</_LinkerOptimizer_Standalone>
 
@@ -13,8 +12,6 @@
     <JsvuDir>$([System.IO.Path]::GetFullPath('$(HOME)/.jsvu'))</JsvuDir>
 
     <_WasmPackager_RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\..\..\..\..\..'))</_WasmPackager_RepoRoot>
-
-    <DotNetRuntimeRoot Condition="Exists('$(_WasmPackager_RepoRoot)/../runtime/docs/project/dotnet-standards.md')">$([System.IO.Path]::GetFullPath('$(_WasmPackager_RepoRoot)/../runtime'))</DotNetRuntimeRoot>
   </PropertyGroup>
 
   <Import Sdk="Mono.Linker.Optimizer" Version="1.0.0" Project="Sdk.props" Condition="'$(WasmPackager_EnableLinker)' == 'true'" />

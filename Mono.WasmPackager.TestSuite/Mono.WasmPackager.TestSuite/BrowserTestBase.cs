@@ -17,6 +17,8 @@ using Xunit;
 
 namespace Mono.WasmPackager.TestSuite
 {
+	using Messaging.Debugger;
+
 	public abstract class BrowserTestBase : DebuggerTestBase
 	{
 		protected BrowserTestBase (Assembly caller = null)
@@ -24,13 +26,12 @@ namespace Mono.WasmPackager.TestSuite
 		{
 		}
 
-		// InspectorClient client;
 		Dictionary<string, TaskCompletionSource<JObject>> notifications = new Dictionary<string, TaskCompletionSource<JObject>> ();
 		Dictionary<string, Func<JObject, CancellationToken, Task>> eventListeners = new Dictionary<string, Func<JObject, CancellationToken, Task>> ();
 
-		public const string RESUME = "resume";
-		public const string PAUSE = "pause";
-		public const string READY = "ready";
+		const string RESUME = "resume";
+		const string PAUSE = "pause";
+		const string READY = "ready";
 
 		Browser browser;
 		BrowserContext context;
@@ -167,9 +168,12 @@ namespace Mono.WasmPackager.TestSuite
 			notifications.Remove (what);
 		}
 
-		public void On (string evtName, Func<JObject, CancellationToken, Task> cb)
+		public void On<T> (string evtName, Func<T, CancellationToken, Task> cb)
 		{
-			eventListeners [evtName] = cb;
+			eventListeners[evtName] = (args, token) => {
+				var obj = args.ToObject<T> (true);
+				return cb (obj, token);
+			};
 		}
 
 		async Task OnEvent (ConnectionEventArgs args, CancellationToken token)
@@ -224,5 +228,13 @@ namespace Mono.WasmPackager.TestSuite
 
 			return value.ToObject<T> (true);
 		}
+
+		protected async Task<PausedNotification> WaitForPaused ()
+		{
+			var paused = await WaitFor (PAUSE).ConfigureAwait (false);
+			return paused.ToObject<PausedNotification> (true);
+		}
+
+		protected Task WaitForResumed () => WaitFor (RESUME);
 	}
 }

@@ -1,3 +1,10 @@
+optimizer-report.xml
+.packages/
+.test-packages/
+.local-chromium/
+aot/
+app/
+.emscripten-cache*
 *.exe
 *.pdb
 *.dll

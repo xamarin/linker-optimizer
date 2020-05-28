@@ -1,7 +1,0 @@
-<Project Sdk="Mono.WasmPackager.Web/1.0.0">
-
-  <PropertyGroup>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
-  </PropertyGroup>
-
-</Project>

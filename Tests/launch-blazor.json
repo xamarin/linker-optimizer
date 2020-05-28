@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "@PROJECT@",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "@PACKAGES_DIR@/mono.wasmpackager.web/1.0.0/tools/Mono.WasmPackager.Web.dll",
+            "args": [
+                "--debug",
+                "--web-root",
+                "${workspaceFolder}/wwwroot",
+                "--framework",
+                "${workspaceFolder}/bin/Debug/netstandard2.1/wwwroot/_framework"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "@PROJECT@ Optimizer",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "@ROOT@/Mono.Linker.Optimizer/bin/Debug/netcoreapp2.0/Mono.Linker.Optimizer.dll",
+            "args": [
+                "@aot/linker-in/linker-optimizer.response"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": true
+        }
+    ]
+}

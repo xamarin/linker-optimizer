@@ -65,6 +65,10 @@ namespace Mono.WasmPackager
 			get; set;
 		}
 
+		public bool UserPdbOnly {
+			get; set;
+		}
+
 		public string[] AotAssemblies {
 			get; set;
 		}
@@ -96,6 +100,7 @@ namespace Mono.WasmPackager
 		List<AssemblyData> assemblies = new List<AssemblyData> ();
 
 		const string BINDINGS_ASM_NAME = "WebAssembly.Bindings";
+		const string INTEROPSERVICES_JAVASCRIPT_NAME = "System.Runtime.InteropServices.JavaScript";
 		const string BINDINGS_RUNTIME_CLASS_NAME = "WebAssembly.Runtime";
 		const string HTTP_ASM_NAME = "System.Net.Http.WebAssemblyHttpHandler";
 		const string WEBSOCKETS_ASM_NAME = "WebAssembly.Net.WebSockets";
@@ -112,13 +117,16 @@ namespace Mono.WasmPackager
 			public bool aot;
 			// Has PDB file
 			public bool pdb;
+			// Is User assembly
+			public bool user;
 
 			public TaskItem CreateTaskItem ()
 			{
 				return new TaskItem (src_path, new Dictionary<string, string> () {
 					{ "Name", name },
 					{ "AOT", aot ? "true" : "false" },
-					{ "PDB", pdb ? "true" : "false" }
+					{ "PDB", pdb ? "true" : "false" },
+					{ "IsUser", user ? "true" : "false" }
 				});
 			}
 		}
@@ -226,7 +234,7 @@ namespace Mono.WasmPackager
 			throw new Exception ($"Could not resolve {asm_name}");
 		}
 
-		void Import (string ra, AssemblyKind kind)
+		void Import (string ra, AssemblyKind kind, bool user = false)
 		{
 			if (!asm_map.Add (ra))
 				return;
@@ -255,12 +263,11 @@ namespace Mono.WasmPackager
 			rp.InMemory = true;
 			var image = ModuleDefinition.ReadModule (ra, rp);
 			file_list.Add (ra);
-			//Debug ($"Processing {ra} debug {add_pdb}");
 
-			var data = new AssemblyData () { name = image.Assembly.Name.Name, src_path = ra };
+			var data = new AssemblyData () { name = image.Assembly.Name.Name, src_path = ra, user = user };
 			assemblies.Add (data);
 
-			if (add_pdb && (kind == AssemblyKind.User || kind == AssemblyKind.Framework)) {
+			if (add_pdb && (user || (!UserPdbOnly && (kind == AssemblyKind.User || kind == AssemblyKind.Framework)))) {
 				file_list.Add (Path.ChangeExtension (ra, "pdb"));
 				data.pdb = true;
 			}
@@ -312,16 +319,21 @@ namespace Mono.WasmPackager
 			foreach (var ra in RootAssemblies) {
 				AssemblyKind kind;
 				var resolved = Resolve (ra, out kind);
-				Import (resolved, kind);
+				Import (resolved, kind, true);
 			}
 
 			if (AddBinding) {
-				var bindings = ResolveBindings (BINDINGS_ASM_NAME + ".dll");
-				Import (bindings, AssemblyKind.Framework);
-				var http = ResolveBindings (HTTP_ASM_NAME + ".dll");
-				Import (http, AssemblyKind.Framework);
-				var websockets = ResolveBindings (WEBSOCKETS_ASM_NAME + ".dll");
-				Import (websockets, AssemblyKind.Framework);
+				if (is_netcore) {
+					var bindings = ResolveBindings (INTEROPSERVICES_JAVASCRIPT_NAME + ".dll");
+					Import (bindings, AssemblyKind.Framework);
+				} else {
+					var bindings = ResolveBindings (BINDINGS_ASM_NAME + ".dll");
+					Import (bindings, AssemblyKind.Framework);
+					var http = ResolveBindings (HTTP_ASM_NAME + ".dll");
+					Import (http, AssemblyKind.Framework);
+					var websockets = ResolveBindings (WEBSOCKETS_ASM_NAME + ".dll");
+					Import (websockets, AssemblyKind.Framework);
+				}
 			}
 
 			if (EnableAOT) {

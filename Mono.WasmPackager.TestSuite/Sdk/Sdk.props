@@ -19,8 +19,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.props" />
-
-  <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.props" />
+  <Import Sdk="Mono.WasmPackager.Web" Version="1.0.0" Project="Sdk.props" />
 
 </Project>

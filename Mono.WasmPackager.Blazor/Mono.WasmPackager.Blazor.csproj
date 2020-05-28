@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.WasmPackager" Version="1.0.0" />
-    <PackageReference Include="Mono.WasmPackager.DevServer" Version="1.0.0" />
+    <PackageReference Include="Mono.WasmPackager.Web" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

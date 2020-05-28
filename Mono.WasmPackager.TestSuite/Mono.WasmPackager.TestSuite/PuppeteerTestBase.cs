@@ -167,7 +167,7 @@ namespace Mono.WasmPackager.TestSuite
 				Url = FileToUrl [fileUrl]
 			};
 
-			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request).ConfigureAwait (false);;
+			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request).ConfigureAwait (false);
 			Assert.EndsWith (file, result.BreakpointId);
 			Assert.Single (result.Locations);
 			Assert.Equal (line - 1, result.Locations [0].LineNumber);
@@ -212,6 +212,12 @@ namespace Mono.WasmPackager.TestSuite
 			Assert.True (notification.CallFrames.Length > 0);
 
 			AssertBreakpointFrame (breakpoints[id], notification.CallFrames [0]);
+		}
+
+		protected async Task WaitForBreakpointHit (string id)
+		{
+			var paused = await WaitForPaused ().ConfigureAwait (false);
+
 		}
 	}
 }

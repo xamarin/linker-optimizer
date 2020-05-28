@@ -54,10 +54,10 @@ namespace Mono.WasmPackager.TestSuite
 				return null;
 			root = Path.GetDirectoryName (root);
 			root = Path.GetDirectoryName (root);
-			if (Path.GetFileName (root) != "Tests")
+			if (Path.GetFileName (root) != "TestSuite")
 				return null;
 			root = Path.GetDirectoryName (root);
-			if (Path.GetFileName (root) != "Packager")
+			if (Path.GetFileName (root) != "Tests")
 				return null;
 			root = Path.Combine (root, ".local-chromium");
 			Debug.WriteLine ($"Using local chromium {root}.");

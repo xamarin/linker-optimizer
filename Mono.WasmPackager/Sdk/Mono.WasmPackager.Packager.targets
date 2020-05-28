@@ -182,6 +182,9 @@ config = {
     <Csc Sources="%(__WasmPackager_PostLink_Dummies.Dummy)"
       Deterministic="true"
       TargetType="library"
+      NoStandardLib="true"
+      NoConfig="true"
+      DisabledWarnings="8021"
       EmitDebugInformation="$(WasmPackager_EnableDebug)"
       References="@(__WasmPackager_AotDummy_References)"
       OutputAssembly="%(__WasmPackager_PostLink_Dummies.LinkerOutput)"
@@ -299,15 +302,6 @@ config = {
   </Target>
 
   <PropertyGroup>
-    <LinkBlazorApplicationDependsOn>
-      $(LinkBlazorApplicationDependsOn);
-      WasmPackager;
-      MartinTest;
-      NotExistent;
-    </LinkBlazorApplicationDependsOn>
-    <LinkerOptimizerDependsOn>
-      $(LinkerOptimizerDependsOn);
-    </LinkerOptimizerDependsOn>
     <_WasmPackager_NetFramework_DependsOn>
       $(_WasmPackager_NetFramework_DependsOn);
       _WasmPackager_CompileAot;

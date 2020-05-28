@@ -1,0 +1,232 @@
+//
+// AUTO-GENERATED FILE - DO NOT MODIFY!
+// This file has been auto-generated from tasks-bootstrap.json.
+//
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "package-optimizer",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../Mono.Linker.Optimizer",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "package-packager",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../Mono.WasmPackager",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-optimizer"
+            ]
+        },
+        {
+            "label": "package-web",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../Mono.WasmPackager.Web",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOn": [
+                "package-packager"
+            ]
+        },
+        {
+            "label": "package-blazor",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../Mono.WasmPackager.Blazor",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOn": [
+                "package-web"
+            ]
+        },
+        {
+            "label": "package-test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "/nologo",
+                "${workspaceFolder}/../../Mono.WasmPackager.TestSuite",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-web"
+            ]
+        },
+
+        {
+            "label": "build-SimpleTest_WebSample_SimpleTest_WebSample",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../Tests/TestSuite/SimpleTest/WebSample/SimpleTest.WebSample.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence"
+        },
+		
+        {
+            "label": "build-WorkingTests_WebSample_WorkingTests_WebSample",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../Tests/TestSuite/WorkingTests/WebSample/WorkingTests.WebSample.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence"
+        },
+		
+        {
+            "label": "build-NetCoreTests_WebSample_NetCoreTests_WebSample",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../Tests/TestSuite/NetCoreTests/WebSample/NetCoreTests.WebSample.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence"
+        },
+		
+        {
+            "label": "build-BlazorTests_BlazorSample_BlazorTests_BlazorSample",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../Tests/TestSuite/BlazorTests/BlazorSample/BlazorTests.BlazorSample.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence"
+        },
+		
+        {
+            "label": "build-SimpleTest_SimpleTest_Test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../Tests/TestSuite/SimpleTest/SimpleTest.Test.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence"
+        },
+		
+        {
+            "label": "build-WorkingTests_WorkingTests_Test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../Tests/TestSuite/WorkingTests/WorkingTests.Test.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence"
+        },
+		
+        {
+            "label": "build-BlazorTests_BlazorTests_Test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../Tests/TestSuite/BlazorTests/BlazorTests.Test.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence"
+        },
+		
+        {
+            "label": "build-NetCoreTests_NetCoreTests_Test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "/nologo",
+                "${workspaceFolder}/../../Tests/TestSuite/NetCoreTests/NetCoreTests.Test.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:Summary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence"
+        },
+		
+        {
+            "label": "build",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-optimizer",
+                "package-packager",
+                "package-blazor",
+                "package-test",
+                "build-SimpleTest_WebSample_SimpleTest_WebSample",
+                "build-WorkingTests_WebSample_WorkingTests_WebSample",
+                "build-NetCoreTests_WebSample_NetCoreTests_WebSample",
+                "build-BlazorTests_BlazorSample_BlazorTests_BlazorSample",
+                "build-SimpleTest_SimpleTest_Test",
+                "build-WorkingTests_WorkingTests_Test",
+                "build-BlazorTests_BlazorTests_Test",
+                "build-NetCoreTests_NetCoreTests_Test",
+
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+   ]
+}

@@ -11,7 +11,7 @@
       <group targetFramework=".NETCoreApp3.0">
         <dependency id="Mono.Cecil" version="0.11.1" />
         <dependency id="Newtonsoft.Json" Version="12.0.3" />
-        <dependency id="Mono.WasmPackager.DevServer" version="1.0.0" />
+        <dependency id="Mono.WasmPackager.Web" version="1.0.0" />
         <dependency id="PuppeteerSharp" version="2.0.0" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.5.0" />
       </group>

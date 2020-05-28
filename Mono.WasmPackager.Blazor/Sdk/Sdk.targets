@@ -3,9 +3,10 @@
 
   <Import Project="$(MSBuildThisFileDirectory)\Mono.WasmPackager.Blazor.targets" />
 
+  <Import Sdk="Microsoft.NET.Sdk.Web" Project="Sdk.props" />
   <Import Sdk="Microsoft.NET.Sdk.Web" Project="Sdk.targets" />
 
-  <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.targets" />
+  <Import Sdk="Mono.WasmPackager.Web" Version="1.0.0" Project="Sdk.targets" />
 
   <PropertyGroup>
     <WasmPackager_DevServer_FrameworkDir>$([System.IO.Path]::GetFullPath('$(OutputPath)/wwwroot/_framework'))</WasmPackager_DevServer_FrameworkDir>
@@ -19,7 +20,5 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="$(BlazorVersion)" PrivateAssets="all" />
     <PackageReference Include="System.Net.Http.Json" Version="$(BlazorHttpJsonVersion)" />
   </ItemGroup>
-
-  <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.targets" />
 
 </Project>

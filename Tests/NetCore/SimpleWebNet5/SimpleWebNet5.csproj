@@ -1,0 +1,9 @@
+<Project Sdk="Mono.WasmPackager.Web/1.0.0">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
+    <WasmPackager_EnableDebug>true</WasmPackager_EnableDebug>
+    <WasmPackager_AddBinding>true</WasmPackager_AddBinding>
+  </PropertyGroup>
+
+</Project>

@@ -2,11 +2,11 @@
   <PropertyGroup>
     <LinkBlazorApplicationDependsOn>
       $(LinkBlazorApplicationDependsOn);
-      MartinTest;
       WasmPackager;
-      MartinTest;
-      NotExistent;
     </LinkBlazorApplicationDependsOn>
+    <LinkerOptimizerDependsOn>
+      $(LinkerOptimizerDependsOn);
+    </LinkerOptimizerDependsOn>
     <LinkerOptimizerConfigurationDependsOn>
       $(LinkerOptimizerConfigurationDependsOn);
       _WasmPackager_PrepareOptimizerConfiguration;
@@ -17,22 +17,18 @@
     </_WasmPackager_Require_Link>
   </PropertyGroup>
 
-  <Target Name="MartinTest">
-    <Message Importance="High" Text="MARTIN TEST" />
-  </Target>
-
   <Target Name="_WasmPackager_PrepareOptimizerConfiguration" DependsOnTargets="$(_WasmPackager_Require_PreLink)">
     <Message Importance="High" Text="WasmPackager: $(WasmPackager_BuildDir)" />
 
     <PropertyGroup>
       <LinkerOptimizerInputPath>$(_WasmPackager_LinkerInput_Dir)</LinkerOptimizerInputPath>
       <LinkerOptimizerOutputPath>$(_WasmPackager_LinkerOutput_Dir)</LinkerOptimizerOutputPath>
-      <LinkerOptimizerEnabled>true</LinkerOptimizerEnabled>
+      <LinkerOptimizerEnabled Condition="'$(LinkerOptimizerEnabled)' == ''">true</LinkerOptimizerEnabled>
       <LinkerOptimizerExtraLinkerArguments>--verbose -c link -u copy --deterministic --disable-opt unreachablebodies --exclude-feature com --exclude-feature remoting --exclude-feature etw</LinkerOptimizerExtraLinkerArguments>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(WasmPackager_AddBinding)' == 'true'">
-      <LinkerOptimizerExtraLinkerArguments>$(LinkerOptimizerExtraLinkerArguments) -p link %(__WasmPackager_Bindings.Identity) -r %(__WasmPackager_Bindings.Identity)</LinkerOptimizerExtraLinkerArguments>
+      <LinkerOptimizerExtraLinkerArguments>$(LinkerOptimizerExtraLinkerArguments) -p link %(WasmPackager_BindingsModules.Identity) -r %(WasmPackager_BindingsModules.Identity)</LinkerOptimizerExtraLinkerArguments>
     </PropertyGroup>
 
     <GetFirstItem Input="@(_WasmPackager_Assemblies)">

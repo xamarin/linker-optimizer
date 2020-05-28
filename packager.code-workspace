@@ -2,71 +2,43 @@
 	"folders": [
 		{
 			"name": "SimpleTest",
-			"path": "Tests/Packager/Tests/SimpleTest"
+			"path": "Tests/TestSuite/SimpleTest"
 		},
 		{
 			"name": "WorkingTests",
-			"path": "Tests/Packager/Tests/WorkingTests"
+			"path": "Tests/TestSuite/WorkingTests"
 		},
 		{
 			"name": "SimpleTest/WebSample",
-			"path": "Tests/Packager/Tests/SimpleTest/WebSample"
+			"path": "Tests/TestSuite/SimpleTest/WebSample"
 		},
 		{
 			"name": "WorkingTests/WebSample",
-			"path": "Tests/Packager/Tests/WorkingTests/WebSample"
+			"path": "Tests/TestSuite/WorkingTests/WebSample"
 		},
 		{
 			"name": "BlazorTests",
-			"path": "Tests/Packager/Tests/BlazorTests"
+			"path": "Tests/TestSuite/BlazorTests"
 		},
 		{
 			"name": "BlazorTests/BlazorSample",
-			"path": "Tests/Packager/Tests/BlazorTests/BlazorSample"
+			"path": "Tests/TestSuite/BlazorTests/BlazorSample"
 		},
 		{
-			"name": "Samples/SimpleHello",
-			"path": "Tests/Packager/Samples/SimpleHello"
+			"name": "NetCoreTests",
+			"path": "Tests/TestSuite/NetCoreTests"
 		},
 		{
-			"name": "Samples/SimpleInterpreter",
-			"path": "Tests/Packager/Samples/SimpleInterpreter"
-		},
-		{
-			"name": "Samples/SimpleMixed",
-			"path": "Tests/Packager/Samples/SimpleMixed"
-		},
-		{
-			"name": "Samples/SimpleDebug",
-			"path": "Tests/Packager/Samples/SimpleDebug"
-		},
-		{
-			"name": "Samples/DontLink",
-			"path": "Tests/Packager/Samples/DontLink"
-		},
-		{
-			"name": "Samples/StandaloneOptimizer",
-			"path": "Tests/Packager/Samples/StandaloneOptimizer"
-		},
-		{
-			"name": "Samples/SimpleWeb",
-			"path": "Tests/Packager/Samples/SimpleWeb"
-		},
-		{
-			"name": "Samples/SimpleWeb2",
-			"path": "Tests/Packager/Samples/SimpleWeb2"
-		},
-		{
-			"name": "Samples/WebBindings",
-			"path": "Tests/Packager/Samples/WebBindings"
+			"name": "NetCoreTests/WebSample",
+			"path": "Tests/TestSuite/NetCoreTests/WebSample"
 		},
 		{
 			"name": "NetCore/SimpleHello",
-			"path": "Tests/Packager/NetCore/SimpleHello"
+			"path": "Tests/NetCore/SimpleHello"
 		},
 		{
-			"name": "DebugBuild",
-			"path": "Tests/DebugBuild"
+			"name": "NetCore/SimpleWebNet5",
+			"path": "Tests/NetCore/SimpleWebNet5"
 		},
 		{
 			"name": "Mono.Linker.Optimizer",
@@ -81,16 +53,16 @@
 			"path": "Mono.WasmPackager.Web"
 		},
 		{
-			"name": "Mono.WasmPackager.DevServer",
-			"path": "Mono.WasmPackager.DevServer"
-		},
-		{
 			"name": "Mono.WasmPackager.Blazor",
 			"path": "Mono.WasmPackager.Blazor"
 		},
 		{
 			"name": "Mono.WasmPackager.TestSuite",
 			"path": "Mono.WasmPackager.TestSuite"
+		},
+		{
+			"name": "Bootstrap",
+			"path": "Tests/Bootstrap"
 		}
 	],
 	"settings": {

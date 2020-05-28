@@ -1,0 +1,158 @@
+{
+	"folders": [
+		{
+			"name": "SimpleTest",
+			"path": "Tests/TestSuite/SimpleTest"
+		},
+		{
+			"name": "WorkingTests",
+			"path": "Tests/TestSuite/WorkingTests"
+		},
+		{
+			"name": "SimpleTest/WebSample",
+			"path": "Tests/TestSuite/SimpleTest/WebSample"
+		},
+		{
+			"name": "WorkingTests/WebSample",
+			"path": "Tests/TestSuite/WorkingTests/WebSample"
+		},
+		{
+			"name": "BlazorTests",
+			"path": "Tests/TestSuite/BlazorTests"
+		},
+		{
+			"name": "BlazorTests/BlazorSample",
+			"path": "Tests/TestSuite/BlazorTests/BlazorSample"
+		},
+		{
+			"name": "NetCoreTests",
+			"path": "Tests/TestSuite/NetCoreTests"
+		},
+		{
+			"name": "NetCoreTests/WebSample",
+			"path": "Tests/TestSuite/NetCoreTests/WebSample"
+		},
+		{
+			"name": "Samples/SimpleHello",
+			"path": "Tests/Samples/SimpleHello"
+		},
+		{
+			"name": "Samples/SimpleInterpreter",
+			"path": "Tests/Samples/SimpleInterpreter"
+		},
+		{
+			"name": "Samples/SimpleMixed",
+			"path": "Tests/Samples/SimpleMixed"
+		},
+		{
+			"name": "Samples/SimpleDebug",
+			"path": "Tests/Samples/SimpleDebug"
+		},
+		{
+			"name": "Samples/DontLink",
+			"path": "Tests/Samples/DontLink"
+		},
+		{
+			"name": "Samples/StandaloneOptimizer",
+			"path": "Tests/Samples/StandaloneOptimizer"
+		},
+		{
+			"name": "Samples/SimpleWeb",
+			"path": "Tests/Samples/SimpleWeb"
+		},
+		{
+			"name": "Samples/SimpleWeb2",
+			"path": "Tests/Samples/SimpleWeb2"
+		},
+		{
+			"name": "Samples/WebBindings",
+			"path": "Tests/Samples/WebBindings"
+		},
+		{
+			"name": "NetCore/SimpleHello",
+			"path": "Tests/NetCore/SimpleHello"
+		},
+		{
+			"name": "NetCore/SimpleWebNet5",
+			"path": "Tests/NetCore/SimpleWebNet5"
+		},
+		{
+			"name": "Mono.Linker.Optimizer",
+			"path": "Mono.Linker.Optimizer"
+		},
+		{
+			"name": "Mono.WasmPackager",
+			"path": "Mono.WasmPackager"
+		},
+		{
+			"name": "Mono.WasmPackager.Web",
+			"path": "Mono.WasmPackager.Web"
+		},
+		{
+			"name": "Mono.WasmPackager.Blazor",
+			"path": "Mono.WasmPackager.Blazor"
+		},
+		{
+			"name": "Mono.WasmPackager.TestSuite",
+			"path": "Mono.WasmPackager.TestSuite"
+		}
+	],
+	"settings": {
+		"editor.wordWrapColumn": 120,
+		"editor.wordBasedSuggestions": false,
+		"[markdown]":{
+			"editor.wordWrap": "wordWrapColumn",
+			"editor.wordWrapColumn": 80,
+		},
+		"editor.renderWhitespace": "all",
+		"git.enableSmartCommit": true,
+		"taskExplorer.enableBash": false,
+		"taskExplorer.enableAnt": false,
+		"taskExplorer.enableBatch": false,
+		"taskExplorer.enableGrunt": false,
+		"taskExplorer.enableMake": false,
+		"taskExplorer.enableNpm": false,
+		"taskExplorer.enableNsis": false,
+		"taskExplorer.enablePerl": false,
+		"taskExplorer.enablePowershell": false,
+		"taskExplorer.enablePython": false,
+		"taskExplorer.enableRuby": false,
+		"taskExplorer.enableSideBar": true,
+		"taskExplorer.enableTsc": false,
+		"[csharp]": {
+			"editor.defaultFormatter": "ms-dotnettools.csharp"
+		},
+		"debug.onTaskErrors": "showErrors",
+		"task.slowProviderWarning": [
+			"ant"
+		],
+		"git.detectSubmodules": false,
+		"git.ignoredRepositories": [
+			"git@github.com:mono/linker.git"
+		],
+		"files.exclude": {
+			"**/aot": true,
+			"**/app": true,
+			"**/bin": true,
+			"**/obj": true,
+			"**/.emscripten-target": true,
+			"**/.emscripten-cache": true,
+			"external/**/*": true,
+			"external": true
+		},
+		"git.autoRepositoryDetection": false,
+		"dotnet-test-explorer.testProjectPath": "*.Test.csproj",
+		"omnisharp.enableEditorConfigSupport": true,
+		"omnisharp.enableRoslynAnalyzers": true,
+	},
+	"extensions": {
+		"recommendations": [
+			"doggy8088.netcore-extension-pack",
+			"formulahendry.dotnet",
+			"formulahendry.dotnet-test-explorer",
+			"leopotam.csharpfixformat",
+			"tintoy.msbuild-project-tools",
+			"spmeesseman.vscode-taskexplorer"
+		]
+	},
+}

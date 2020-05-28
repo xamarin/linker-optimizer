@@ -3,9 +3,7 @@
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
-  <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.targets" />
-
-  <Import Sdk="Mono.WasmPackager.DevServer" Version="1.0.0" Project="Sdk.targets" />
+  <Import Sdk="Mono.WasmPackager.Web" Version="1.0.0" Project="Sdk.targets" />
 
   <PropertyGroup>
     <_WasmPackager_DevServer_FilterSources_DependsOn>

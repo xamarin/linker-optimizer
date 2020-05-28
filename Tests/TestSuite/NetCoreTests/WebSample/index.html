@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en-us">
+	<head>
+	</head>
+	<body>
+		<script type="text/javascript">
+			// Keep in sync with the managed side
+			const messageText = "MESSAGE BUTTON CLICKED"
+			const messageText2 = "MESSAGE BUTTON CLICKED - BACK FROM MANAGED"
+			const caughtExceptionText = "CAUGHT EXCEPTION BUTTON CLICKED"
+			const caughtExceptionText2 = "CAUGHT EXCEPTION BUTTON CLICKED - BACK FROM MANAGED"
+			const variablesText = "VARIABLES BUTTON CLICKED"
+			const variablesText2 = "VARIABLES BUTTON CLICKED - BACK FROM MANAGED"
+			const textReady = "READY"
+			const textMessage = "MESSAGE"
+			const throwMessage = "THROW"
+
+			var App = {
+				init: function () {
+					this.output = document.getElementById ("output");
+					this.button = document.getElementById ("button");
+					BINDING.call_static_method("[NetCoreTests.WebSample] NetCoreTests.WebSample.Hello:Main", []);
+					this.message = BINDING.bind_static_method("[NetCoreTests.WebSample] NetCoreTests.WebSample.Hello:Message", []);
+					this.throw = BINDING.bind_static_method("[NetCoreTests.WebSample] NetCoreTests.WebSample.Hello:Throw", []);
+					this.caught = BINDING.bind_static_method("[NetCoreTests.WebSample] NetCoreTests.WebSample.Exceptions:Caught", []);
+					this.testVariables = BINDING.bind_static_method("[NetCoreTests.WebSample] NetCoreTests.WebSample.Variables:VariableTest", []);
+					this.output.innerText = textReady
+				},
+				onClickMessage: function () {
+					console.log(messageText)
+					this.message()
+					console.log(messageText2)
+					this.output.innerText = textMessage
+				},
+				onClickThrow: function () {
+					this.output.innerText = throwMessage;
+					try {
+						throw new Error("Hello!")
+					} catch (error) {
+						console.log(`TEST ERROR: ${error}`)
+					}
+					this.throw()
+				},
+				onClickCaught: function () {
+					console.log(caughtExceptionText)
+					this.caught()
+					console.log(caughtExceptionText2)
+					this.output.innerText = textMessage
+				},
+				onClickVariables: function () {
+					this.testVariables()
+				},
+			};
+		</script>
+		<p>Test Paragraph.</p>
+		<div id="output">INIT</div>
+		<button type="button" onclick="App.onClickMessage()" id="message">Message</button>
+		<button type="button" onclick="App.onClickThrow()" id="throw">Throw</button>
+		<button type="button" onclick="App.onClickCaught()" id="caught">Caught Exception</button>
+		<button type="button" onclick="App.onClickVariables()" id="variables">Variables</button>
+		<script type="text/javascript" src="mono-config.js"></script>
+		<script type="text/javascript" src="runtime.js"></script>
+		<script defer type="text/javascript" src="dotnet.js"></script>
+	</body>
+</html>
