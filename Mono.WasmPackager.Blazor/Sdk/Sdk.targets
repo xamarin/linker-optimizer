@@ -6,13 +6,14 @@
   <Import Sdk="Microsoft.NET.Sdk.Web" Project="Sdk.props" />
   <Import Sdk="Microsoft.NET.Sdk.Web" Project="Sdk.targets" />
 
-  <Import Sdk="Mono.WasmPackager.Web" Version="1.0.0" Project="Sdk.targets" />
-
   <PropertyGroup>
-    <WasmPackager_DevServer_FrameworkDir>$([System.IO.Path]::GetFullPath('$(OutputPath)/wwwroot/_framework'))</WasmPackager_DevServer_FrameworkDir>
-    <WasmPackager_DevServer_RootDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/wwwroot'))</WasmPackager_DevServer_RootDir>
+    <WasmPackager_DevServer_ProjectDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</WasmPackager_DevServer_ProjectDir>
+    <WasmPackager_DevServer_RootDir>$(WasmPackager_DevServer_ProjectDir)/wwwroot</WasmPackager_DevServer_RootDir>
+    <WasmPackager_DevServer_FrameworkDir>$(WasmPackager_DevServer_ProjectDir)/bin/Debug/netstandard2.1/wwwroot/_framework</WasmPackager_DevServer_FrameworkDir>
     <WasmPackager_DevServer_Arguments>--web-root &quot;$(WasmPackager_DevServer_RootDir)&quot; --framework &quot;$(WasmPackager_DevServer_FrameworkDir)&quot;</WasmPackager_DevServer_Arguments>
   </PropertyGroup>
+
+  <Import Sdk="Mono.WasmPackager.Web" Version="1.0.0" Project="Sdk.targets" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(BlazorVersion)" />

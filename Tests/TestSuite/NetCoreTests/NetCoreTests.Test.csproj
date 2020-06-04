@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(MSBuildProjectDirectory)/../SharedTests/xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="$(MSBuildProjectDirectory)/../SharedTests/*.cs" />
   </ItemGroup>
 
 </Project>

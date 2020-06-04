@@ -1,0 +1,1 @@
+const mainAssembly = "NetCoreTests.WebSample"

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+	<script type="text/javascript" src="setup.js"></script>
+	<script type="text/javascript" src="constants.js"></script>
+	<script type="text/javascript" src="mono-config.js"></script>
+	<script type="text/javascript" src="runtime.js"></script>
+</head>
+
+<body>
+	<script type="text/javascript">
+
+		var App = {
+			init: function () {
+				console.log(`THE SETUP: ${mainAssembly}`)
+				this.output = document.getElementById("output")
+				this.button = document.getElementById("button")
+				BINDING.call_static_method(`[${mainAssembly}] SharedTests.SharedSample.Hello:Main`, [])
+				this.message = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Hello:Message`, [])
+				this.throw = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Hello:Throw`, [])
+				this.caught = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Exceptions:Caught`, [])
+				this.testVariables = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Variables:VariableTest`, [])
+
+				let version = document.getElementById("version")
+				let osVersion = document.getElementById("osversion")
+				let getVersion = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Variables:GetVersion`, [])
+				let getOSVersion = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Variables:GetOSVersion`, [])
+				version.innerText = getVersion()
+				osVersion.innerText = getOSVersion()
+
+				// Keep this line at the end, to make sure none of the above has thrown any exceptions.
+				this.output.innerText = textReady
+			},
+			onClickMessage: function () {
+				console.log(messageText)
+				this.message()
+				console.log(messageText2)
+				this.output.innerText = textMessage
+			},
+			onClickThrow: function () {
+				this.output.innerText = throwMessage
+				try {
+					throw new Error("Hello!")
+				} catch (error) {
+					console.log(`TEST ERROR: ${error}`)
+				}
+				this.throw()
+			},
+			onClickCaught: function () {
+				console.log(caughtExceptionText)
+				this.caught()
+				console.log(caughtExceptionText2)
+				this.output.innerText = textMessage
+			},
+			onClickVariables: function () {
+				this.testVariables()
+			},
+		};
+	</script>
+	<p>Test Paragraph.</p>
+	<div id="output">INIT</div>
+	<div>
+		<button type="button" onclick="App.onClickMessage()" id="message">Message</button>
+		<button type="button" onclick="App.onClickThrow()" id="throw">Throw</button>
+		<button type="button" onclick="App.onClickCaught()" id="caught">Caught Exception</button>
+		<button type="button" onclick="App.onClickVariables()" id="variables">Variables</button>
+	</div>
+	<div>
+		<p>Environment.Version: <code id="version">UNKNOWN</code></p>
+		<p>Environment.OSVersion: <code id="osversion">UNKNOWN</code></p>
+	</div>
+	<div>
+		<!-- FIXME: it looks like we can't move this into the <head> section. -->
+		<script defer type="text/javascript" src="dotnet.js"></script>
+	</div>
+</body>
+
+</html>

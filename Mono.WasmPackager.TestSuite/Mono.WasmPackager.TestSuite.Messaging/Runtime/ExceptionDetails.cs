@@ -1,6 +1,6 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Runtime
 {
-	public class ExceptionDetails
+	public class ExceptionDetails : ProtocolObject
 	{
 		public int ExceptionId { get; set; }
 		public string Text { get; set; }

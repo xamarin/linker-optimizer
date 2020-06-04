@@ -1,6 +1,6 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Debugger
 {
-	public class RemoveBreakpointRequest
+	public class RemoveBreakpointRequest : ProtocolObject
 	{
 		public string BreakpointId { get; set; }
 	}

@@ -7,10 +7,4 @@
 
   <Import Sdk="Mono.WasmPackager" Version="1.0.0" Project="Sdk.props" />
 
-  <ItemGroup>
-    <_WasmPackager_AppBundle_Files Include="index.html">
-      <Source>$(MSBuildProjectDirectory)/index.html</Source>
-    </_WasmPackager_AppBundle_Files>
-  </ItemGroup>
-
 </Project>

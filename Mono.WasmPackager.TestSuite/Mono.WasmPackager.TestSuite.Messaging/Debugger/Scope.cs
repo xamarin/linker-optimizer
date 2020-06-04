@@ -2,7 +2,7 @@ namespace Mono.WasmPackager.TestSuite.Messaging.Debugger
 {
 	using Runtime;
 
-	public class Scope
+	public class Scope : ProtocolObject
 	{
 		public ScopeType Type { get; set; }
 		public RemoteObject Object { get; set; }

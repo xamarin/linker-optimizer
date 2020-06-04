@@ -11,13 +11,12 @@ using Mono.WasmPackager.DevServer;
 
 namespace NetCoreTests
 {
-	public class TestPuppeteer : DebuggerTestBase
+	public class Hello : DebuggerTestBase
 	{
 		[Fact]
-		public async Task TestBrowser ()
+		public void StartServer ()
 		{
-			await BrowserController.Connect ("http://www.microsoft.com/");
-			Debug.WriteLine ("DONE");
+			Debug.WriteLine ($"SERVER READY");
 		}
 	}
 }

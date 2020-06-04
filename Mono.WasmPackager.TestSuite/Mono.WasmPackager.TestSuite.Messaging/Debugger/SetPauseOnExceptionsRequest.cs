@@ -1,6 +1,6 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Debugger
 {
-	public class SetPauseOnExceptionsRequest
+	public class SetPauseOnExceptionsRequest : ProtocolObject
 	{
 		public PauseOnExceptionMode State {
 			get; set;

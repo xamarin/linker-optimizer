@@ -1,6 +1,6 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Runtime
 {
-	public class GetPropertiesRequest
+	public class GetPropertiesRequest : ProtocolObject
 	{
 		public string ObjectId { get; set; }
 		// Properties below are optional.

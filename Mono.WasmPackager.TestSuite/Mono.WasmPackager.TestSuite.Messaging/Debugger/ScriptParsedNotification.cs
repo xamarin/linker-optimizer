@@ -2,7 +2,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Mono.WasmPackager.TestSuite.Messaging.Debugger
 {
-	public class ScriptParsedNotification
+	public class ScriptParsedNotification : ProtocolObject
 	{
 		public string ScriptId { get; set; }
 		public string Url { get; set; }

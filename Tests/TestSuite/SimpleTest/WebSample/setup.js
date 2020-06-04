@@ -1,0 +1,1 @@
+const mainAssembly = "SimpleTest.WebSample"

@@ -1,0 +1,10 @@
+// Keep in sync with the managed side
+const messageText = "MESSAGE BUTTON CLICKED"
+const messageText2 = "MESSAGE BUTTON CLICKED - BACK FROM MANAGED"
+const caughtExceptionText = "CAUGHT EXCEPTION BUTTON CLICKED"
+const caughtExceptionText2 = "CAUGHT EXCEPTION BUTTON CLICKED - BACK FROM MANAGED"
+const variablesText = "VARIABLES BUTTON CLICKED"
+const variablesText2 = "VARIABLES BUTTON CLICKED - BACK FROM MANAGED"
+const textReady = "READY"
+const textMessage = "MESSAGE"
+const throwMessage = "THROW"

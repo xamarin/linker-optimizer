@@ -106,7 +106,7 @@ namespace Mono.WasmPackager.TestSuite
 
 		protected async Task<string> ClickAndWaitForMessage (string selector, string message, bool regex = false)
 		{
-			var button = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);;
+			var button = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);
 			var wait = WaitForConsole (message, regex);
 			var click = button.ClickAsync ();
 			await Task.WhenAll (wait, click).ConfigureAwait (false);
@@ -115,7 +115,7 @@ namespace Mono.WasmPackager.TestSuite
 
 		protected async Task<string> ClickAndWaitForException (string selector, string exception, string message = null)
 		{
-			var button = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);;
+			var button = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);
 			var wait = WaitForException (exception, message);
 			var click = button.ClickAsync ();
 			await Task.WhenAll (wait, click).ConfigureAwait (false);
@@ -124,8 +124,8 @@ namespace Mono.WasmPackager.TestSuite
 
 		protected async Task<string> GetInnerHtml (string selector)
 		{
-			var handle = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);;
-			var property = await handle.GetPropertyAsync ("innerHTML").ConfigureAwait (false);;
+			var handle = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);
+			var property = await handle.GetPropertyAsync ("innerHTML").ConfigureAwait (false);
 			var value = property.RemoteObject.Value;
 			return value.Value<string> ();
 		}
@@ -148,7 +148,7 @@ namespace Mono.WasmPackager.TestSuite
 				}
 			};
 
-			var response = await SendCommand<GetPossibleBreakpointsResponse> ("Debugger.getPossibleBreakpoints", request).ConfigureAwait (false);;
+			var response = await SendCommand<GetPossibleBreakpointsResponse> ("Debugger.getPossibleBreakpoints", request).ConfigureAwait (false);
 			Assert.True (response.Locations.Length > 1);
 		}
 
@@ -179,7 +179,7 @@ namespace Mono.WasmPackager.TestSuite
 		{
 			breakpoints.Remove (breakpointId);
 			var request = new RemoveBreakpointRequest { BreakpointId = breakpointId };
-			await SendCommand<RemoveBreakpointResponse> ("Debugger.removeBreakpoint", request).ConfigureAwait (false);;
+			await SendCommand<RemoveBreakpointResponse> ("Debugger.removeBreakpoint", request).ConfigureAwait (false);
 		}
 
 		protected void AssertBreakpointFrame (SourceLocation location, CallFrame frame)

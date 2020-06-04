@@ -1,6 +1,6 @@
 using System;
 
-namespace SimpleTest.WebSample
+namespace SharedTests.SharedSample
 {
 	public class MyObject
 	{

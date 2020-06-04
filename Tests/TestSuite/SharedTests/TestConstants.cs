@@ -1,6 +1,6 @@
 using Mono.WasmPackager.TestSuite;
 
-namespace SimpleTest
+namespace SharedTests
 {
 	public static class TestConstants
 	{
@@ -19,6 +19,6 @@ namespace SimpleTest
 
 		public const string MyExceptionMessage = "Throwing here.";
 
-		public const string MyExceptionClassName = "SimpleTest.WebSample.MyException";
+		public const string MyExceptionClassName = "SharedTests.SharedSample.MyException";
 	}
 }

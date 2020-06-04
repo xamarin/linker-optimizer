@@ -6,6 +6,15 @@
     <WasmPackager_AddBinding>true</WasmPackager_AddBinding>
     <WasmPackager_EnableDebug>true</WasmPackager_EnableDebug>
     <WasmPackager_EnableTestSuite>true</WasmPackager_EnableTestSuite>
+    <WasmPackager_UserPdbOnly>true</WasmPackager_UserPdbOnly>
   </PropertyGroup>
+
+  <ItemGroup>
+    <WasmPackager_WebRoot_Files Include="setup.js;wwwroot/*;$(MSBuildProjectDirectory)/../../SharedTests/SharedSample/wwwroot/*">
+      <Name>%(Filename)%(Extension)</Name>
+      <Source>%(FullPath)</Source>
+    </WasmPackager_WebRoot_Files>
+    <Compile Include="$(MSBuildProjectDirectory)/../../SharedTests/SharedSample/*.cs" />
+  </ItemGroup>
 
 </Project>

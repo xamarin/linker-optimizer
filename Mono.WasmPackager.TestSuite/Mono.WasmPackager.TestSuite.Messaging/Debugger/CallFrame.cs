@@ -2,7 +2,7 @@ namespace Mono.WasmPackager.TestSuite.Messaging.Debugger
 {
 	using Runtime;
 
-	public class CallFrame
+	public class CallFrame : ProtocolObject
 	{
 		public string CallFrameId { get; set; }
 		public string FunctionName { get; set; }

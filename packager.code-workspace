@@ -1,6 +1,14 @@
 {
 	"folders": [
 		{
+			"name": "SharedTests",
+			"path": "Tests/TestSuite/SharedTests"
+		},
+		{
+			"name": "SharedTests/SharedSample",
+			"path": "Tests/TestSuite/SharedTests/SharedSample"
+		},
+		{
 			"name": "SimpleTest",
 			"path": "Tests/TestSuite/SimpleTest"
 		},

@@ -1,6 +1,6 @@
 using System;
 
-namespace WorkingTests.WebSample
+namespace SharedTests.SharedSample
 {
 	public class MyException : Exception
 	{

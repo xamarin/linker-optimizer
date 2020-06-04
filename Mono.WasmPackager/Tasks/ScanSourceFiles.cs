@@ -59,6 +59,7 @@ namespace Mono.WasmPackager
 
 			if (!Path.IsPathRooted (file))
 				file = Path.Combine (ProjectDirectory, file);
+			file = Path.GetFullPath (file);
 
 			var ok = true;
 			int lineNumber = 0;

@@ -9,9 +9,9 @@ using Xunit;
 using Mono.WasmPackager.TestSuite;
 using Mono.WasmPackager.DevServer;
 
-namespace SimpleTest
+namespace SharedTests
 {
-	public class TestBrowser : BrowserTestBase
+	public sealed class TestBrowser : BrowserTestBase
 	{
 		[Fact]
 		public void TestLaunch ()

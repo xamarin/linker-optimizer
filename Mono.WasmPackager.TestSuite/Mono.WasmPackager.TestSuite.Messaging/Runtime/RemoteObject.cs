@@ -1,6 +1,6 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Runtime
 {
-	public class RemoteObject
+	public class RemoteObject : ProtocolObject
 	{
 		public RemoveObjectType Type { get; set; }
 		public string Subtype { get; set; }

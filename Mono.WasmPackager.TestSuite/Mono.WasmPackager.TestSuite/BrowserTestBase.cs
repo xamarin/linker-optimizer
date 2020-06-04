@@ -45,6 +45,8 @@ namespace Mono.WasmPackager.TestSuite
 		AbstractConnection connection;
 		CancellationTokenSource cts;
 
+		volatile TaskCompletionSource<PausedNotification> currentCommand;
+
 		protected Page Page => page;
 
 		protected virtual bool Headless => true;
@@ -162,16 +164,30 @@ namespace Mono.WasmPackager.TestSuite
 
 		void NotifyOf (string what, JObject args)
 		{
-			if (!notifications.ContainsKey (what))
+			if (!notifications.ContainsKey (what)) {
+				Debug.WriteLine ($"Invalid internal state, notifying of {what}, but nobody waiting");
+				if (string.Equals (what, PAUSE) && NotifyOfPause (args.ToObject<PausedNotification> ()))
+					return;
 				throw new Exception ($"Invalid internal state, notifying of {what}, but nobody waiting");
+			}
 			notifications [what].SetResult (args);
 			notifications.Remove (what);
 		}
 
+		bool NotifyOfPause (PausedNotification notification)
+		{
+			var tcs = currentCommand;
+			if (tcs == null)
+				return false;
+
+			tcs.TrySetResult (notification);
+			return true;
+		}
+
 		public void On<T> (string evtName, Func<T, CancellationToken, Task> cb)
 		{
-			eventListeners[evtName] = (args, token) => {
-				var obj = args.ToObject<T> (true);
+			eventListeners [evtName] = (args, token) => {
+				var obj = args.ToObject<T> ();
 				return cb (obj, token);
 			};
 		}
@@ -204,9 +220,26 @@ namespace Mono.WasmPackager.TestSuite
 
 		public async Task<T> SendCommand<T> (string message, object args)
 		{
-			var jobj = JObject.FromObject (args, JsonHelper.DefaultJsonSerializer);
+			var jobj = JObject.FromObject (args);
 
-			var response = await client.SendCommand (message, jobj, cts.Token).ConfigureAwait (false);
+			var tcs = new TaskCompletionSource<PausedNotification> ();
+			if (Interlocked.CompareExchange (ref currentCommand, tcs, null) != null)
+				throw new InvalidOperationException ($"{nameof (SendCommand)} is already running!");
+
+			JObject response;
+			try {
+				var sendTask = client.SendCommand (message, jobj, cts.Token);
+				await Task.WhenAny (sendTask, tcs.Task).ConfigureAwait (false);
+
+				if (tcs.Task.Status == TaskStatus.RanToCompletion) {
+					Debug.WriteLine ($"GOT PAUSED NOTIFICATION: {tcs.Task.Result}");
+					throw new CommandErrorException ("Got pause notification during command", null);
+				}
+
+				response = sendTask.Result;
+			} finally {
+				currentCommand = null;
+			}
 
 			var result = response ["result"] as JObject;
 			var error = response ["error"] as JObject;
@@ -226,13 +259,13 @@ namespace Mono.WasmPackager.TestSuite
 			if (error != null)
 				throw new CommandErrorException (message, error);
 
-			return value.ToObject<T> (true);
+			return value.ToObject<T> ();
 		}
 
 		protected async Task<PausedNotification> WaitForPaused ()
 		{
 			var paused = await WaitFor (PAUSE).ConfigureAwait (false);
-			return paused.ToObject<PausedNotification> (true);
+			return paused.ToObject<PausedNotification> ();
 		}
 
 		protected Task WaitForResumed () => WaitFor (RESUME);

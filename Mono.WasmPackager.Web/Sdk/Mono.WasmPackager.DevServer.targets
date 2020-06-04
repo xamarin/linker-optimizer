@@ -4,12 +4,12 @@
   <UsingTask TaskName="Mono.WasmPackager.GenerateTestSettings" AssemblyFile="$(_WasmPackager_PackagerAssembly)" />
 
   <PropertyGroup>
+    <OutputType Condition="'$(_WasmPackager_IsBlazor)' != 'true'">Library</OutputType>
+    <WasmPackager_DevServer_RootDir Condition="'$(WasmPackager_DevServer_RootDir)' == ''">$([System.IO.Path]::GetFullPath('$(WasmPackager_AppDir)'))</WasmPackager_DevServer_RootDir>
+    <WasmPackager_DevServer_Arguments Condition="'$(WasmPackager_DevServer_Arguments)' == ''">--web-root $(WasmPackager_DevServer_RootDir)</WasmPackager_DevServer_Arguments>
     <RunCommand>dotnet</RunCommand>
     <RunArguments>$(MSBuildThisFileDirectory)../tools/Mono.WasmPackager.Web.dll $(WasmPackager_DevServer_Arguments)</RunArguments>
     <RunWorkingDirectory>$(WasmPackager_DevServer_RootDir)</RunWorkingDirectory>
-    <OutputType Condition="'$(_WasmPackager_IsBlazor)' != 'true'">Library</OutputType>
-    <WasmPackager_DevServer_RootDir>$([System.IO.Path]::GetFullPath('$(WasmPackager_AppDir)'))</WasmPackager_DevServer_RootDir>
-    <WasmPackager_DevServer_Arguments>--web-root $(WasmPackager_DevServer_RootDir)</WasmPackager_DevServer_Arguments>
   </PropertyGroup>
 
   <PropertyGroup>

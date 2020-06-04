@@ -7,10 +7,12 @@ my @WEB_DIRS = qw[Samples/SimpleWeb Samples/SimpleWeb2 Samples/WebBindings NetCo
 my @TEST_DIRS = qw[TestSuite/SimpleTest TestSuite/WorkingTests TestSuite/BlazorTests TestSuite/NetCoreTests];
 my @BLAZOR_DIRS = qw[Samples/SimpleBlazor];
 
-my @WEB_TEST_DIRS = qw[TestSuite/SimpleTest/WebSample TestSuite/WorkingTests/WebSample TestSuite/NetCoreTests/WebSample];
-my @BLAZOR_TEST_DIRS = qw[TestSuite/BlazorTests/BlazorSample];
+my @WEB_TEST_SAMPLE_DIRS = qw[TestSuite/SimpleTest/WebSample TestSuite/WorkingTests/WebSample TestSuite/NetCoreTests/WebSample];
+my @BLAZOR_TEST_SAMPLE_DIRS = qw[TestSuite/BlazorTests/BlazorSample];
 
 my @ALL_PROJECTS = ();
+my @ALL_TEST_PROJECTS = ();
+my @ALL_TEST_SAMPLE_PROJECTS = ();
 
 sub update($$$;$$)
 {
@@ -63,6 +65,8 @@ sub update($$$;$$)
 	}
 	close $FILE;
 	close $OUTPUT;
+
+	return $projectPath;
 }
 
 sub createBootstrap($$$)
@@ -91,15 +95,19 @@ sub createBootstrap($$$)
 	print $OUTPUT "// This file has been auto-generated from $template.\n";
 	print $OUTPUT "//\n";
 
+	my %buildLabels = ();
+
 	my $allProjects = "";
 	my $allDependencies = "";
 	for my $project (@ALL_PROJECTS) {
 		my $name = $project;
 		$name =~ s,^(?:TestSuite/)(.*?)\.csproj$,\1,;
 		$name =~ s,[/\.],_,g;
+		my $label = "z-build-$name";
+		$buildLabels{$project} = $label;
 		$allProjects .= qq[
         {
-            "label": "build-$name",
+            "label": "$label",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -113,8 +121,20 @@ sub createBootstrap($$$)
             "dependsOrder": "sequence"
         },
 		];
-		$allDependencies .= "                \"build-$name\",\n";
+		$allDependencies .= "                \"$label\",\n";
 	}
+
+	my $buildTestsDependsOn = "";
+	my $buildTestSamplesDependsOn = "";
+	for my $project (@ALL_TEST_SAMPLE_PROJECTS) {
+		$buildTestSamplesDependsOn .= "                \"$buildLabels{$project}\",\n";
+	}
+	for my $project (@ALL_TEST_PROJECTS) {
+		$buildTestsDependsOn .= "                \"$buildLabels{$project}\",\n";
+	}
+	$allDependencies =~ s/,\n$//s;
+	$buildTestSamplesDependsOn =~ s/,\s*$//s;
+	$buildTestsDependsOn =~ s/,\s*$//s;
 
 	open (my $FILE, $template) or die "Could not open template file '$template' $!";
 	while (my $row = <$FILE>) {
@@ -122,28 +142,35 @@ sub createBootstrap($$$)
 		$row =~ s/\@PACKAGES_DIR\@/$packagesDir/g;
 		$row =~ s/\@ALL_PROJECTS\@/$allProjects/g;
 		$row =~ s/\@ALL_DEPENDENCIES\@/$allDependencies/g;
+		$row =~ s/\@BUILD_TESTS_DEPENDS_ON\@/$buildTestsDependsOn/g;
+		$row =~ s/\@BUILD_TEST_SAMPLES_DEPENDS_ON\@/$buildTestSamplesDependsOn/g;
+
 		print $OUTPUT $row;
 	}
 	close $FILE;
 	close $OUTPUT;
 }
 
-for my $dir (@WEB_TEST_DIRS)
+for my $dir (@WEB_TEST_SAMPLE_DIRS)
 {
-	update($dir, "tasks-web.json", "tasks.json", 1, 1);
+	my $project = update($dir, "tasks-web.json", "tasks.json", 1, 1);
 	update($dir, "launch-web.json", "launch.json", 1);
+	push (@ALL_TEST_SAMPLE_PROJECTS, $project);
+
 }
 
-for my $dir (@BLAZOR_TEST_DIRS)
+for my $dir (@BLAZOR_TEST_SAMPLE_DIRS)
 {
-	update($dir, "tasks-web.json", "tasks.json", 1, 1);
+	my $project = update($dir, "tasks-web.json", "tasks.json", 1, 1);
 	update($dir, "launch-blazor.json", "launch.json", 1);
+	push (@ALL_TEST_SAMPLE_PROJECTS, $project);
 }
 
 for my $dir (@TEST_DIRS)
 {
-	update($dir, "tasks-test.json", "tasks.json", 1, 1);
+	my $project = update($dir, "tasks-test.json", "tasks.json", 1, 1);
 	update($dir, "launch-test.json", "launch.json");
+	push (@ALL_TEST_PROJECTS, $project);
 }
 
 for my $dir (@CONSOLE_DIRS)

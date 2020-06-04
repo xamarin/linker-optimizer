@@ -1,6 +1,6 @@
 using System;
 
-namespace WorkingTests.WebSample
+namespace SharedTests.SharedSample
 {
 	public static class Variables
 	{
@@ -20,5 +20,9 @@ namespace WorkingTests.WebSample
 			Console.WriteLine (test);
 			Console.WriteLine (exc);
 		} // @@END-SCOPE
+
+		public static string GetVersion () => Environment.Version.ToString ();
+
+		public static string GetOSVersion () => Environment.OSVersion.ToString ();
 	}
 }

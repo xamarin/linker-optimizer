@@ -1,6 +1,6 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Runtime
 {
-	public class PropertyDescriptor
+	public class PropertyDescriptor : ProtocolObject
 	{
 		public string Name { get; set; }
 		public bool Configurable { get; set; }

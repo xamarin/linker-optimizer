@@ -15,7 +15,7 @@ using Mono.WasmPackager.DevServer;
 
 using SharedTests;
 
-namespace SimpleTest
+namespace NetCoreTests
 {
 	public class TestVariables : PuppeteerTestBase
 	{

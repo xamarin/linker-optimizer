@@ -2,6 +2,31 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "package",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-optimizer",
+                "package-packager",
+                "package-web",
+                "package-blazor",
+                "package-test"
+            ]
+        },
+        {
+            "label": "build-test-samples",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+@BUILD_TEST_SAMPLES_DEPENDS_ON@
+            ]
+        },
+        {
+            "label": "build-tests",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+@BUILD_TESTS_DEPENDS_ON@
+            ]
+        },
+        {
             "label": "package-optimizer",
             "command": "dotnet",
             "type": "process",
@@ -25,11 +50,7 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "package-optimizer"
-            ]
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "package-web",
@@ -42,10 +63,7 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
-            "problemMatcher": "$msCompile",
-            "dependsOn": [
-                "package-packager"
-            ]
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "package-blazor",
@@ -58,10 +76,7 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
-            "problemMatcher": "$msCompile",
-            "dependsOn": [
-                "package-web"
-            ]
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "package-test",
@@ -74,22 +89,16 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "package-web"
-            ]
+            "problemMatcher": "$msCompile"
         },
 @ALL_PROJECTS@
         {
             "label": "build",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "package-optimizer",
-                "package-packager",
-                "package-blazor",
-                "package-test",
-@ALL_DEPENDENCIES@
+                "package",
+                "build-test-samples",
+                "build-tests"
             ],
             "group": {
                 "kind": "build",

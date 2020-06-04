@@ -9,9 +9,9 @@ using Xunit;
 using Mono.WasmPackager.TestSuite;
 using Mono.WasmPackager.DevServer;
 
-namespace WorkingTests
+namespace SharedTests
 {
-	public class TestPuppeteer : DebuggerTestBase
+	public sealed class TestPuppeteer : DebuggerTestBase
 	{
 		[Fact]
 		public async Task TestBrowser ()

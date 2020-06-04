@@ -6,6 +6,37 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "package",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "package-optimizer",
+                "package-packager",
+                "package-web",
+                "package-blazor",
+                "package-test"
+            ]
+        },
+        {
+            "label": "build-test-samples",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "z-build-SimpleTest_WebSample_SimpleTest_WebSample",
+                "z-build-WorkingTests_WebSample_WorkingTests_WebSample",
+                "z-build-NetCoreTests_WebSample_NetCoreTests_WebSample",
+                "z-build-BlazorTests_BlazorSample_BlazorTests_BlazorSample"
+            ]
+        },
+        {
+            "label": "build-tests",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "z-build-SimpleTest_SimpleTest_Test",
+                "z-build-WorkingTests_WorkingTests_Test",
+                "z-build-BlazorTests_BlazorTests_Test",
+                "z-build-NetCoreTests_NetCoreTests_Test"
+            ]
+        },
+        {
             "label": "package-optimizer",
             "command": "dotnet",
             "type": "process",
@@ -29,11 +60,7 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "package-optimizer"
-            ]
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "package-web",
@@ -46,10 +73,7 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
-            "problemMatcher": "$msCompile",
-            "dependsOn": [
-                "package-packager"
-            ]
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "package-blazor",
@@ -62,10 +86,7 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
-            "problemMatcher": "$msCompile",
-            "dependsOn": [
-                "package-web"
-            ]
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "package-test",
@@ -78,15 +99,11 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:Summary"
             ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "package-web"
-            ]
+            "problemMatcher": "$msCompile"
         },
 
         {
-            "label": "build-SimpleTest_WebSample_SimpleTest_WebSample",
+            "label": "z-build-SimpleTest_WebSample_SimpleTest_WebSample",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -101,7 +118,7 @@
         },
 		
         {
-            "label": "build-WorkingTests_WebSample_WorkingTests_WebSample",
+            "label": "z-build-WorkingTests_WebSample_WorkingTests_WebSample",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -116,7 +133,7 @@
         },
 		
         {
-            "label": "build-NetCoreTests_WebSample_NetCoreTests_WebSample",
+            "label": "z-build-NetCoreTests_WebSample_NetCoreTests_WebSample",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -131,7 +148,7 @@
         },
 		
         {
-            "label": "build-BlazorTests_BlazorSample_BlazorTests_BlazorSample",
+            "label": "z-build-BlazorTests_BlazorSample_BlazorTests_BlazorSample",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -146,7 +163,7 @@
         },
 		
         {
-            "label": "build-SimpleTest_SimpleTest_Test",
+            "label": "z-build-SimpleTest_SimpleTest_Test",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -161,7 +178,7 @@
         },
 		
         {
-            "label": "build-WorkingTests_WorkingTests_Test",
+            "label": "z-build-WorkingTests_WorkingTests_Test",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -176,7 +193,7 @@
         },
 		
         {
-            "label": "build-BlazorTests_BlazorTests_Test",
+            "label": "z-build-BlazorTests_BlazorTests_Test",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -191,7 +208,7 @@
         },
 		
         {
-            "label": "build-NetCoreTests_NetCoreTests_Test",
+            "label": "z-build-NetCoreTests_NetCoreTests_Test",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -209,19 +226,9 @@
             "label": "build",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "package-optimizer",
-                "package-packager",
-                "package-blazor",
-                "package-test",
-                "build-SimpleTest_WebSample_SimpleTest_WebSample",
-                "build-WorkingTests_WebSample_WorkingTests_WebSample",
-                "build-NetCoreTests_WebSample_NetCoreTests_WebSample",
-                "build-BlazorTests_BlazorSample_BlazorTests_BlazorSample",
-                "build-SimpleTest_SimpleTest_Test",
-                "build-WorkingTests_WorkingTests_Test",
-                "build-BlazorTests_BlazorTests_Test",
-                "build-NetCoreTests_NetCoreTests_Test",
-
+                "package",
+                "build-test-samples",
+                "build-tests"
             ],
             "group": {
                 "kind": "build",
