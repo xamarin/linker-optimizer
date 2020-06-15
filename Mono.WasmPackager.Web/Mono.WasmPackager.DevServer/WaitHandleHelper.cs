@@ -32,10 +32,10 @@ namespace Mono.WasmPackager.DevServer
 					null,
 					timeout,
 					true);
-				tokenRegistration = token.Register (_ => tcs.TrySetResult (default (T)), null);
+				tokenRegistration = token.Register (_ => tcs.TrySetResult (default), null);
 				return await tcs.Task;
 			} catch (TaskCanceledException) {
-				return default (T);
+				return default;
 			} finally {
 				if (registeredHandle != null)
 					registeredHandle.Unregister (null);

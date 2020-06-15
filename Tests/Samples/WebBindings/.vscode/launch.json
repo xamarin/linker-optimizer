@@ -9,7 +9,7 @@
             "name": "WebBindings",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/../.packages/mono.wasmpackager.web/1.0.0/tools/Mono.WasmPackager.Web.dll",
+            "program": "${workspaceFolder}/../../.packages/mono.wasmpackager.web/1.0.0/tools/Mono.WasmPackager.Web.dll",
             "args": [
                 "--debug",
                 "--web-root",

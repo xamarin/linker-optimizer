@@ -9,7 +9,7 @@
             "name": "NetCoreTests.WebSample",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/../../.test-packages/mono.wasmpackager.web/1.0.0/tools/Mono.WasmPackager.Web.dll",
+            "program": "${workspaceFolder}/../../../.test-packages/mono.wasmpackager.web/1.0.0/tools/Mono.WasmPackager.Web.dll",
             "args": [
                 "--debug",
                 "--web-root",

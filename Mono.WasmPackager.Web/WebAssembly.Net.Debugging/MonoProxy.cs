@@ -193,7 +193,7 @@ namespace WebAssembly.Net.Debugging {
 				}
 
 			case "Debugger.resume": {
-					await OnResume (id, token);
+					await OnResume (id, method, args, context, token);
 					break;
 				}
 
@@ -701,11 +701,11 @@ namespace WebAssembly.Net.Debugging {
 				await RuntimeReady (sessionId, token);
 		}
 
-		async Task OnResume (MessageId msd_id, CancellationToken token)
+		Task OnResume (MessageId id, string method, JObject args, ExecutionContext context, CancellationToken token)
 		{
 			//discard managed frames
-			GetContext (msd_id).ClearState ();
-			await Task.CompletedTask;
+			GetContext (id).ClearState ();
+			return Task.CompletedTask;
 		}
 
 		async Task<bool> Step (MessageId msg_id, StepKind kind, CancellationToken token)

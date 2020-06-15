@@ -56,14 +56,14 @@ namespace SimpleTest
 		async Task GetProperties (CallFrame frame)
 		{
 			var request = new GetPropertiesRequest { ObjectId = frame.CallFrameId };
-			var response = await SendCommand<GetPropertiesResponse> ("Runtime.getProperties", request);
+			var response = await SendCommand (request);
 			Debug.WriteLine ($"RESPONSE: {response}");
 		}
 
 		async Task<RemoteObject> EvaluateOnCallFrame (CallFrame frame, string expression)
 		{
 			var request = new EvaluateOnCallFrameRequest { CallFrameId = frame.CallFrameId, Expression = expression };
-			var response = await SendCommand<EvaluateOnCallFrameResponse> ("Debugger.evaluateOnCallFrame", request);
+			var response = await SendCommand (request).ConfigureAwait (false);
 			Debug.WriteLine ($"RESPONSE: {response}");
 			return response.Result;
 		}

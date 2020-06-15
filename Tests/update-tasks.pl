@@ -42,7 +42,7 @@ sub update($$$;$$)
 	my $packagesFolder = $testsample ? ".test-packages" : ".packages";
 
 	my $root = "\${workspaceFolder}" . "/.." x $up;
-	my $packagesDir = "\${workspaceFolder}" . "/.." x ($up - 2) . "/${packagesFolder}";
+	my $packagesDir = "\${workspaceFolder}" . "/.." x ($up - 1) . "/${packagesFolder}";
 	print "ROOT: |$root|$packagesDir|\n";
 
 	my $vscodeDir = "$dir/.vscode";

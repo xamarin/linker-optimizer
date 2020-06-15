@@ -21,7 +21,7 @@ namespace BlazorTests
 		{
 			await StartBlazorApp ().ConfigureAwait (false);
 
-			var bodySelector = await Page.QuerySelectorAsync (TestConstants.BodySelector);
+			var bodySelector = await QuerySelectorAsync (TestConstants.BodySelector);
 			Assert.NotNull (bodySelector);
 
 			await AssertSelectorVisible (TestConstants.BodySelector);
@@ -42,7 +42,7 @@ namespace BlazorTests
 		{
 			await StartBlazorApp ().ConfigureAwait (false);
 
-			var bodySelector = await Page.QuerySelectorAsync (TestConstants.BodySelector);
+			var bodySelector = await QuerySelectorAsync (TestConstants.BodySelector);
 			Assert.NotNull (bodySelector);
 
 			await AssertSelectorVisible (TestConstants.BodySelector);

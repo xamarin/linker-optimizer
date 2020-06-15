@@ -1,13 +1,11 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 using Newtonsoft.Json.Linq;
 using WebAssembly.Net.Debugging;
 
@@ -16,7 +14,7 @@ namespace Mono.WasmPackager.DevServer
 	public abstract class WebSocketConnection : AbstractConnection
 	{
 		WebSocket socket;
-		AsyncQueue<Command> sendQueue;
+		readonly AsyncQueue<Command> sendQueue;
 		protected List<(int, Command)> pendingCmds = new List<(int, Command)> ();
 		protected int next_cmd_id;
 
@@ -116,14 +114,16 @@ namespace Mono.WasmPackager.DevServer
 			return result;
 		}
 
+		[Conditional ("CONNECTION_DEBUG")]
 		void Log (string msg)
 		{
-			// Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
+			Debug.WriteLine ($"[{GetType ().Name}]: {msg}");
 		}
 
+		[Conditional ("CONNECTION_DEBUG")]
 		protected internal void LogProtocol (string method, string msg, object args = null)
 		{
-			// LoggingHelper.LogProtocol (this, method, msg, args);
+			LoggingHelper.LogProtocol (this, method, msg, args);
 		}
 
 		public override async Task Close (bool wait, CancellationToken cancellationToken)

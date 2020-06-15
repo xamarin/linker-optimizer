@@ -1,16 +1,9 @@
 using System;
-using System.IO;
-using System.Text;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Net.WebSockets;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
-using WebAssembly.Net.Debugging;
 
 namespace Mono.WasmPackager.DevServer
 {
@@ -22,7 +15,7 @@ namespace Mono.WasmPackager.DevServer
 			this.manager = manager;
 		}
 
-		WebSocketManager manager;
+		readonly WebSocketManager manager;
 
 		protected override Task<WebSocket> CreateSocket (CancellationToken token)
 		{

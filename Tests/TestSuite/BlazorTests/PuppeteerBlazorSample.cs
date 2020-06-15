@@ -38,7 +38,7 @@ namespace BlazorTests
 		{
 			Debug.WriteLine ("Starting Blazor App");
 
-			var titleSelector = await Page.QuerySelectorAsync (TestConstants.TitleSelector);
+			var titleSelector = await QuerySelectorAsync (TestConstants.TitleSelector);
 			Assert.NotNull (titleSelector);
 
 			var titleText = await titleSelector.GetInnerHtml ();
@@ -48,16 +48,16 @@ namespace BlazorTests
 			await AssertInnerHtml (TestConstants.NavBarTitleSelector, TestConstants.NavBarTitleText);
 			await AssertInnerHtml (TestConstants.NothingHereSelector, TestConstants.NothingHereText);
 
-			HomeSelector = await Page.QuerySelectorAsync (TestConstants.HomeButton);
+			HomeSelector = await QuerySelectorAsync (TestConstants.HomeButton);
 			Assert.NotNull (HomeSelector);
 
-			CounterSelector = await Page.QuerySelectorAsync (TestConstants.CounterButton);
+			CounterSelector = await QuerySelectorAsync (TestConstants.CounterButton);
 			Assert.NotNull (CounterSelector);
 
-			ControlsSelector = await Page.QuerySelectorAsync (TestConstants.ControlsButton);
+			ControlsSelector = await QuerySelectorAsync (TestConstants.ControlsButton);
 			Assert.NotNull (ControlsSelector);
 
-			FetchSelector = await Page.QuerySelectorAsync (TestConstants.FetchButton);
+			FetchSelector = await QuerySelectorAsync (TestConstants.FetchButton);
 		}
 
 		protected Task AssertSelectorVisible (string selector, string text = null) => AssertSelectorVisible (selector, true, text);
@@ -66,7 +66,7 @@ namespace BlazorTests
 
 		async Task AssertSelectorVisible (string selector, bool visible, string text = null)
 		{
-			var handle = await Page.QuerySelectorAsync (selector);
+			var handle = await QuerySelectorAsync (selector);
 			if (visible)
 				Assert.NotNull (handle);
 			else {

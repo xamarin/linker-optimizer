@@ -1,29 +1,21 @@
 using System;
-using System.IO;
-using System.Text;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Net.WebSockets;
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using WebAssembly.Net.Debugging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using P = PuppeteerSharp;
 
-namespace Mono.WasmPackager.DevServer
-{
-	public class NewDevToolsProxy : IDisposable
-	{
-		MonoProxy proxy;
-		AbstractConnection ideConnection;
-		AbstractConnection browserConnection;
-		AsyncQueue<ConnectionEventArgs> eventQueue;
-		TaskCompletionSource<bool> exitTcs;
-		ILoggerFactory loggerFactory;
-		ILogger logger;
+namespace Mono.WasmPackager.DevServer {
+	public class NewDevToolsProxy : IDisposable {
+		readonly MonoProxy proxy;
+		readonly AbstractConnection ideConnection;
+		readonly AbstractConnection browserConnection;
+		readonly AsyncQueue<ConnectionEventArgs> eventQueue;
+		readonly AsyncQueue<ConnectionEventArgs> ideQueue;
+		readonly TaskCompletionSource<bool> exitTcs;
+		readonly ILoggerFactory loggerFactory;
 		int disposed;
 
 		NewDevToolsProxy (AbstractConnection browserConnection, AbstractConnection ideConnection)
@@ -32,9 +24,10 @@ namespace Mono.WasmPackager.DevServer
 			this.ideConnection = ideConnection;
 
 			loggerFactory = new LoggerFactory ();
-			logger = loggerFactory.CreateLogger<NewDevToolsProxy> ();
 			exitTcs = new TaskCompletionSource<bool> ();
-			proxy = new MonoProxy (browserConnection, ideConnection, this, loggerFactory);
+			proxy = new MonoProxy (this, loggerFactory);
+			eventQueue = new AsyncQueue<ConnectionEventArgs> (false, "proxy-events");
+			ideQueue = new AsyncQueue<ConnectionEventArgs> (true, "proxy-commands");
 		}
 
 		public static NewDevToolsProxy Create (TestSession session, WebSocketManager manager)
@@ -51,7 +44,7 @@ namespace Mono.WasmPackager.DevServer
 			return new NewDevToolsProxy (browserConnection, ideConnection);
 		}
 
-		internal async Task<Result> SendCommand (SessionId id, string method, JObject args, CancellationToken token)
+		internal async Task<Result> SendCommand (SessionId id, string method, JObject args, CancellationToken _)
 		{
 			LogProtocol (method, "sending command", args);
 			if (id.sessionId != null && id.sessionId != browserConnection.SessionId)
@@ -67,13 +60,34 @@ namespace Mono.WasmPackager.DevServer
 			}
 		}
 
-		internal async Task SendEvent (SessionId sessionId, string method, JObject args, CancellationToken token)
+		async Task ProxyCommand (MessageId id, ConnectionEventArgs args)
+		{
+			LogProtocol (args.Message, "proxy command", args.Arguments);
+			if (id.sessionId != null && id.sessionId != browserConnection.SessionId)
+				throw new InvalidOperationException ();
+
+			JObject result;
+			try {
+				result = await browserConnection.SendAsync (id, args.Message, args.Arguments).ConfigureAwait (false);
+				LogProtocol (args.Message, "sending to browser - proxy response", result);
+			} catch (Exception e) {
+				LogProtocol (args.Message, "sending to browser - error", e.Message);
+				result = Result.Exception (e).ToJObject (id);
+			}
+
+			result["id"] = id.id;
+			result["sessionId"] = id.sessionId;
+
+			await ideConnection.SendAsync (id, null, result, false).ConfigureAwait (false);
+		}
+
+		internal async Task SendEvent (SessionId sessionId, string method, JObject args, CancellationToken _)
 		{
 			LogProtocol (method, "sending to ide", args);
 			await ideConnection.SendAsync (sessionId, method, args, false).ConfigureAwait (false);
 		}
 
-		internal async Task SendResponse (MessageId id, Result result, CancellationToken token)
+		internal async Task SendResponse (MessageId id, Result result, CancellationToken _)
 		{
 			Log ("verbose", $"sending response to ide: {id}: {result.ToJObject (id)}");
 			await ideConnection.SendAsync (id, null, result.ToJObject (id), false).ConfigureAwait (false);
@@ -92,10 +106,8 @@ namespace Mono.WasmPackager.DevServer
 
 			var x = new CancellationTokenSource ();
 
-			eventQueue = new AsyncQueue<ConnectionEventArgs> (false, "proxy-events");
 			eventQueue.Start ((args, token) => AsyncEventHandler ("browser", args, token));
 
-			var ideQueue = new AsyncQueue<ConnectionEventArgs> (true, "proxy-commands");
 			ideQueue.Start ((args, token) => AsyncEventHandler ("ide", args, token));
 
 			await browserConnection.Start (async (args, token) => {
@@ -118,11 +130,25 @@ namespace Mono.WasmPackager.DevServer
 				}
 				LogProtocol (args.Message, "BROWSER MESSAGE", args.Arguments);
 				var sessionId = new SessionId (args.SessionId);
-				proxy.AcceptEvent (sessionId, args);
-				if (args.Handler != null)
+				var command = proxy.AcceptEvent (sessionId, args);
+
+				async ValueTask Continuation (CommandResult result)
+				{
+					if (result.ProxyCommand)
+						await SendEvent (sessionId, args.Message, args.Arguments, token).ConfigureAwait (false);
+					else if (result.HasResult)
+						throw new InvalidOperationException ();
+				}
+
+				if (command.Handler != null) {
+					args.Handler = async token => {
+						var result = await command.Handler (token).ConfigureAwait (false);
+						await Continuation (result);
+					};
 					eventQueue.Enqueue (args);
-				else if (!args.SkipEvent)
-					await SendEvent (sessionId, args.Message, args.Arguments, token).ConfigureAwait (false);
+				} else {
+					await Continuation (command.Result);
+				}
 			}, x.Token);
 
 			await ideConnection.Start (async (args, token) => {
@@ -133,12 +159,25 @@ namespace Mono.WasmPackager.DevServer
 				}
 				LogProtocol (args.Message, "IDE MESSAGE", args.Arguments);
 				var id = new MessageId (args.SessionId, args.Id);
-				proxy.AcceptCommand (id, args);
-				if (args.Handler != null)
+				var command = proxy.AcceptCommand (id, args);
+
+				async ValueTask Continuation (CommandResult result)
+				{
+					if (result.ProxyCommand) {
+						await ProxyCommand (id, args).ConfigureAwait (false);
+					} else if (result.HasResult) {
+						await SendResponse (id, result.Result, token).ConfigureAwait (false);
+					}
+				}
+
+				if (command.Handler != null) {
+					args.Handler = async token => {
+						var result = await command.Handler (token).ConfigureAwait (false);
+						await Continuation (result);
+					};
 					ideQueue.Enqueue (args);
-				else if (!args.SkipEvent) {
-					var res = await SendCommand (id, args.Message, args.Arguments, token);
-					await SendResponse (id, res, token);
+				} else {
+					await Continuation (command.Result).ConfigureAwait (false);
 				}
 			}, x.Token);
 		}

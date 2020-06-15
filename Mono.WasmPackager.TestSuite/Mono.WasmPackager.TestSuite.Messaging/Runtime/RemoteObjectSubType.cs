@@ -1,0 +1,29 @@
+namespace Mono.WasmPackager.TestSuite.Messaging.Runtime
+{
+	public enum RemoteObjectSubType
+	{
+		Array,
+		Null,
+		Node,
+		Regex,
+		Date,
+		Map,
+		Set,
+		WeakMap,
+		WeakSet,
+		Iterator,
+		Generator,
+		Error,
+		Proxy,
+		Promise,
+		TypedArray,
+		ArrayBuffer,
+		DataView,
+		I32,
+		I64,
+		F32,
+		F64,
+		V128,
+		ExternRef
+	}
+}

@@ -32,8 +32,29 @@ namespace Mono.WasmPackager
 
 			var ok = true;
 
-			foreach (var file in SourceFiles)
-				ok &= ScanFile (file.ItemSpec);
+			foreach (var file in SourceFiles) {
+				bool native = false;
+				var isNative = file.GetMetadata ("IsNative");
+				if (!string.IsNullOrEmpty (isNative))
+					native = bool.Parse (isNative);
+
+				string path = file.ItemSpec, source = null, name;
+
+				if (!Path.IsPathRooted (path))
+					path = Path.Combine (ProjectDirectory, path);
+				path = Path.GetFullPath (path);
+
+				if (native) {
+					source = file.GetMetadata ("Source");
+					name = file.GetMetadata ("Name");
+				} else {
+					name = path;
+				}
+
+				var info = new FileInfo (path, native, source, name);
+
+				ok &= ScanFile (info);
+			}
 
 			if (!ok)
 				return false;
@@ -53,17 +74,13 @@ namespace Mono.WasmPackager
 		List<Annotation> annotations = new List<Annotation> ();
 		Dictionary<string, Annotation> annotationByName = new Dictionary<string, Annotation> ();
 
-		bool ScanFile (string file)
+		bool ScanFile (FileInfo file)
 		{
-			Log.LogMessage (MessageImportance.Normal, $"  scanning source file: {file}");
-
-			if (!Path.IsPathRooted (file))
-				file = Path.Combine (ProjectDirectory, file);
-			file = Path.GetFullPath (file);
+			Log.LogMessage (MessageImportance.Normal, $"  scanning source file: {file.FileName}");
 
 			var ok = true;
 			int lineNumber = 0;
-			using (var stream = new StreamReader (file)) {
+			using (var stream = new StreamReader (file.FileName)) {
 				string text;
 				while ((text = stream.ReadLine ()) != null) {
 					++lineNumber;
@@ -94,9 +111,9 @@ namespace Mono.WasmPackager
 			return ok;
 		}
 
-		bool ProcessAnnotation (string file, int line, int? column, string name, string value)
+		bool ProcessAnnotation (FileInfo file, int line, int? column, string name, string value)
 		{
-			Log.LogMessage (MessageImportance.Low, $"  annotation: {file} {line} {column} - {name} {value}");
+			Log.LogMessage (MessageImportance.Low, $"  annotation: {file.FileName} {line} {column} - {name} {value}");
 
 			bool ExpectArgument ()
 			{
@@ -247,7 +264,7 @@ namespace Mono.WasmPackager
 				get;
 			}
 
-			public string File {
+			public FileInfo File {
 				get;
 			}
 
@@ -275,7 +292,7 @@ namespace Mono.WasmPackager
 				get; set;
 			}
 
-			public Annotation (AnnotationType type, string file, int line, int? column, string value)
+			public Annotation (AnnotationType type, FileInfo file, int line, int? column, string value)
 			{
 				Type = type;
 				File = file;
@@ -287,7 +304,10 @@ namespace Mono.WasmPackager
 			public string CreateOutputLine ()
 			{
 				var args = new List<string> ();
-				args.Add ($"\"{File}\"");
+				args.Add ($"\"{File.FileName}\"");
+				args.Add ($"\"{File.Name}\"");
+				args.Add (File.Source != null ? $"\"{File.Source}\"" : "null");
+				args.Add (File.IsNative ? "true" : "false");
 				var function = !string.IsNullOrEmpty (Function) ? Function : Value;
 				args.Add ($"\"{function}\"");
 				args.Add (Line.ToString ());
@@ -304,6 +324,33 @@ namespace Mono.WasmPackager
 			}
 
 			public override string ToString () => $"[{Type} {File}:{Line}:{Column ?? 0}{(!string.IsNullOrEmpty (Value) ? " " : "")}{Value}]";
+		}
+	}
+
+	public class FileInfo
+	{
+		public string FileName {
+			get;
+		}
+
+		public bool IsNative {
+			get;
+		}
+
+		public string Source {
+			get;
+		}
+
+		public string Name {
+			get;
+		}
+
+		public FileInfo (string file, bool isNative, string source, string name)
+		{
+			FileName = file;
+			IsNative = isNative;
+			Source = source;
+			Name = name;
 		}
 	}
 }

@@ -10,6 +10,7 @@ using Xunit;
 
 using Mono.WasmPackager.TestSuite;
 using Mono.WasmPackager.TestSuite.Messaging.Debugger;
+using Mono.WasmPackager.TestSuite.Messaging.Runtime;
 using Mono.WasmPackager.DevServer;
 
 namespace SharedTests
@@ -52,8 +53,8 @@ namespace SharedTests
 			var exceptionData = notification.Data.ToObject<PausedExceptionData> ();
 			Assert.NotNull (exceptionData);
 
-			Assert.Equal ("object", exceptionData.Type);
-			Assert.Equal ("error", exceptionData.Subtype);
+			Assert.Equal (RemoteObjectType.Object, exceptionData.Type);
+			Assert.Equal (RemoteObjectSubType.Error, exceptionData.SubType);
 			Assert.Equal (TestConstants.MyExceptionClassName, exceptionData.ClassName);
 			// The message needs to end with a newline or it won't be displayed.
 			Assert.Equal (TestConstants.MyExceptionMessage + "\n", exceptionData.Description);
@@ -66,7 +67,7 @@ namespace SharedTests
 		protected async Task SetPauseOnExceptions (PauseOnExceptionMode mode)
 		{
 			var request = new SetPauseOnExceptionsRequest { State = mode };
-			await SendCommand<SetPauseOnExceptionsResponse> ("Debugger.setPauseOnExceptions", request);
+			await SendCommand (request).ConfigureAwait (false);
 		}
 	}
 }

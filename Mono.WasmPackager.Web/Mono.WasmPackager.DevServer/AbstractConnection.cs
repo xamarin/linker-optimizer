@@ -1,13 +1,6 @@
 using System;
-using System.IO;
-using System.Text;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Net.WebSockets;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
 using Newtonsoft.Json.Linq;
 using WebAssembly.Net.Debugging;
 

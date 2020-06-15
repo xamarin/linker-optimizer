@@ -1,32 +1,18 @@
 using System;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Net.WebSockets;
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
-using WebAssembly.Net.Debugging;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Mono.WasmPackager.DevServer;
-using P = PuppeteerSharp;
 
 namespace WebAssembly.Net.Debugging {
 	partial class MonoProxy : IMonoProxy {
-		NewDevToolsProxy proxy;
-		AbstractConnection ideConnection;
-		AbstractConnection browserConnection;
+		readonly NewDevToolsProxy proxy;
 
-		ILogger logger;
+		readonly ILogger logger;
 
-		internal MonoProxy (AbstractConnection browserConnection, AbstractConnection ideConnection, NewDevToolsProxy proxy, ILoggerFactory loggerFactory)
+		internal MonoProxy (NewDevToolsProxy proxy, ILoggerFactory loggerFactory)
 		{
-			this.browserConnection = browserConnection;
-			this.ideConnection = ideConnection;
 			this.proxy = proxy;
 
 			logger = loggerFactory.CreateLogger<MonoProxy> ();
@@ -53,29 +39,23 @@ namespace WebAssembly.Net.Debugging {
 			return proxy.SendResponse (id, result, token);
 		}
 
-		internal void AcceptEvent (SessionId sessionId, ConnectionEventArgs eventArgs)
+		internal ProxyCommand AcceptEvent (SessionId sessionId, ConnectionEventArgs eventArgs)
 		{
-			var result = AcceptEvent (sessionId, eventArgs.Message, eventArgs.Arguments);
-			eventArgs.Handler = result.Handler;
-			eventArgs.SkipEvent = result.IgnoreCommand;
-			if (result.HasResult)
-				throw new InvalidOperationException ();
-		}
+			var message = eventArgs.Message;
+			var args = eventArgs.Arguments;
 
-		CommandResult AcceptEvent (SessionId sessionId, string message, JObject args)
-		{
 			switch (message) {
 			case "Runtime.consoleAPICalled": {
 					var type = args["type"]?.ToString ();
 					if (type == "debug") {
 						if (args["args"]?[0]?["value"]?.ToString () == MonoConstants.RUNTIME_IS_READY && args["args"]?[1]?["value"]?.ToString () == "fe00e07a-5519-4dfe-b35a-f867dbaf2e28")
-							return CommandResult.Async (token => RuntimeReady (sessionId, token));
+							return ProxyCommand.AsyncProxy (token => RuntimeReady (sessionId, token));
 					}
 					break;
 				}
 
 			case "Runtime.executionContextCreated": {
-					return CommandResult.Async (token => OnExecutionContextCreated (sessionId, message, args, token));
+					return ProxyCommand.AsyncProxy (token => OnExecutionContextCreated (sessionId, message, args, token));
 				}
 
 			case "Debugger.paused": {
@@ -83,7 +63,7 @@ namespace WebAssembly.Net.Debugging {
 					var top_func = args? ["callFrames"]? [0]? ["functionName"]?.Value<string> ();
 
 					if (IsFireBreakpointFunction (top_func)) {
-						return CommandResult.Async (token => OnBreakpointHit (sessionId, args, token));
+						return ProxyCommand.AsyncBool (token => OnBreakpointHit (sessionId, args, token));
 					}
 					break;
 				}
@@ -99,7 +79,7 @@ namespace WebAssembly.Net.Debugging {
 					case var _ when url == "":
 					case var _ when url.StartsWith ("wasm://", StringComparison.Ordinal): {
 							Log ("verbose", $"ignoring wasm: Debugger.scriptParsed {url}");
-							return CommandResult.Complete;
+							return ProxyCommand.Complete;
 						}
 					}
 					Log ("verbose", $"proxying Debugger.scriptParsed ({sessionId.sessionId}) {url} {args}");
@@ -107,58 +87,21 @@ namespace WebAssembly.Net.Debugging {
 				}
 			}
 
-			return CommandResult.Proxy;
+			return ProxyCommand.Proxy;
 		}
 
-		internal void AcceptCommand (MessageId id, ConnectionEventArgs eventArgs)
+		ProxyCommand Async (MessageId id, string method, JObject args, ExecutionContext context, Func<MessageId, string, JObject, ExecutionContext, CancellationToken, Task<Result>> func)
 		{
-			var result = AcceptCommand (id, eventArgs.Message, eventArgs.Arguments);
-			eventArgs.Handler = result.Handler;
-			eventArgs.SkipEvent = result.IgnoreCommand;
-			if (result.HasResult)
-				eventArgs.Handler = token => SendResponse (id, result.Result, token);
+			return ProxyCommand.Async (token => func (id, method, args, context, token));
 		}
 
-		CommandResult Async (MessageId id, string method, JObject args, ExecutionContext context, Func<MessageId, string, JObject, ExecutionContext, CancellationToken, Task<Result>> func)
-		{
-			return CommandResult.Async (async token => {
-				var result = await func (id, method, args, context, token).ConfigureAwait (false);
-				await proxy.SendResponse (id, result, token);
-			});
-		}
-
-		CommandResult Async (MessageId id, string method, JObject args, ExecutionContext context, Func<CancellationToken, Task<Result>> func)
-		{
-			return CommandResult.Async (async token => {
-				var result = await func (token).ConfigureAwait (false);
-				await proxy.SendResponse (id, result, token);
-			});
-		}
-
-		CommandResult Async (MessageId id, string method, JObject args, ExecutionContext context, Func<MessageId, string, JObject, ExecutionContext, CancellationToken, Task<bool>> func)
-		{
-			return CommandResult.Async (async token => {
-				if (await func (id, method, args, context, token).ConfigureAwait (false))
-					return;
-				var res = await proxy.SendCommand (id, method, args, token);
-				await proxy.SendResponse (id, res, token);
-			});
-		}
-
-		CommandResult Async (MessageId id, string method, JObject args, ExecutionContext context, Func<CancellationToken, Task<bool>> func)
-		{
-			return CommandResult.Async (async token => {
-				if (await func (token).ConfigureAwait (false))
-					return;
-				var res = await proxy.SendCommand (id, method, args, token);
-				await proxy.SendResponse (id, res, token);
-			});
-		}
-
-		CommandResult AcceptCommand (MessageId id, string method, JObject args)
+		internal ProxyCommand AcceptCommand (MessageId id, ConnectionEventArgs eventArgs)
 		{
 			if (!contexts.TryGetValue (id, out var context))
-				return CommandResult.Proxy;
+				return ProxyCommand.Proxy;
+
+			var method = eventArgs.Message;
+			var args = eventArgs.Arguments;
 
 			switch (method) {
 			case "Debugger.enable": {
@@ -166,11 +109,11 @@ namespace WebAssembly.Net.Debugging {
 				}
 
 			case "Debugger.getScriptSource": {
-					return Async (id, method, args, context, OnGetScriptSource);
+					return ProxyCommand.AsyncBool (token => OnGetScriptSource (id, method, args, context, token));
 				}
 
 			case "Runtime.compileScript": {
-					return Async (id, method, args, context, OnCompileDotnetScript);
+					return ProxyCommand.AsyncBool (token => OnCompileDotnetScript (id, method, args, context, token));
 				}
 
 			case "Debugger.getPossibleBreakpoints": {
@@ -182,7 +125,7 @@ namespace WebAssembly.Net.Debugging {
 				}
 
 			case "Debugger.setBreakpointByUrl": {
-					return Async (id, method, args, context, async token => {
+					return ProxyCommand.AsyncBool (async token => {
 						await OnSetBreakpointByUrl (id, method, args, context, token);
 						return true;
 					});
@@ -193,26 +136,26 @@ namespace WebAssembly.Net.Debugging {
 				}
 
 			case "Debugger.resume": {
-					return CommandResult.Async (token => OnResume (id, token));
+					return ProxyCommand.AsyncProxy (token => OnResume (id, method, args, context, token));
 				}
 
 			case "Debugger.stepInto": {
-					return CommandResult.Async (token => Step (id, StepKind.Into, token));
+					return ProxyCommand.AsyncBool (token => Step (id, StepKind.Into, token));
 				}
 
 			case "Debugger.stepOut": {
-					return CommandResult.Async (token => Step (id, StepKind.Out, token));
+					return ProxyCommand.AsyncBool (token => Step (id, StepKind.Out, token));
 				}
 
 			case "Debugger.stepOver": {
-					return CommandResult.Async (token => Step (id, StepKind.Over, token));
+					return ProxyCommand.AsyncBool (token => Step (id, StepKind.Over, token));
 				}
 
 			case "Runtime.getProperties": {
 					if (!DotnetObjectId.TryParse (args? ["objectId"], out var objectId))
 						break;
 
-					return Async (id, method, args, context, token => RuntimeGetProperties (id, objectId, args, token));
+					return ProxyCommand.Async (token => RuntimeGetProperties (id, objectId, args, token));
 				}
 
 			case "Debugger.evaluateOnCallFrame": {
@@ -221,7 +164,7 @@ namespace WebAssembly.Net.Debugging {
 
 					switch (objectId.Scheme) {
 					case "scope":
-						return Async (id, method, args, context, token => OnEvaluateOnCallFrame (
+						return ProxyCommand.AsyncBool (token => OnEvaluateOnCallFrame (
 								id, context,
 								int.Parse (objectId.Value),
 								args? ["expression"]?.Value<string> (), token));
@@ -234,7 +177,7 @@ namespace WebAssembly.Net.Debugging {
 				}
 			}
 
-			return CommandResult.Proxy;
+			return ProxyCommand.Proxy;
 		}
 
 		async Task<Result> OnSetPauseOnExceptions (MessageId id, string method, JObject args, ExecutionContext context, CancellationToken token)

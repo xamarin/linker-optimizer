@@ -1,6 +1,6 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Runtime
 {
-	public enum RemoveObjectType
+	public enum RemoteObjectType
 	{
 		Object,
 		Function,

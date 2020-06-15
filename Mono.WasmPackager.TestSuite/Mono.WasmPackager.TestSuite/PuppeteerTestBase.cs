@@ -1,10 +1,8 @@
 using System;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
 using Xunit;
@@ -15,30 +13,36 @@ namespace Mono.WasmPackager.TestSuite
 
 	public abstract class PuppeteerTestBase : InspectorTestBase
 	{
-		readonly Dictionary<string, SourceLocation> breakpoints;
-	
+		readonly Dictionary<string, BreakpointInfo> breakpoints;
+
 		protected PuppeteerTestBase (Assembly caller = null)
 			: base (caller ?? Assembly.GetCallingAssembly ())
 		{
-			breakpoints = new Dictionary<string, SourceLocation> ();
+			breakpoints = new Dictionary<string, BreakpointInfo> ();
 		}
+
+		protected Task Resume () => SendCommand (new ResumeRequest ());
+
+		protected Task StepOver () => SendCommand (new StepOverRequest ());
+
+		protected Task StepOut () => SendCommand (new StepOutRequest ());
 
 		protected Task<string> WaitForConsole (string message, bool regex = false)
 		{
 			var tcs = new TaskCompletionSource<string> ();
 			var rx = regex ? new Regex (message, RegexOptions.Compiled) : null;
 
-			EventHandler<ConsoleEventArgs> handler = null;
-			handler = (sender, e) => {
+			void Handler (object sender, ConsoleEventArgs e)
+			{
 				if ((regex && rx.IsMatch (e.Message.Text)) || e.Message.Text.Equals (message)) {
-					Page.Console -= handler;
+					InternalPage.Console -= Handler;
 					tcs.TrySetResult (e.Message.Text);
 				}
 			};
 
-			Page.Console += handler;
+			InternalPage.Console += Handler;
 
-			return tcs.Task;
+			return CheckedWait (tcs.Task);
 		}
 
 		protected async Task<string> WaitForException (string exception, string message = null)
@@ -47,94 +51,110 @@ namespace Mono.WasmPackager.TestSuite
 			var errorTcs = new TaskCompletionSource<string> ();
 			var seenUnhandled = false;
 
-			EventHandler<ConsoleEventArgs> consoleHandler = null;
-			EventHandler<ErrorEventArgs> errorHandler = null;
-			EventHandler<PageErrorEventArgs> pageErrorHandler = null;
-
-			Action<string> unexpected = text => {
-				Page.Console -= consoleHandler;
+			void Unexpected (string text)
+			{
+				InternalPage.Console -= ConsoleHandler;
 				var exception = new InvalidOperationException ($"Received unexpected text '{text}'.");
 				consoleTcs.TrySetException (exception);
 				errorTcs.TrySetException (exception);
-			};
+			}
 
-			consoleHandler = (sender, e) => {
+			void ConsoleHandler (object sender, ConsoleEventArgs e)
+			{
 				if (e.Message.Text.Equals ("Unhandled Exception:")) {
 					if (!seenUnhandled)
 						seenUnhandled = true;
 					else
-						unexpected (e.Message.Text);
+						Unexpected (e.Message.Text);
 					return;
 				} else if (!seenUnhandled) {
 					return;
 				}
 
 				if (!e.Message.Text.StartsWith (exception + ": ")) {
-					unexpected (e.Message.Text);
+					Unexpected (e.Message.Text);
 					return;
 				}
 
 				if (!string.IsNullOrEmpty (message)) {
 					var end = e.Message.Text.Substring (exception.Length + 2);
 					if (!end.Equals (message))
-						unexpected (e.Message.Text);
+						Unexpected (e.Message.Text);
 				}
 
-				Page.Console -= consoleHandler;
+				InternalPage.Console -= ConsoleHandler;
 				consoleTcs.TrySetResult (e.Message.Text);
 			};
 
-			errorHandler = (sender, e) => {
+			void ErrorHandler (object sender, ErrorEventArgs e)
+			{
 				var exception = new InvalidOperationException ($"Got unexpected 'Error' event: {e.Error}");
-				Page.Error -= errorHandler;
+				InternalPage.Error -= ErrorHandler;
 				consoleTcs.TrySetException (exception);
 				errorTcs.TrySetException (exception);
-			};
+			}
 
-			pageErrorHandler += (sender, e) => {
-				Page.PageError -= pageErrorHandler;
+			void PageErrorHandler (object sender, PageErrorEventArgs e)
+			{
+				InternalPage.PageError -= PageErrorHandler;
 				errorTcs.TrySetResult (e.Message);
-			};
+			}
 
-			Page.Console += consoleHandler;
-			Page.Error += errorHandler;
-			Page.PageError += pageErrorHandler;
+			InternalPage.Console += ConsoleHandler;
+			InternalPage.Error += ErrorHandler;
+			InternalPage.PageError += PageErrorHandler;
 
-			var result = await Task.WhenAll (consoleTcs.Task, errorTcs.Task).ConfigureAwait (false);
+			var result = await CheckedWaitAll (consoleTcs.Task, errorTcs.Task).ConfigureAwait (false);
 			return result [1];
 		}
 
 		protected async Task<string> ClickAndWaitForMessage (string selector, string message, bool regex = false)
 		{
-			var button = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);
+			var button = await QuerySelectorAsync (selector).ConfigureAwait (false);
 			var wait = WaitForConsole (message, regex);
 			var click = button.ClickAsync ();
-			await Task.WhenAll (wait, click).ConfigureAwait (false);
+			await CheckedWaitAll (wait, click).ConfigureAwait (false);
 			return wait.Result;
 		}
 
 		protected async Task<string> ClickAndWaitForException (string selector, string exception, string message = null)
 		{
-			var button = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);
+			var button = await QuerySelectorAsync (selector).ConfigureAwait (false);
 			var wait = WaitForException (exception, message);
 			var click = button.ClickAsync ();
-			await Task.WhenAll (wait, click).ConfigureAwait (false);
+			await CheckedWaitAll (wait, click).ConfigureAwait (false);
 			return wait.Result;
+		}
+
+		protected async Task ClickWithPausedNotification (string selector, Func<PausedNotification, Task> action)
+		{
+			var waitForPaused = WaitForPaused ();
+
+			var button = await QuerySelectorAsync (selector).ConfigureAwait (false);
+			var click = button.ClickAsync ();
+
+			var pausedNotification = await waitForPaused.ConfigureAwait (false);
+			await action (pausedNotification).ConfigureAwait (false);
+
+			var waitForResumed = WaitForResumed ();
+			await Resume ().ConfigureAwait (false);
+
+			await CheckedWaitAll (waitForResumed, click).ConfigureAwait (false);
 		}
 
 		protected async Task<string> GetInnerHtml (string selector)
 		{
-			var handle = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);
-			var property = await handle.GetPropertyAsync ("innerHTML").ConfigureAwait (false);
+			var handle = await QuerySelectorAsync (selector).ConfigureAwait (false);
+			var property = await CheckedWait (handle.GetPropertyAsync ("innerHTML")).ConfigureAwait (false);
 			var value = property.RemoteObject.Value;
 			return value.Value<string> ();
 		}
 
 		protected async Task AssertInnerHtml (string selector, string expected)
 		{
-			var handle = await Page.QuerySelectorAsync (selector).ConfigureAwait (false);
+			var handle = await QuerySelectorAsync (selector).ConfigureAwait (false);
 			Assert.NotNull (handle);
-			var inner = await handle.GetInnerHtml ().ConfigureAwait (false);
+			var inner = await CheckedWait (handle.GetInnerHtml ()).ConfigureAwait (false);
 			Assert.Equal (expected, inner);
 		}
 
@@ -148,46 +168,66 @@ namespace Mono.WasmPackager.TestSuite
 				}
 			};
 
-			var response = await SendCommand<GetPossibleBreakpointsResponse> ("Debugger.getPossibleBreakpoints", request).ConfigureAwait (false);
+			var response = await SendCommand (request).ConfigureAwait (false);
 			Assert.True (response.Locations.Length > 1);
 		}
 
-		protected async Task<string> InsertBreakpoint (SourceLocation location)
+		(string, string) LookupLocation (SourceLocation location)
 		{
-			var id = await InsertBreakpoint (location.File, location.Line).ConfigureAwait (false);
-			breakpoints.Add (id, location);
-			return id;
+			string url;
+			if (location.IsNative) {
+				url = new Uri (ServerRoot, location.File).ToString ();
+			} else {
+				var fileUrl = $"dotnet://{Settings.DevServer_Assembly}/{location.FullPath}";
+				url = FileToUrl [fileUrl];
+			}
+
+			var scriptId = UrlToScriptId [url];
+			return (url, scriptId);
 		}
 
-		async Task<string> InsertBreakpoint (string file, int line)
+		protected async Task<BreakpointInfo> InsertBreakpoint (SourceLocation location)
 		{
-			var fileUrl = $"dotnet://{Settings.DevServer_Assembly}/{file}";
+			var (url, scriptId) = LookupLocation (location);
+
 			var request = new InsertBreakpointRequest {
-				LineNumber = line - 1,
-				Url = FileToUrl [fileUrl]
+				LineNumber = location.Line - 1,
+				Url = url
 			};
 
-			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request).ConfigureAwait (false);
-			Assert.EndsWith (file, result.BreakpointId);
+			var result = await SendCommand (request).ConfigureAwait (false);
+			Assert.EndsWith (url, result.BreakpointId);
 			Assert.Single (result.Locations);
-			Assert.Equal (line - 1, result.Locations [0].LineNumber);
-			Assert.Equal (FileToId [fileUrl], result.Locations [0].ScriptId);
-			return result.BreakpointId;
+			Assert.Equal (location.Line - 1, result.Locations [0].LineNumber);
+			Assert.Equal (scriptId, result.Locations [0].ScriptId);
+
+			var breakpoint = new BreakpointInfo (location, url, scriptId, result.BreakpointId);
+			breakpoints.Add (breakpoint.Id, breakpoint);
+			return breakpoint;
 		}
 
-		protected async Task RemoveBreakpoint (string breakpointId)
+		protected async Task RemoveBreakpoint (BreakpointInfo breakpoint)
 		{
-			breakpoints.Remove (breakpointId);
-			var request = new RemoveBreakpointRequest { BreakpointId = breakpointId };
-			await SendCommand<RemoveBreakpointResponse> ("Debugger.removeBreakpoint", request).ConfigureAwait (false);
+			breakpoints.Remove (breakpoint.Id);
+			var request = new RemoveBreakpointRequest { BreakpointId = breakpoint.Id };
+			await SendCommand (request).ConfigureAwait (false);
+		}
+
+		protected void AssertBreakpointFrame (BreakpointInfo breakpoint, CallFrame frame)
+		{
+			AssertBreakpointFrame (breakpoint.Location, breakpoint.Url, breakpoint.ScriptId, frame);
 		}
 
 		protected void AssertBreakpointFrame (SourceLocation location, CallFrame frame)
 		{
-			var scriptId = FileToId [$"dotnet://{Settings.DevServer_Assembly}/{location.File}"];
+			var (url, scriptId) = LookupLocation (location);
+			AssertBreakpointFrame (location, url, scriptId, frame);
+		}
 
+		void AssertBreakpointFrame (SourceLocation location, string url, string scriptId, CallFrame frame)
+		{
 			Assert.Equal (location.FunctionName, frame.FunctionName);
-			Assert.EndsWith (location.File, frame.Url);
+			Assert.Equal (url, frame.Url);
 			Assert.NotNull (frame.Location);
 			Assert.Equal (scriptId, frame.Location.ScriptId);
 			Assert.Equal (location.Line, frame.Location.LineNumber + 1);
@@ -204,20 +244,17 @@ namespace Mono.WasmPackager.TestSuite
 			Assert.NotNull (scope.Object);
 		}
 
-		protected void AssertBreakpointHit (string id, PausedNotification notification)
+		protected void AssertBreakpointHit (BreakpointInfo breakpoint, PausedNotification notification)
 		{
+			Assert.NotNull (notification.HitBreakpoints);
 			Assert.Single (notification.HitBreakpoints);
-			Assert.Equal (id, notification.HitBreakpoints [0]);
+
+			Assert.EndsWith (breakpoint.Location.File, notification.HitBreakpoints [0].ToString ());
+			Assert.Equal (breakpoint.Id, notification.HitBreakpoints [0]);
 			Assert.Equal (StoppedReason.Other, notification.Reason);
 			Assert.True (notification.CallFrames.Length > 0);
 
-			AssertBreakpointFrame (breakpoints[id], notification.CallFrames [0]);
-		}
-
-		protected async Task WaitForBreakpointHit (string id)
-		{
-			var paused = await WaitForPaused ().ConfigureAwait (false);
-
+			AssertBreakpointFrame (breakpoint, notification.CallFrames [0]);
 		}
 	}
 }

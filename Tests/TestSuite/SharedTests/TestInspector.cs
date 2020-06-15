@@ -37,7 +37,7 @@ namespace SharedTests
 			if (Location.Column != null)
 				request.ColumnNumber = Location.Column.Value;
 
-			var result = await SendCommand<InsertBreakpointResponse> ("Debugger.setBreakpointByUrl", request);
+			var result = await SendCommand (request).ConfigureAwait (false);
 			Assert.EndsWith (Path.GetFileName (Location.File), result.BreakpointId);
 			Assert.Single (result.Locations);
 
@@ -62,7 +62,7 @@ namespace SharedTests
 				}
 			};
 
-			var response = await SendCommand<GetPossibleBreakpointsResponse> ("Debugger.getPossibleBreakpoints", request);
+			var response = await SendCommand (request).ConfigureAwait (false);
 			Assert.True (response.Locations.Length > 1);
 		}
 	}

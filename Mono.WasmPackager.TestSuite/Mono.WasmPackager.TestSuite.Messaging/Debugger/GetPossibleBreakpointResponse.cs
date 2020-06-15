@@ -1,6 +1,6 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Debugger
 {
-	public class GetPossibleBreakpointsResponse : ProtocolObject
+	public class GetPossibleBreakpointsResponse : ProtocolResponse
 	{
 		public Location[] Locations { get; set; }
 	}

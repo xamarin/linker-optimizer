@@ -1,10 +1,6 @@
 using System;
-using System.IO;
-using System.Text;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
@@ -24,7 +20,7 @@ namespace Mono.WasmPackager.DevServer
 		readonly bool allowParallel;
 		readonly CancellationTokenSource cts;
 		Func<T, CancellationToken, Task> handler;
-		TaskCompletionSource<bool> completedTcs;
+		readonly TaskCompletionSource<bool> completedTcs;
 		volatile int closed;
 		int disposed;
 		int running;

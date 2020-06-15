@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using WebAssembly.Net.Debugging;
 
 namespace Mono.WasmPackager.DevServer
 {
@@ -21,10 +20,6 @@ namespace Mono.WasmPackager.DevServer
 		}
 
 		public JObject Arguments {
-			get; internal set;
-		}
-
-		public bool SkipEvent {
 			get; internal set;
 		}
 

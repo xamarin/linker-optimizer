@@ -17,8 +17,6 @@ namespace Mono.WasmPackager.TestSuite
 {
 	public static class BrowserController
 	{
-		const int DevToolsPort = 9022;
-
 		public static async Task Connect (string url)
 		{
 			var chromiumPath = await TestSuiteSetup.GetChromiumPath (null);
@@ -34,12 +32,10 @@ namespace Mono.WasmPackager.TestSuite
 				ExecutablePath = chromiumPath
 			};
 
-			using (var browser = await PuppeteerSharp.Puppeteer.LaunchAsync (options)) {
-				var context = await browser.CreateIncognitoBrowserContextAsync ();
-				using (var page = await context.NewPageAsync ()) {
-					await page.GoToAsync (url);
-				}
-			}
+			using var browser = await PuppeteerSharp.Puppeteer.LaunchAsync (options);
+			var context = await browser.CreateIncognitoBrowserContextAsync ();
+			using var page = await context.NewPageAsync ();
+			await page.GoToAsync (url);
 		}
 	}
 }

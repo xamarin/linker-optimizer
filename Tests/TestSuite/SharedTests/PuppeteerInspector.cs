@@ -15,9 +15,9 @@ namespace SharedTests
 	{
 		protected async Task SharedTestMessage ()
 		{
-			Debug.WriteLine ($"SERVER READY: {Page}");
+			Debug.WriteLine ($"SERVER READY");
 
-			var selector = await Page.QuerySelectorAsync ("#output");
+			var selector = await QuerySelectorAsync ("#output");
 			Debug.WriteLine ($"SELECTOR: {selector}");
 
 			var inner = await GetInnerHtml ("#output");

@@ -18,8 +18,5 @@ namespace Mono.WasmPackager.TestSuite
 				new StringEnumConverter (new CamelCaseNamingStrategy (), false)
 			}
 		};
-
-		static readonly Lazy<JsonSerializer> DefaultJsonSerializer = new Lazy<JsonSerializer> (
-			() => JsonSerializer.Create (CreateDefaultJsonSerializerSettings ()));
 	}
 }

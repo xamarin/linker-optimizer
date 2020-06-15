@@ -1,13 +1,7 @@
 using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Logging;
@@ -25,6 +19,7 @@ namespace Mono.WasmPackager.DevServer
 			int proxyPort = 9300;
 			int webPort = 8000;
 			bool debug = false;
+			bool disableProxy = false;
 
 			int pos = 0;
 			while (pos < args.Length) {
@@ -45,6 +40,9 @@ namespace Mono.WasmPackager.DevServer
 				case "--web-port":
 					webPort = int.Parse (args [pos++]);
 					break;
+				case "--disable-proxy":
+					disableProxy = true;
+					break;
 				default:
 					throw new NotSupportedException ($"Unknown command-line argument: '{key}'.");
 				}
@@ -57,8 +55,9 @@ namespace Mono.WasmPackager.DevServer
 				WebRoot = root,
 				EnableDebugging = debug,
 				FrameworkDirectory = framework,
-				DebugServerPort = proxyPort,
-				FileServerPort = webPort
+				DebugProxyPort = proxyPort,
+				FileServerPort = webPort,
+				EnableDebugProxy = !disableProxy
 			};
 
 			options.FileServerOptions.EnableDirectoryBrowsing = true;
@@ -135,7 +134,8 @@ namespace Mono.WasmPackager.DevServer
 		public override void Configure (IApplicationBuilder app)
 		{
 			var addresses = app.ServerFeatures.Get<IServerAddressesFeature> ();
-			addresses.Addresses.Add ($"http://localhost:{ServerOptions.DebugServerPort}/");
+			if (ServerOptions.EnableDebugProxy)
+				addresses.Addresses.Add ($"http://localhost:{ServerOptions.DebugProxyPort}/");
 			addresses.Addresses.Add ($"http://localhost:{ServerOptions.FileServerPort}/");
 
 			app.UseWebSockets ();
@@ -147,7 +147,7 @@ namespace Mono.WasmPackager.DevServer
 
 			app.UseEndpoints (endpoints => {
 				proxy.ConfigureRoutes ((pattern, action) =>
-					endpoints.MapGet (pattern, action).RequireHost ($"*:{ServerOptions.DebugServerPort}"));
+					endpoints.MapGet (pattern, action).RequireHost ($"*:{ServerOptions.DebugProxyPort}"));
 				if (ServerOptions.EnableTestHarness) {
 					var harness = app.ApplicationServices.GetRequiredService<TestHarnessStartup> ();
 					harness.Configure (endpoints);

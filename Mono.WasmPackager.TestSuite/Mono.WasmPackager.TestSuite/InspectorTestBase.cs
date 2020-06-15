@@ -33,18 +33,24 @@ namespace Mono.WasmPackager.TestSuite
 			get;
 		}
 
+		protected Dictionary<string, string> UrlToScriptId {
+			get;
+		}
+
 		protected InspectorTestBase (Assembly caller = null)
 			: base (caller ?? Assembly.GetCallingAssembly ())
 		{
 			ScriptsIdToUrl = new Dictionary<string, string> ();
 			FileToUrl = new Dictionary<string, string> ();
 			FileToId = new Dictionary<string, string> ();
+			UrlToScriptId = new Dictionary<string, string> ();
 			SubscribeToScripts ();
 		}
 
 		void SubscribeToScripts ()
 		{
 			On<ScriptParsedNotification> ("Debugger.scriptParsed", async (args, c) => {
+				UrlToScriptId [args.Url] = args.ScriptId;
 				if (!args.ScriptId.StartsWith ("dotnet://"))
 					return;
 				ScriptsIdToUrl [args.ScriptId] = args.DotNetUrl;

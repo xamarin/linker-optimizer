@@ -1,17 +1,11 @@
-using System;
 using System.Net.Mime;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.StaticFiles;
 using System.Text.Encodings.Web;
 
@@ -36,10 +30,6 @@ namespace Mono.WasmPackager.DevServer
 		}
 
 		DirectoryBrowserMiddleware DirectoryBrowser {
-			get;
-		}
-
-		StaticFileMiddleware StaticFileHandler {
 			get;
 		}
 
@@ -100,11 +90,5 @@ namespace Mono.WasmPackager.DevServer
 
 			return Chain (context);
 		}
-
-		Task TryServeStaticFile (HttpContext context)
-		{
-			throw new NotImplementedException ();
-		}
-
 	}
 }

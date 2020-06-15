@@ -19,6 +19,9 @@
 
     <ItemGroup>
       <__WasmPackager_ScanSourceFiles Include="@(Compile);@(RazorComponentWithTargetPath)" />
+      <__WasmPackager_ScanSourceFiles Include="@(WasmPackager_WebRoot_Files)">
+        <IsNative>true</IsNative>
+      </__WasmPackager_ScanSourceFiles>
       <__WasmPackager_ScanSourceFiles Remove="**/*.g.cs" />
     </ItemGroup>
 

@@ -1,7 +1,9 @@
 namespace Mono.WasmPackager.TestSuite.Messaging.Debugger
 {
-	public class EvaluateOnCallFrameRequest : ProtocolObject
+	public class EvaluateOnCallFrameRequest : ProtocolRequest<EvaluateOnCallFrameResponse>
 	{
+		public override string Command => "Debugger.evaluateOnCallFrame";
+
 		public string CallFrameId { get; set; }
 		public string Expression { get; set; }
 

@@ -4,6 +4,7 @@
 <head>
 	<script type="text/javascript" src="setup.js"></script>
 	<script type="text/javascript" src="constants.js"></script>
+	<script type="text/javascript" src="variables.js"></script>
 	<script type="text/javascript" src="mono-config.js"></script>
 	<script type="text/javascript" src="runtime.js"></script>
 </head>
@@ -19,6 +20,7 @@
 				BINDING.call_static_method(`[${mainAssembly}] SharedTests.SharedSample.Hello:Main`, [])
 				this.message = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Hello:Message`, [])
 				this.throw = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Hello:Throw`, [])
+				this.stepOver = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Hello:StepOver`, [])
 				this.caught = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Exceptions:Caught`, [])
 				this.testVariables = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Variables:VariableTest`, [])
 
@@ -53,9 +55,18 @@
 				console.log(caughtExceptionText2)
 				this.output.innerText = textMessage
 			},
+			onClickStepOver: function() {
+				this.stepOver()
+			},
 			onClickVariables: function () {
 				this.testVariables()
 			},
+			onClickJsVariables: function () {
+				jsVariables()
+			},
+			onClickJsException: function () {
+				jsException ()
+			}
 		};
 	</script>
 	<p>Test Paragraph.</p>
@@ -64,7 +75,10 @@
 		<button type="button" onclick="App.onClickMessage()" id="message">Message</button>
 		<button type="button" onclick="App.onClickThrow()" id="throw">Throw</button>
 		<button type="button" onclick="App.onClickCaught()" id="caught">Caught Exception</button>
+		<button type="button" onclick="App.onClickStepOver()" id="stepOver">Step Over</button>
 		<button type="button" onclick="App.onClickVariables()" id="variables">Variables</button>
+		<button type="button" onclick="App.onClickJsVariables()" id="jsVariables">JS Variables</button>
+		<button type="button" onclick="App.onClickJsException()" id="jsException">JS Exception</button>
 	</div>
 	<div>
 		<p>Environment.Version: <code id="version">UNKNOWN</code></p>

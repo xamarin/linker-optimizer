@@ -16,7 +16,15 @@ namespace SharedTests.SharedSample
 
 		public static void Throw ()
 		{
-			throw new InvalidOperationException ("Throwing here.");
+			throw new InvalidOperationException (TestConstants.MyExceptionMessage);
 		}
+
+		// @@BEGIN-FUNCTION: StepOver
+		public static void StepOver ()
+		{ // @@BEGIN-SCOPE
+			Console.WriteLine (TestConstants.StepOverFirstLine);  // @@BREAKPOINT: StepOverFirstLine
+			Console.WriteLine (TestConstants.StepOverSecondLine); // @@LINE: StepOverSecondLine
+		} // @@END-SCOPE
+		// @@END-FUNCTION
 	}
 }

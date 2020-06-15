@@ -1,21 +1,10 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
-
-using WebAssembly.Net.Debugging;
 
 namespace Mono.WasmPackager.DevServer
 {
@@ -39,17 +28,17 @@ namespace Mono.WasmPackager.DevServer
 
 			foreach (var key in response.Keys) {
 				switch (key) {
-					case "devtoolsFrontendUrl":
-						var front = response[key];
-						filtered[key] = $"{debuggerHost.Scheme}://{debuggerHost.Authority}{front.Replace ($"ws={debuggerHost.Authority}", $"ws={request.Host}")}";
-						break;
-					case "webSocketDebuggerUrl":
-						var page = new Uri (response[key]);
-						filtered[key] = $"{page.Scheme}://{request.Host}{page.PathAndQuery}";
-						break;
-					default:
-						filtered[key] = response[key];
-						break;
+				case "devtoolsFrontendUrl":
+					var front = response [key];
+					filtered [key] = $"{debuggerHost.Scheme}://{debuggerHost.Authority}{front.Replace ($"ws={debuggerHost.Authority}", $"ws={request.Host}")}";
+					break;
+				case "webSocketDebuggerUrl":
+					var page = new Uri (response [key]);
+					filtered [key] = $"{page.Scheme}://{request.Host}{page.PathAndQuery}";
+					break;
+				default:
+					filtered [key] = response [key];
+					break;
 				}
 			}
 			return filtered;
@@ -58,21 +47,18 @@ namespace Mono.WasmPackager.DevServer
 		string GetEndpoint (HttpContext context)
 		{
 			var request = context.Request;
-			var requestPath = request.Path;
 			return $"{DevToolsHost.Scheme}://{DevToolsHost.Authority}{request.Path}{request.QueryString}";
 		}
 
 		async Task Copy (HttpContext context)
 		{
-			using (var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds (5) }) {
-				var response = await httpClient.GetAsync (GetEndpoint (context));
-				context.Response.ContentType = response.Content.Headers.ContentType.ToString ();
-				if ((response.Content.Headers.ContentLength ?? 0) > 0)
-					context.Response.ContentLength = response.Content.Headers.ContentLength;
-				var bytes = await response.Content.ReadAsByteArrayAsync ();
-				await context.Response.Body.WriteAsync (bytes);
-
-			}
+			using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds (5) };
+			var response = await httpClient.GetAsync (GetEndpoint (context));
+			context.Response.ContentType = response.Content.Headers.ContentType.ToString ();
+			if ((response.Content.Headers.ContentLength ?? 0) > 0)
+				context.Response.ContentLength = response.Content.Headers.ContentLength;
+			var bytes = await response.Content.ReadAsByteArrayAsync ();
+			await context.Response.Body.WriteAsync (bytes);
 		}
 
 		async Task RewriteSingle (HttpContext context)
@@ -85,7 +71,7 @@ namespace Mono.WasmPackager.DevServer
 
 		async Task RewriteArray (HttpContext context)
 		{
-			var tabs = await ProxyGetJsonAsync<Dictionary<string, string>[]> (GetEndpoint (context));
+			var tabs = await ProxyGetJsonAsync<Dictionary<string, string> []> (GetEndpoint (context));
 			var alteredTabs = tabs.Select (t => MapValues (t, context, DevToolsHost)).ToArray ();
 			context.Response.ContentType = "application/json";
 			await context.Response.WriteAsync (JsonConvert.SerializeObject (alteredTabs));
@@ -98,12 +84,11 @@ namespace Mono.WasmPackager.DevServer
 				return;
 			}
 
-			var endpoint = new Uri ($"ws://{DevToolsHost.Authority}{context.Request.Path.ToString ()}");
-			using (var proxy = NewDevToolsProxy.Create (endpoint, context.WebSockets)) {
-				await proxy.Start ().ConfigureAwait (false);
+			var endpoint = new Uri ($"ws://{DevToolsHost.Authority}{context.Request.Path}");
+			using var proxy = NewDevToolsProxy.Create (endpoint, context.WebSockets);
+			await proxy.Start ().ConfigureAwait (false);
 
-				await proxy.WaitForExit ().ConfigureAwait (false);
-			}
+			await proxy.WaitForExit ().ConfigureAwait (false);
 		}
 
 		public void ConfigureRoutes (Action<string, RequestDelegate> mapGet)
@@ -119,11 +104,10 @@ namespace Mono.WasmPackager.DevServer
 
 		static async Task<T> ProxyGetJsonAsync<T> (string url)
 		{
-			using (var httpClient = new HttpClient ()) {
-				var response = await httpClient.GetAsync (url);
-				var jsonResponse = await response.Content.ReadAsStringAsync ();
-				return JsonConvert.DeserializeObject<T> (jsonResponse);
-			}
+			using var httpClient = new HttpClient ();
+			var response = await httpClient.GetAsync (url);
+			var jsonResponse = await response.Content.ReadAsStringAsync ();
+			return JsonConvert.DeserializeObject<T> (jsonResponse);
 		}
 	}
 }

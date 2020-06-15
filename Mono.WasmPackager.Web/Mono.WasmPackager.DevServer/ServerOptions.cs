@@ -7,7 +7,7 @@ namespace Mono.WasmPackager.DevServer
 	{
 		public Uri DevToolsUrl { get; set; } = new Uri ("http://localhost:9222");
 
-		public int DebugServerPort { get; set; } = 9300;
+		public int DebugProxyPort { get; set; } = 9300;
 
 		public int FileServerPort { get; set; } = 8000;
 
@@ -24,6 +24,8 @@ namespace Mono.WasmPackager.DevServer
 		public string PagePath { get; set; } = "index.html";
 
 		public bool VerboseLogging { get; set; } = true;
+
+		public bool EnableDebugProxy { get; set; } = true;
 
 		public FileServerOptions FileServerOptions { get; set; } = new FileServerOptions ();
 	}

@@ -22,5 +22,11 @@ namespace NetCoreTests
 
 		[Fact]
 		public Task TestSecondFrame () => SharedTestSecondFrame ();
+
+		[Fact]
+		public Task TestStepOver () => SharedStepOver ();
+
+		[Fact]
+		public Task TestJsBreakpoint () => SharedJsBreakpoint ();
 	}
 }

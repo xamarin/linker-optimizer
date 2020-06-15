@@ -1,5 +1,3 @@
-using Mono.WasmPackager.TestSuite;
-
 namespace SharedTests
 {
 	public static class TestConstants
@@ -18,7 +16,18 @@ namespace SharedTests
 		public const int DefaultTimeout = 15;
 
 		public const string MyExceptionMessage = "Throwing here.";
+		public const string StepOverFirstLine = "STEP-OVER-FIRST-LINE";
+		public const string StepOverSecondLine = "STEP-OVER-SECOND-LINE";
 
 		public const string MyExceptionClassName = "SharedTests.SharedSample.MyException";
+
+		public static class Selectors
+		{
+			public const string Output = "#output";
+			public const string Message = "#message";
+			public const string StepOver = "#stepOver";
+			public const string JsVariables = "#jsVariables";
+			public const string JsException = "#jsException";
+		}
 	}
 }

@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using WebAssembly.Net.Debugging;
 
 namespace Mono.WasmPackager.DevServer
 {
@@ -34,9 +33,9 @@ namespace Mono.WasmPackager.DevServer
 			connection.Dispose ();
 		}
 
-		public Task<JObject> SendCommand (string method, JObject args, CancellationToken token)
+		public Task<JObject> SendCommand (string method, JObject args, CancellationToken _)
 		{
-			return connection.SendAsync (default (SessionId), method, args);
+			return connection.SendAsync (default, method, args);
 		}
 	}
 }

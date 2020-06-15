@@ -1,28 +1,23 @@
 using System;
-using System.IO;
-using System.Text;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-using System.Net.WebSockets;
-using System.Collections.Generic;
-
-using WebAssembly.Net.Debugging;
 using Mono.WasmPackager.DevServer;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Mono.WasmPackager.TestSuite
 {
 	public abstract class DebuggerTestBase : IAsyncLifetime, IDisposable
 	{
-		Task serverTask;
+		readonly Task serverTask;
 		bool disposed;
 
 		public ITestSuiteSettings Settings {
+			get;
+		}
+
+		public Uri ServerRoot {
 			get;
 		}
 
@@ -41,6 +36,8 @@ namespace Mono.WasmPackager.TestSuite
 
 			Debug.WriteLine ($"DevServer_RootDir: {Settings.DevServer_RootDir}");
 			Debug.WriteLine ($"DevServer_FrameworkDir: {Settings.DevServer_FrameworkDir}");
+
+			ServerRoot = new Uri ("http://localhost:8000/");
 
 			Server = Server.CreateTestHarness (Settings.DevServer_RootDir, Settings.DevServer_FrameworkDir);
 			serverTask = Server.Host.StartAsync ();

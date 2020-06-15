@@ -15,6 +15,7 @@
       <Source>%(FullPath)</Source>
     </WasmPackager_WebRoot_Files>
     <Compile Include="$(MSBuildProjectDirectory)/../../SharedTests/SharedSample/*.cs" />
+    <Compile Include="$(MSBuildProjectDirectory)/../../SharedTests/TestConstants.cs" />
   </ItemGroup>
 
 </Project>

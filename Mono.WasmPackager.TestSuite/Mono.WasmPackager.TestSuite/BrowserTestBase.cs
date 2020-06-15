@@ -1,22 +1,17 @@
 using System;
-using System.IO;
-using System.Text;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics;
 
-using WebAssembly.Net.Debugging;
 using Mono.WasmPackager.DevServer;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
-using Xunit;
 
 namespace Mono.WasmPackager.TestSuite
 {
+	using Messaging;
 	using Messaging.Debugger;
 
 	public abstract class BrowserTestBase : DebuggerTestBase
@@ -26,8 +21,8 @@ namespace Mono.WasmPackager.TestSuite
 		{
 		}
 
-		Dictionary<string, TaskCompletionSource<JObject>> notifications = new Dictionary<string, TaskCompletionSource<JObject>> ();
-		Dictionary<string, Func<JObject, CancellationToken, Task>> eventListeners = new Dictionary<string, Func<JObject, CancellationToken, Task>> ();
+		readonly Dictionary<string, TaskCompletionSource<JObject>> notifications = new Dictionary<string, TaskCompletionSource<JObject>> ();
+		readonly Dictionary<string, Func<JObject, CancellationToken, Task>> eventListeners = new Dictionary<string, Func<JObject, CancellationToken, Task>> ();
 
 		const string RESUME = "resume";
 		const string PAUSE = "pause";
@@ -44,10 +39,11 @@ namespace Mono.WasmPackager.TestSuite
 		NewDevToolsClient client;
 		AbstractConnection connection;
 		CancellationTokenSource cts;
+		TaskCompletionSource<Exception> errorTcs;
+
+		internal Page InternalPage => page;
 
 		volatile TaskCompletionSource<PausedNotification> currentCommand;
-
-		protected Page Page => page;
 
 		protected virtual bool Headless => true;
 
@@ -57,7 +53,10 @@ namespace Mono.WasmPackager.TestSuite
 		{
 			await base.InitializeAsync ();
 
+			errorTcs = new TaskCompletionSource<Exception> ();
+
 			cts = new CancellationTokenSource ();
+			cts.Token.Register (() => errorTcs.TrySetCanceled ());
 
 			var chromiumPath = await TestSuiteSetup.GetChromiumPath (Settings);
 
@@ -87,7 +86,7 @@ namespace Mono.WasmPackager.TestSuite
 			Debug.WriteLine ($"{ME} loaded page {url} - {page.Target.TargetId}");
 
 			var targetId = page.Target.TargetId;
-			var uri = new Uri ($"ws://localhost:{Server.ServerOptions.DebugServerPort}/connect-to-puppeteer?instance-id={targetId}");
+			var uri = new Uri ($"ws://localhost:{Server.ServerOptions.DebugProxyPort}/connect-to-puppeteer?instance-id={targetId}");
 
 			if (!TestHarnessStartup.Registration.TryAdd (targetId, Session))
 				throw new InvalidOperationException ($"Failed to register target '{targetId}'.");
@@ -156,22 +155,29 @@ namespace Mono.WasmPackager.TestSuite
 		public Task<JObject> WaitFor (string what)
 		{
 			if (notifications.ContainsKey (what))
-				throw new Exception ($"Invalid internal state, waiting for {what} while another wait is already setup");
+				throw OnError ($"Invalid internal state, waiting for {what} while another wait is already setup");
 			var n = new TaskCompletionSource<JObject> ();
 			notifications [what] = n;
-			return n.Task;
+			return CheckedWait (n.Task);
 		}
 
 		void NotifyOf (string what, JObject args)
 		{
-			if (!notifications.ContainsKey (what)) {
+			if (!notifications.Remove (what, out var notification)) {
 				Debug.WriteLine ($"Invalid internal state, notifying of {what}, but nobody waiting");
 				if (string.Equals (what, PAUSE) && NotifyOfPause (args.ToObject<PausedNotification> ()))
 					return;
-				throw new Exception ($"Invalid internal state, notifying of {what}, but nobody waiting");
+				throw OnError ($"Invalid internal state, notifying of {what}, but nobody waiting");
 			}
-			notifications [what].SetResult (args);
-			notifications.Remove (what);
+
+			notification.SetResult (args);
+		}
+
+		Exception OnError (string message)
+		{
+			var error = new Exception (message);
+			errorTcs.TrySetException (error);
+			throw error;
 		}
 
 		bool NotifyOfPause (PausedNotification notification)
@@ -218,9 +224,37 @@ namespace Mono.WasmPackager.TestSuite
 				await eventListeners [args.Message] (args.Arguments, token);
 		}
 
-		public async Task<T> SendCommand<T> (string message, object args)
+		public async Task<T> CheckedWait<T> (Task<T> task)
 		{
-			var jobj = JObject.FromObject (args);
+			var result = await Task.WhenAny (task, errorTcs.Task);
+			if (result == errorTcs.Task)
+				throw errorTcs.Task.Result;
+			return task.Result;
+		}
+
+		public async Task CheckedWait (Task task)
+		{
+			var result = await Task.WhenAny (task, errorTcs.Task);
+			if (result == errorTcs.Task)
+				throw errorTcs.Task.Result;
+		}
+
+		public Task<T[]> CheckedWaitAll<T> (params Task<T>[] tasks) => CheckedWait (Task.WhenAll (tasks));
+
+		public Task CheckedWaitAll (params Task[] tasks) => CheckedWait (Task.WhenAll (tasks));
+
+		void CheckError ()
+		{
+			if (errorTcs.Task.Status == TaskStatus.Faulted || errorTcs.Task.Status == TaskStatus.Canceled)
+				throw errorTcs.Task.Result;
+		}
+
+		public Task<ElementHandle> QuerySelectorAsync (string selector) => CheckedWait (InternalPage.QuerySelectorAsync (selector));
+
+		public async Task<T> SendCommand<T> (ProtocolRequest<T> request, string message = null)
+			where T : ProtocolResponse
+		{
+			var jobj = JObject.FromObject (request);
 
 			var tcs = new TaskCompletionSource<PausedNotification> ();
 			if (Interlocked.CompareExchange (ref currentCommand, tcs, null) != null)
@@ -228,8 +262,9 @@ namespace Mono.WasmPackager.TestSuite
 
 			JObject response;
 			try {
-				var sendTask = client.SendCommand (message, jobj, cts.Token);
-				await Task.WhenAny (sendTask, tcs.Task).ConfigureAwait (false);
+				var sendTask = client.SendCommand (message ?? request.Command, jobj, cts.Token);
+				await Task.WhenAny (sendTask, tcs.Task, errorTcs.Task).ConfigureAwait (false);
+				CheckError ();
 
 				if (tcs.Task.Status == TaskStatus.RanToCompletion) {
 					Debug.WriteLine ($"GOT PAUSED NOTIFICATION: {tcs.Task.Result}");
@@ -247,19 +282,18 @@ namespace Mono.WasmPackager.TestSuite
 			if (result != null && error != null)
 				throw new ArgumentException ($"Both {nameof (result)} and {nameof (error)} arguments cannot be non-null.");
 
-			JObject value;
-			bool resultHasError = String.Compare ((result? ["result"] as JObject)? ["subtype"]?.Value<string> (), "error") == 0;
-			if (result != null && resultHasError) {
-				value = null;
-				error = result;
-			} else {
-				value = result;
-			}
-
 			if (error != null)
 				throw new CommandErrorException (message, error);
 
-			return value.ToObject<T> ();
+			return result.ToObject<T> ();
+		}
+
+		public async Task<T> SendPageCommand<T> (ProtocolRequest<T> request, string message = null)
+			where T : ProtocolResponse
+		{
+			var jobj = JObject.FromObject (request);
+			var response = await CheckedWait (page.Client.SendAsync (message ?? request.Command, jobj)).ConfigureAwait (false);
+			return response.ToObject<T> ();
 		}
 
 		protected async Task<PausedNotification> WaitForPaused ()

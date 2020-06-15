@@ -8,6 +8,8 @@ insert_final_newline = true
 
 [{*.cs, *.tt}]
 indent_style = tab
+tab_width = 4
+indent_size = 4
 csharp_indent_block_contents = true
 csharp_indent_braces = false
 csharp_indent_case_contents = true
