@@ -55,9 +55,9 @@ namespace SharedTests
 
 			Assert.Equal (RemoteObjectType.Object, exceptionData.Type);
 			Assert.Equal (RemoteObjectSubType.Error, exceptionData.SubType);
-			Assert.Equal (TestConstants.MyExceptionClassName, exceptionData.ClassName);
+			Assert.Equal (TestConstants.MyErrorClassName, exceptionData.ClassName);
 			// The message needs to end with a newline or it won't be displayed.
-			Assert.Equal (TestConstants.MyExceptionMessage + "\n", exceptionData.Description);
+			Assert.StartsWith (TestConstants.MyErrorMessage + "\n", exceptionData.Description);
 			Assert.StartsWith ("dotnet:exception:", exceptionData.ObjectId);
 			Assert.False (exceptionData.Uncaught);
 

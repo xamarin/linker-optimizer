@@ -104,13 +104,13 @@ namespace WebAssembly.Net.Debugging {
 		public bool IsOk => Value != null;
 		public bool IsErr => Error != null;
 
-		Result (JObject result, JObject error)
+		Result (JObject result, JObject error, bool checkHasError = true)
 		{
 			if (result != null && error != null)
 				throw new ArgumentException ($"Both {nameof(result)} and {nameof(error)} arguments cannot be non-null.");
 
 			bool resultHasError = String.Compare ((result? ["result"] as JObject)? ["subtype"]?. Value<string> (), "error") == 0;
-			if (result != null && resultHasError) {
+			if (result != null && checkHasError && resultHasError) {
 				this.Value = null;
 				this.Error = result;
 			} else {
@@ -126,7 +126,7 @@ namespace WebAssembly.Net.Debugging {
 		}
 
 		public static Result Ok (JObject ok)
-			=> new Result (ok, null);
+			=> new Result (ok, null, false);
 
 		public static Result OkFromObject (object ok)
 			=> Ok (JObject.FromObject(ok));

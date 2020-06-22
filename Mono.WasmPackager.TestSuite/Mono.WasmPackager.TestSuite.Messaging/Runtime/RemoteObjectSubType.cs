@@ -2,6 +2,7 @@ namespace Mono.WasmPackager.TestSuite.Messaging.Runtime
 {
 	public enum RemoteObjectSubType
 	{
+		None,
 		Array,
 		Null,
 		Node,

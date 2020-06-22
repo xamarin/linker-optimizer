@@ -23,6 +23,8 @@
 				this.stepOver = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Hello:StepOver`, [])
 				this.caught = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Exceptions:Caught`, [])
 				this.testVariables = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Variables:VariableTest`, [])
+				this.exceptionVariable = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Variables:ExceptionVariable`, [])
+				this.throwExceptionVariable = BINDING.bind_static_method(`[${mainAssembly}] SharedTests.SharedSample.Variables:ThrowExceptionVariable`, [])
 
 				let version = document.getElementById("version")
 				let osVersion = document.getElementById("osversion")
@@ -61,6 +63,12 @@
 			onClickVariables: function () {
 				this.testVariables()
 			},
+			onClickExceptionVariable: function () {
+				this.exceptionVariable()
+			},
+			onClickThrowExceptionVariable: function () {
+				this.throwExceptionVariable()
+			},
 			onClickJsVariables: function () {
 				jsVariables()
 			},
@@ -77,6 +85,8 @@
 		<button type="button" onclick="App.onClickCaught()" id="caught">Caught Exception</button>
 		<button type="button" onclick="App.onClickStepOver()" id="stepOver">Step Over</button>
 		<button type="button" onclick="App.onClickVariables()" id="variables">Variables</button>
+		<button type="button" onclick="App.onClickExceptionVariable()" id="exceptionVariable">Exception Variable</button>
+		<button type="button" onclick="App.onClickThrowExceptionVariable()" id="throwExceptionVariable">Throw Exception Variable</button>
 		<button type="button" onclick="App.onClickJsVariables()" id="jsVariables">JS Variables</button>
 		<button type="button" onclick="App.onClickJsException()" id="jsException">JS Exception</button>
 	</div>

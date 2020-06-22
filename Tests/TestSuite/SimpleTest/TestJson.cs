@@ -15,7 +15,7 @@ using Mono.WasmPackager.DevServer;
 
 namespace SimpleTest
 {
-	public class TestJson
+	public class Json
 	{
 		const string ExtraField = "extraField";
 		const string ExtraValue = "extraValue";

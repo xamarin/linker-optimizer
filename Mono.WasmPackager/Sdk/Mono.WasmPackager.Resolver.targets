@@ -38,7 +38,7 @@
     <PackageReference Include="Mono.WebAssembly.Runtime" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Runtime.Aot" Version="$(MonoWebAssemblySdkVersion)" />
     <PackageReference Include="Mono.WebAssembly.Tools" Version="$(MonoWebAssemblySdkVersion)" />
-    <PackageReference Include="Mono.WebAssembly.NetCore" Version="$(MonoWebAssemblySdkVersion)" />
+    <PackageReference Include="Mono.WebAssembly.NetCore" Version="$(MonoWebAssemblyNetCoreSdkVersion)" />
   </ItemGroup>
 
   <!-- Derived and private settings -->
@@ -124,7 +124,12 @@
 
     <ItemGroup Condition="'$(_WasmPackager_EnableEmcc)' == 'true'">
       <_WasmPackager_SdkSources Include="driver.c">
-        <Emcc_Flags>-DDRIVER_GEN=1 $(__WasmPackager_Driver_Emcc_Flags)</Emcc_Flags>
+        <Emcc_Flags>-DDRIVER_GEN=1 $(__WasmPackager_Driver_Emcc_Flags) -I$(WasmPackager_MonoRuntimePath)/src</Emcc_Flags>
+        <Emcc_Deps>$(_WasmPackager_IcallTable);$(_WasmPackager_PInvokeTable)</Emcc_Deps>
+      </_WasmPackager_SdkSources>
+
+      <_WasmPackager_SdkSources Include="pinvoke.c">
+        <Emcc_Flags>-DDRIVER_GEN=1 $(__WasmPackager_Driver_Emcc_Flags) -I$(WasmPackager_MonoRuntimePath)/src</Emcc_Flags>
         <Emcc_Deps>$(_WasmPackager_IcallTable);$(_WasmPackager_PInvokeTable)</Emcc_Deps>
       </_WasmPackager_SdkSources>
 

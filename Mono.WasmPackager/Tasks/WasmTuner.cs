@@ -147,10 +147,6 @@ namespace Mono.WasmPackager
 			}
 
 			output.WriteLine ("// GENERATED FILE, DO NOT MODIFY");
-			output.WriteLine ("typedef struct {");
-			output.WriteLine ("const char *name;");
-			output.WriteLine ("void *func;");
-			output.WriteLine ("} PinvokeImport;");
 			output.WriteLine ();
 
 			foreach (var pinvoke in pinvokes) {

@@ -14,7 +14,7 @@
     </When>
     <When Condition="'$(WasmPackager_NetCore)' == 'true'">
       <PropertyGroup>
-        <MonoWebAssemblyNetCoreRoot>$(WasmPackager_NugetPackageRoot)/mono.webassembly.netcore/$(MonoWebAssemblySdkVersion)</MonoWebAssemblyNetCoreRoot>
+        <MonoWebAssemblyNetCoreRoot>$(WasmPackager_NugetPackageRoot)/mono.webassembly.netcore/$(MonoWebAssemblyDotNetSdkVersion)</MonoWebAssemblyNetCoreRoot>
         <MonoWebAssemblyRuntimeRoot>$(MonoWebAssemblyNetCoreRoot)/native</MonoWebAssemblyRuntimeRoot>
         <MonoWebAssemblyFrameworkRoot>$(MonoWebAssemblyNetCoreRoot)/wasm-lib</MonoWebAssemblyFrameworkRoot>
         <MonoWebAssemblyBindingsRoot>$(MonoWebAssemblyNetCoreRoot)/wasm-lib</MonoWebAssemblyBindingsRoot>

@@ -5,6 +5,6 @@ namespace Mono.WasmPackager.TestSuite.Messaging.Debugger
 		public override string Command => "Debugger.enable";
 
 		// Optional parameters below
-		public int MaxScriptCacheSize { get; set; }
+		public int? MaxScriptCacheSize { get; set; }
 	}
 }

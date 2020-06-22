@@ -575,19 +575,23 @@ namespace WebAssembly.Net.Debugging {
 
 			// This will also take care of adding the exception object to the locals window.
 
-			string className = null, description = null;
+			string className = null, description = null, stack = string.Empty;
 			foreach (var value in scope_values) {
 				var name = value ["name"]?.Value<string> ();
 				switch (name) {
-				case "klass":
+				case "__class__":
 					className = GetStringValue (value);
 					break;
-				case "message":
+				case "Message":
 					description = GetStringValue (value);
+					break;
+				case "Stack":
+					stack = GetStringValue (value);
 					break;
 				}
 			}
 
+			// None of these should ever happen.
 			if (string.IsNullOrEmpty (className))
 				className = "Exception";
 			if (string.IsNullOrEmpty (description))
@@ -597,7 +601,7 @@ namespace WebAssembly.Net.Debugging {
 				type = "object",
 				subtype = "error",
 				className,
-				description = description + "\n",
+				description = stack,
 				objectId = objectId.ToString (),
 				uncaught = unhandledInt > 0
 			});

@@ -27,6 +27,6 @@ namespace WorkingTests
 		public Task TestStepOver () => SharedStepOver ();
 
 		[Fact]
-		public Task TestJsBreakpoint () => SharedJsBreakpoint ();
+		public Task JsBreakpoint () => SharedJsBreakpoint ();
 	}
 }

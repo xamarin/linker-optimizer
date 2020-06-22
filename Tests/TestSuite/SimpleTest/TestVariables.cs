@@ -43,7 +43,7 @@ namespace SimpleTest
 
 			var obj = await EvaluateOnCallFrame (frame, "obj");
 
-			await EvaluateOnCallFrame (frame, "obj.PropertyThrows");
+			// await EvaluateOnCallFrame (frame, "obj.PropertyThrows");
 
 			Debug.WriteLine ($"DONE");
 		}

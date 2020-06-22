@@ -16,7 +16,7 @@ namespace SharedTests.SharedSample
 
 		public static void Throw ()
 		{
-			throw new InvalidOperationException (TestConstants.MyExceptionMessage);
+			throw new InvalidOperationException (TestConstants.MyErrorMessage);
 		}
 
 		// @@BEGIN-FUNCTION: StepOver

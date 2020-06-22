@@ -7,7 +7,7 @@ namespace SharedTests.SharedSample
 		public static void Throw ()
 		{
 			// @@BREAKPOINT: Throw
-			throw new MyException ("Throwing here.", 99999);
+			throw new MyError ();
 		}
 
 		public static void Caught ()
@@ -16,7 +16,7 @@ namespace SharedTests.SharedSample
 			try {
 				// @@LINE: CallingThrow
 				Throw ();
-			} catch (MyException ex) {
+			} catch (MyError ex) {
 				// @@LINE: Caught
 				Console.WriteLine ($"Caught Exception: {ex}");
 			}

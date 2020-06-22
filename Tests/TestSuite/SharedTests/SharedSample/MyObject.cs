@@ -20,7 +20,7 @@ namespace SharedTests.SharedSample
 
 		public string PropertyThrows {
 			get {
-				throw new MyException ("Property Throws", 88888);
+				throw new MyError ();
 			}
 		}
 
